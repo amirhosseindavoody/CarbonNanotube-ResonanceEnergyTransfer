@@ -11,22 +11,11 @@ module comparams
   complex*16, parameter :: i1=(0.d0,1.d0)
   
   !Input parameters
-  integer :: n_ch,m_ch !chiral vector parameters
-  integer :: nkg,nr,i_sub !reciprocal space mesh size in graphene and number of CNT unit cells in real space
   real*8 :: E_th !threshold energy
   real*8 :: Kcm_max
   
   !Flags
   logical :: flg_dielectric
-  
-  !Physical constants
-  real*8 :: eV,hb
-  real*8 :: a_cc,a_l !lattice constants
-  real*8 :: e2p,t0,s0 !tight binding constants
-  real*8 :: Upp !constant used in the Ohno potential
-  real*8 :: eps0 !permittivity of free space
-  real*8 :: q0 !charge of electron
-  real*8 :: kappa !dielectric constant due to core electrons in CNT
   
   !Geometrical properties
   real*8, dimension(2) :: a1,a2,b1,b2,ch_vec,t_vec,aCC_vec

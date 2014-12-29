@@ -5,7 +5,6 @@
 !*******************************************************************************
 
 program CNT_Exciton
-  use comparams
   implicit none
   
   !call fnTest
