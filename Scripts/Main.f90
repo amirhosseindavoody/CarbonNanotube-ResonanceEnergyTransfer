@@ -4,35 +4,27 @@
 ! Last modified: 3/17/2014
 !*******************************************************************************
 
-program CNT_Exciton
+program cntForsterEnergyTransfer
+  use cnt_class
+  use inputParameters
   implicit none
   
-  !call fnTest
+  type (cnt) :: firstCNT, secondCNT
   
-  call fnInput
   
-  call fnOpenFiles
   
-  call fnSaveSimInfo
+  firstCNT = cnt( n_ch1, m_ch1, nkg1)
+  secondCNT = cnt (n_ch2, m_ch2, nkg2)
   
-  call fnPhysConst
+  call firstCNT.calculateBands(i_sub1, E_th, Kcm_max)
+  call firstCNT.printProperties()
   
-  call fnGeomProp
-  
-  call fnCNTband
-
-  call fnDielectric
-  
-  call fnSelfEnergy
-  
-  call fnExcitonDispersion
-  
-  call fnSaveMisc
-  
-  call fnCloseFiles
+  call secondCNT.calculateBands(i_sub2, E_th, Kcm_max)
+  call secondCNT.printProperties()
   
 
   print *,'Finish!!!!'
+  pause
   
-endprogram
+end program cntForsterEnergyTransfer
 

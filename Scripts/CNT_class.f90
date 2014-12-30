@@ -1,4 +1,5 @@
 module cnt_class
+    use physicalConstants
     implicit none
     
     private
@@ -6,16 +7,13 @@ module cnt_class
     public  :: cnt
     
     type cnt
-      integer :: n_ch,m_ch !chiral vector parameters
-      integer :: nkg !reciprocal space mesh size in graphene
-      integer :: nr !number of CNT unit cells in real space
+      integer, private :: n_ch,m_ch !chiral vector parameters
       integer :: i_sub !subband index used in exciton energy calculation
     
       !Geometrical properties
       real*8, dimension(2) :: a1,a2,b1,b2,ch_vec,t_vec,aCC_vec
       real*8 :: len_ch,radius
-      integer :: dR,Nu,MC
-      integer :: t1,t2
+      integer :: Nu
       real*8, dimension(:,:), allocatable :: posA,posB,posAA,posBB,posAB,posBA
     
       !Reciprocal lattice properties
@@ -31,6 +29,244 @@ module cnt_class
       real*8, dimension(:,:,:), allocatable:: Sk  !Self-energy 
       complex*16, dimension(:,:,:), allocatable:: Cc,Cv !Tight-binding wavefunction coefficients
       
+    contains
+        procedure :: calculateBands
+        procedure :: printProperties
     end type cnt
+    
+    interface cnt
+      module procedure init_cnt
+    end interface
+      
+    contains
+      
+      type(cnt) function init_cnt(n_ch,m_ch,nkg)
+        use smallFunctions
+        integer, intent(in) :: n_ch, m_ch
+        integer, intent(in) :: nkg
+        integer :: dR = 1
+        integer :: t1,t2
+        real*8 :: cosTh, sinTh
+        real*8, dimension(2,2) :: Rot
+        integer :: i,j,k
+        
+        init_cnt.n_ch = n_ch
+        init_cnt.m_ch = m_ch
+        
+        ! unit vectors and reciprocal lattice vectors************************************************************************
+        init_cnt.a1=(/dsqrt(3.d0)/2.d0*a_l, 1.d0/2.d0*a_l/)
+        init_cnt.a2=(/dsqrt(3.d0)/2.d0*a_l, -1.d0/2.d0*a_l/)
+        init_cnt.b1=(/1.d0/dsqrt(3.d0)*2.d0*pi/a_l, +1.d0*2.d0*pi/a_l/)
+        init_cnt.b2=(/1.d0/dsqrt(3.d0)*2.d0*pi/a_l, -1.d0*2.d0*pi/a_l/)
+        init_cnt.aCC_vec=1.d0/3.d0*(init_cnt.a1+init_cnt.a2)
+        
+        ! calculate chirality and translational vectors of CNT unit cell.****************************************************
+        init_cnt.ch_vec=dble(n_ch)*init_cnt.a1+dble(m_ch)*init_cnt.a2
+        init_cnt.len_ch=a_l*dsqrt(dble(n_ch)**2+dble(m_ch)**2+dble(n_ch)*dble(m_ch))
+        init_cnt.radius=init_cnt.len_ch/2.d0/pi
+  
+        call gcd(dR,2*n_ch+m_ch,2*m_ch+n_ch)
+  
+        t1=(2*m_ch+n_ch)/dR
+        t2=-(2*n_ch+m_ch)/dR
+  
+        init_cnt.t_vec=dble(t1)*init_cnt.a1+dble(t2)*init_cnt.a2
+  
+        init_cnt.Nu=2*(n_ch**2+m_ch**2+n_ch*m_ch)/dR
+ 
+ 
+        ! rotate basis vectors so that ch_vec is along x-axis
+        cosTh=init_cnt.ch_vec(1)/norm2(init_cnt.ch_vec)
+        sinTh=init_cnt.ch_vec(2)/norm2(init_cnt.ch_vec)
+        Rot=reshape((/ cosTh, -sinTh , sinTh, cosTh /), (/2,2/))
+        init_cnt.ch_vec=matmul(Rot,init_cnt.ch_vec)
+        init_cnt.t_vec=matmul(Rot,init_cnt.t_vec)
+        init_cnt.a1=matmul(Rot,init_cnt.a1)
+        init_cnt.a2=matmul(Rot,init_cnt.a2)
+        init_cnt.b1=matmul(Rot,init_cnt.b1)
+        init_cnt.b2=matmul(Rot,init_cnt.b2)
+        init_cnt.aCC_vec=matmul(Rot,init_cnt.aCC_vec)
+  
+        ! calculate reciprocal lattice of CNT.*******************************************************************************
+        init_cnt.dk=norm2(init_cnt.b1)/(dble(nkg)-1.d0)
+        init_cnt.K1=(-t2*init_cnt.b1+t1*init_cnt.b2)/(dble(init_cnt.Nu))
+        init_cnt.K2=(dble(m_ch)*init_cnt.b1-dble(n_ch)*init_cnt.b2)/dble(init_cnt.Nu)
+        init_cnt.K2=init_cnt.K2/norm2(init_cnt.K2)
+  
+        ! calculate coordinates of atoms in the unwarped CNT unit cell.******************************************************
+        allocate(init_cnt.posA(init_cnt.Nu,2))
+        allocate(init_cnt.posB(init_cnt.Nu,2))
+    
+        k=0
+        do i=0,t1+n_ch
+          do j=t2,m_ch
+            if ((dble(t2)/dble(t1)*i .le. j) .and. (dble(m_ch)/dble(n_ch)*i .ge. j) .and. (dble(t2)/dble(t1)*(i-n_ch) .gt. (j-m_ch)) .and. (dble(m_ch)/dble(n_ch)*(i-t1) .lt. (j-t2))) then
+              k=k+1
+              init_cnt.posA(k,1)=dble(i)*init_cnt.a1(1)+dble(j)*init_cnt.a2(1)
+              init_cnt.posA(k,2)=dble(i)*init_cnt.a1(2)+dble(j)*init_cnt.a2(2)
+              init_cnt.posB(k,1)=init_cnt.posA(k,1)+init_cnt.aCC_vec(1)
+              init_cnt.posB(k,2)=init_cnt.posA(k,2)+init_cnt.aCC_vec(2)
+        
+              if (init_cnt.posA(k,1) .gt. init_cnt.ch_vec(1)) init_cnt.posA(k,1)=init_cnt.posA(k,1)-init_cnt.ch_vec(1);
+              if (init_cnt.posA(k,1) .lt. 0) init_cnt.posA(k,1)=init_cnt.posA(k,1)+init_cnt.ch_vec(1);
+              if (init_cnt.posA(k,2) .gt. init_cnt.t_vec(2)) init_cnt.posA(k,2)=init_cnt.posA(k,2)-init_cnt.t_vec(2);
+              if (init_cnt.posA(k,2) .lt. 0) init_cnt.posA(k,2)=init_cnt.posA(k,2)+init_cnt.t_vec(2);
+          
+              if (init_cnt.posB(k,1) .gt. init_cnt.ch_vec(1)) init_cnt.posB(k,1)=init_cnt.posB(k,1)-init_cnt.ch_vec(1);
+              if (init_cnt.posB(k,1) .lt. 0) init_cnt.posB(k,1)=init_cnt.posB(k,1)+init_cnt.ch_vec(1);
+              if (init_cnt.posB(k,2) .gt. init_cnt.t_vec(2)) init_cnt.posB(k,2)=init_cnt.posB(k,2)-init_cnt.t_vec(2);
+              if (init_cnt.posB(k,2) .lt. 0) init_cnt.posB(k,2)=init_cnt.posB(k,2)+init_cnt.t_vec(2);
+              
+            endif
+          enddo
+        enddo
+    
+        if (k .ne. init_cnt.Nu) stop "*** Error in calculating atom positions ***"
+  
+        ! calculate distances between atoms in a warped CNT unit cell.*******************************************************
+        allocate(init_cnt.posAA(init_cnt.Nu,2))
+        allocate(init_cnt.posAB(init_cnt.Nu,2))
+        allocate(init_cnt.posBA(init_cnt.Nu,2))
+        allocate(init_cnt.posBB(init_cnt.Nu,2))
+  
+        do i=1,init_cnt.Nu
+          init_cnt.posAA(i,:)=init_cnt.posA(i,:)-init_cnt.posA(1,:)
+          init_cnt.posAB(i,:)=init_cnt.posA(i,:)-init_cnt.posB(1,:)
+          init_cnt.posBA(i,:)=init_cnt.posB(i,:)-init_cnt.posA(1,:)
+          init_cnt.posBB(i,:)=init_cnt.posB(i,:)-init_cnt.posB(1,:)
+          if (init_cnt.posAA(i,1) .gt. init_cnt.ch_vec(1)/2.d0) init_cnt.posAA(i,1)=init_cnt.posAA(i,1)-init_cnt.ch_vec(1)
+          if (init_cnt.posAB(i,1) .gt. init_cnt.ch_vec(1)/2.d0) init_cnt.posAB(i,1)=init_cnt.posAB(i,1)-init_cnt.ch_vec(1)
+          if (init_cnt.posBA(i,1) .gt. init_cnt.ch_vec(1)/2.d0) init_cnt.posBA(i,1)=init_cnt.posBA(i,1)-init_cnt.ch_vec(1)
+          if (init_cnt.posBB(i,1) .gt. init_cnt.ch_vec(1)/2.d0) init_cnt.posBB(i,1)=init_cnt.posBB(i,1)-init_cnt.ch_vec(1)
+          
+        end do
+    end function init_cnt
+    
+    
+      !**************************************************************************************************************************
+      ! calculate band structure of the CNT
+      !**************************************************************************************************************************
+      subroutine calculateBands(self, i_sub, E_th, Kcm_max)
+        class(cnt), intent(inout) :: self
+        integer, intent(in) :: i_sub
+        real*8, intent(in) :: E_th, Kcm_max
+        
+        integer :: nkc, imin_sub
+        integer :: i,j,mu,ik,tmpi
+        integer, dimension(:), allocatable :: min_loc
+        real*8 :: tmpr
+        real*8, dimension(2) :: k,E1_tmp,E2_tmp
+        real*8, dimension(:), allocatable :: k_vec,min_energy
+        real*8, dimension(:,:,:), allocatable :: E_k
+        complex*16, dimension(:,:,:), allocatable :: Cc_k,Cv_k
+        complex*16, dimension(2) :: Cc_tmp,Cv_tmp
+  
+        ! set the value of i_sub
+        self.i_sub = i_sub
+        
+        ! calculate CNT energy dispersion.***********************************************************************************
+        self.ikc_max=floor(pi/norm2(self.t_vec)/self.dk)
+        self.ikc_min=-self.ikc_max
+        nkc=2*self.ikc_max+1
+  
+        allocate(k_vec(self.ikc_min:self.ikc_max))
+        allocate(E_k(1-self.Nu/2:self.Nu/2,self.ikc_min:self.ikc_max,2))
+        allocate(Cc_k(1-self.Nu/2:self.Nu/2,self.ikc_min:self.ikc_max,2))
+        allocate(Cv_k(1-self.Nu/2:self.Nu/2,self.ikc_min:self.ikc_max,2))
+        allocate(min_loc(0:self.Nu/2))
+  
+        do ik=self.ikc_min,self.ikc_max
+          k_vec(ik)=dble(ik)*self.dk
+        end do
+  
+        do mu=1-self.Nu/2,self.Nu/2
+          do ik=self.ikc_min,self.ikc_max
+            k = dble(mu) * self.K1 + dble(ik) * self.dk * self.K2
+            call grapheneEnergy(self, E_k(mu,ik,:), Cc_k(mu,ik,:), Cv_k(mu,ik,:), k)
+          enddo
+        enddo
+  
+  
+        ! find the subbands with a minimum energy.***************************************************************************
+        min_loc=minloc(E_k(0:self.Nu/2,:,1),2)
+        imin_sub=count((min_loc .lt. nkc) .and. (min_loc .gt. 1))
+        allocate(self.min_sub(imin_sub))
+        allocate(min_energy(imin_sub))
+  
+        ! store the value of mu for subbands with minimums in the variable min_sub
+        i=1
+        do mu=0,self.Nu/2
+          if ((min_loc(mu) .gt. 1) .and. (min_loc(mu) .lt. nkc)) then
+            self.min_sub(i)=mu
+            min_energy(i)=minval(E_k(mu,:,1))
+            i=i+1
+          end if
+        end do
+  
+        ! sort the subbands
+        do i=imin_sub,2,-1
+          do j=i-1,1,-1
+            if (min_energy(i) .lt. min_energy(j)) then
+              tmpr=min_energy(i)
+              tmpi=self.min_sub(i)
+              min_energy(i)=min_energy(j)
+              self.min_sub(i)=self.min_sub(j)
+              min_energy(j)=tmpr
+              self.min_sub(j)=tmpi
+            end if    
+          end do
+        end do
+  
+        ! find the max k-index that energy is below threshold energy (E_th).
+        ik=0
+        E1_tmp=(/ min_energy(self.i_sub),0 /)
+        E2_tmp=(/ min_energy(self.i_sub),0 /)
+        do while ((min(E1_tmp(1),E2_tmp(1))-min_energy(self.i_sub)) .le. E_th )
+          k=dble(self.min_sub(self.i_sub))*self.K1+dble(ik)*self.dk*self.K2
+          call grapheneEnergy(self,E1_tmp,Cc_tmp,Cv_tmp,k)
+          k=dble(self.min_sub(self.i_sub))*self.K1-dble(ik)*self.dk*self.K2
+          call grapheneEnergy(self,E2_tmp(:),Cc_tmp,Cv_tmp,k)
+          ik=ik+1
+        enddo
+  
+        ! set the index boundaries for some arrays and kernels. *************************************************************
+        self.ik_max=ik                              !the higher limit of k-vector that is below E_th
+        self.ik_min=-ik                             !the lower limit of k-vector that is below E_th
+        self.iKcm_max=floor(Kcm_max/self.dk)        !the higher limit of center of mass wave vector that we calculate
+        self.iKcm_min = - self.iKcm_max                     !the lower limit of center of mass wave vector that we calculate
+        self.ikr_high=self.iKcm_max-self.ik_min     !the maximum index that the relative wavenumber in the entire simulation.
+        self.ikr_low=-self.ikr_high                 !the minimum index that the relative wavenumber in the entire simulation.
+        self.ik_high=self.ikr_high+self.iKcm_max    !the maximum index that the wavenumber in the entire simulation.
+        self.ik_low=-self.ik_high                   !the minimum index that the wavenumber in the entire simulation.
+        self.iq_max=2*self.ikr_high                 !the higher limit of the index in v_FT and esp_q
+        self.iq_min=-self.iq_max                    !the lower limit of the index in v_FT and esp_q
+      
+      end subroutine calculateBands
+    
+      subroutine printProperties(self)
+        class(cnt), intent(in) :: self
+        print *, self.n_ch
+        print *, self.m_ch
+        print *, 2*self.n_ch+self.m_ch,2*self.m_ch+self.n_ch
+      end subroutine printProperties
+    
+      subroutine grapheneEnergy(currCNT,E,Cc,Cv,k)
+        type(cnt), intent(in) :: currCNT
+        complex*16 :: f_k
+        real*8, dimension(2), intent(in) :: k
+        real*8, dimension(2), intent(out) :: E
+        complex*16, dimension(2), intent(out) :: Cv
+        complex*16, dimension(2), intent(out) :: Cc
+  
+        f_k=exp(i1*dot_product(k,(currCNT.a1+currCNT.a2)/3.d0))+exp(i1*dot_product(k,(currCNT.a1-2.d0*currCNT.a2)/3.d0))+exp(i1*dot_product(k,(currCNT.a2-2.d0*currCNT.a1)/3.d0))  
+  
+        E(1)=+t0*abs(f_k)
+        E(2)=-t0*abs(f_k)
+  
+        Cc(1)=+1.d0/sqrt(2.d0)
+        Cc(2)=+1.d0/sqrt(2.d0)*conjg(f_k)/abs(f_k)
+        Cv(1)=+1.d0/sqrt(2.d0)
+        Cv(2)=-1.d0/sqrt(2.d0)*conjg(f_k)/abs(f_k)
+      end subroutine grapheneEnergy
     
 end module cnt_class
