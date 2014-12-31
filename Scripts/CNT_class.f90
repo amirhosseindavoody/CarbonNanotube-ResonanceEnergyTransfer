@@ -40,6 +40,9 @@ module cnt_class
       
     contains
       
+      !**************************************************************************************************************************
+      ! initialize CNT by calculating its geometrical properties
+      !**************************************************************************************************************************
       type(cnt) function init_cnt(n_ch,m_ch,nkg)
         use smallFunctions
         integer, intent(in) :: n_ch, m_ch
@@ -53,14 +56,14 @@ module cnt_class
         init_cnt.n_ch = n_ch
         init_cnt.m_ch = m_ch
         
-        ! unit vectors and reciprocal lattice vectors************************************************************************
+        ! unit vectors and reciprocal lattice vectors.
         init_cnt.a1=(/dsqrt(3.d0)/2.d0*a_l, 1.d0/2.d0*a_l/)
         init_cnt.a2=(/dsqrt(3.d0)/2.d0*a_l, -1.d0/2.d0*a_l/)
         init_cnt.b1=(/1.d0/dsqrt(3.d0)*2.d0*pi/a_l, +1.d0*2.d0*pi/a_l/)
         init_cnt.b2=(/1.d0/dsqrt(3.d0)*2.d0*pi/a_l, -1.d0*2.d0*pi/a_l/)
         init_cnt.aCC_vec=1.d0/3.d0*(init_cnt.a1+init_cnt.a2)
         
-        ! calculate chirality and translational vectors of CNT unit cell.****************************************************
+        ! calculate chirality and translational vectors of CNT unit cell.
         init_cnt.ch_vec=dble(n_ch)*init_cnt.a1+dble(m_ch)*init_cnt.a2
         init_cnt.len_ch=a_l*dsqrt(dble(n_ch)**2+dble(m_ch)**2+dble(n_ch)*dble(m_ch))
         init_cnt.radius=init_cnt.len_ch/2.d0/pi
@@ -75,7 +78,7 @@ module cnt_class
         init_cnt.Nu=2*(n_ch**2+m_ch**2+n_ch*m_ch)/dR
  
  
-        ! rotate basis vectors so that ch_vec is along x-axis
+        ! rotate basis vectors so that ch_vec is along x-axis.
         cosTh=init_cnt.ch_vec(1)/norm2(init_cnt.ch_vec)
         sinTh=init_cnt.ch_vec(2)/norm2(init_cnt.ch_vec)
         Rot=reshape((/ cosTh, -sinTh , sinTh, cosTh /), (/2,2/))
@@ -87,13 +90,13 @@ module cnt_class
         init_cnt.b2=matmul(Rot,init_cnt.b2)
         init_cnt.aCC_vec=matmul(Rot,init_cnt.aCC_vec)
   
-        ! calculate reciprocal lattice of CNT.*******************************************************************************
+        ! calculate reciprocal lattice of CNT.
         init_cnt.dk=norm2(init_cnt.b1)/(dble(nkg)-1.d0)
         init_cnt.K1=(-t2*init_cnt.b1+t1*init_cnt.b2)/(dble(init_cnt.Nu))
         init_cnt.K2=(dble(m_ch)*init_cnt.b1-dble(n_ch)*init_cnt.b2)/dble(init_cnt.Nu)
         init_cnt.K2=init_cnt.K2/norm2(init_cnt.K2)
   
-        ! calculate coordinates of atoms in the unwarped CNT unit cell.******************************************************
+        ! calculate coordinates of atoms in the unwarped CNT unit cell.
         allocate(init_cnt.posA(init_cnt.Nu,2))
         allocate(init_cnt.posB(init_cnt.Nu,2))
     
@@ -123,7 +126,7 @@ module cnt_class
     
         if (k .ne. init_cnt.Nu) stop "*** Error in calculating atom positions ***"
   
-        ! calculate distances between atoms in a warped CNT unit cell.*******************************************************
+        ! calculate distances between atoms in a warped CNT unit cell.
         allocate(init_cnt.posAA(init_cnt.Nu,2))
         allocate(init_cnt.posAB(init_cnt.Nu,2))
         allocate(init_cnt.posBA(init_cnt.Nu,2))
@@ -140,7 +143,7 @@ module cnt_class
           if (init_cnt.posBB(i,1) .gt. init_cnt.ch_vec(1)/2.d0) init_cnt.posBB(i,1)=init_cnt.posBB(i,1)-init_cnt.ch_vec(1)
           
         end do
-    end function init_cnt
+      end function init_cnt
     
     
       !**************************************************************************************************************************
@@ -164,7 +167,7 @@ module cnt_class
         ! set the value of i_sub
         self.i_sub = i_sub
         
-        ! calculate CNT energy dispersion.***********************************************************************************
+        ! calculate CNT energy dispersion.
         self.ikc_max=floor(pi/norm2(self.t_vec)/self.dk)
         self.ikc_min=-self.ikc_max
         nkc=2*self.ikc_max+1
@@ -187,7 +190,7 @@ module cnt_class
         enddo
   
   
-        ! find the subbands with a minimum energy.***************************************************************************
+        ! find the subbands with a minimum energy.
         min_loc=minloc(E_k(0:self.Nu/2,:,1),2)
         imin_sub=count((min_loc .lt. nkc) .and. (min_loc .gt. 1))
         allocate(self.min_sub(imin_sub))
@@ -229,20 +232,41 @@ module cnt_class
           ik=ik+1
         enddo
   
-        ! set the index boundaries for some arrays and kernels. *************************************************************
+        ! set the index boundaries for some arrays and kernels.
         self.ik_max=ik                              !the higher limit of k-vector that is below E_th
         self.ik_min=-ik                             !the lower limit of k-vector that is below E_th
         self.iKcm_max=floor(Kcm_max/self.dk)        !the higher limit of center of mass wave vector that we calculate
-        self.iKcm_min = - self.iKcm_max                     !the lower limit of center of mass wave vector that we calculate
+        self.iKcm_min = - self.iKcm_max             !the lower limit of center of mass wave vector that we calculate
         self.ikr_high=self.iKcm_max-self.ik_min     !the maximum index that the relative wavenumber in the entire simulation.
         self.ikr_low=-self.ikr_high                 !the minimum index that the relative wavenumber in the entire simulation.
         self.ik_high=self.ikr_high+self.iKcm_max    !the maximum index that the wavenumber in the entire simulation.
         self.ik_low=-self.ik_high                   !the minimum index that the wavenumber in the entire simulation.
         self.iq_max=2*self.ikr_high                 !the higher limit of the index in v_FT and esp_q
         self.iq_min=-self.iq_max                    !the lower limit of the index in v_FT and esp_q
+        
+        ! calculate the tight-binding energies and coefficients.
+        allocate(self.Ek(2,self.ik_low:self.ik_high,2))        
+        allocate(self.Cc(2,self.ik_low:self.ik_high,2))
+        allocate(self.Cv(2,self.ik_low:self.ik_high,2))
+  
+        
+        do ik=self.ik_low,self.ik_high
+          print *,'tight-binding energy: ik=',ik
+
+          mu=self.min_sub(i_sub) !first band
+          k=dble(mu)*self.K1+dble(ik)*self.dk*self.K2
+          call grapheneEnergy(self,self.Ek(1,ik,:),self.Cc(1,ik,:),self.Cv(1,ik,:),k)
+
+          mu=-self.min_sub(i_sub) !second band
+          k=dble(mu)*self.K1+dble(ik)*self.dk*self.K2
+          call grapheneEnergy(self,self.Ek(2,ik,:),self.Cc(2,ik,:),self.Cv(2,ik,:),k)
+        enddo
       
       end subroutine calculateBands
-    
+      
+      !**************************************************************************************************************************
+      ! print properties of CNT to the console
+      !**************************************************************************************************************************
       subroutine printProperties(self)
         class(cnt), intent(in) :: self
         print *, self.n_ch
