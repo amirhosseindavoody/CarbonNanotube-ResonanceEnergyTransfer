@@ -5,23 +5,29 @@
 !*******************************************************************************
 
 program cntForsterEnergyTransfer
-  use cnt_class
+  use cntClass
   use inputParameters
+  use dataClass
   implicit none
   
   type (cnt) :: firstCNT, secondCNT
   
   
   
-  firstCNT = cnt( n_ch1, m_ch1, nkg1)
-  secondCNT = cnt (n_ch2, m_ch2, nkg2)
+  firstCNT = cnt( n_ch1, m_ch1, nkg)
+  secondCNT = cnt (n_ch2, m_ch2, nkg)
   
   call firstCNT.calculateBands(i_sub1, E_th, Kcm_max)
-  call firstCNT.printProperties()
+  !call firstCNT.printProperties()
   
   call secondCNT.calculateBands(i_sub2, E_th, Kcm_max)
-  call secondCNT.printProperties()
+  !call secondCNT.printProperties()
   
+  !call saveCNTProperties(firstCNT)
+  !call saveCNTProperties(secondCNT)
+  
+  call loadExcitonWavefunction(firstCNT)
+  call loadExcitonWavefunction(secondCNT)
 
   print *,'Finish!!!!'
   pause

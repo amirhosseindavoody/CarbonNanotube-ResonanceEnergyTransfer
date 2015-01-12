@@ -51,6 +51,7 @@
 		<File RelativePath="..\Scripts\inputParameters.f90"/>
 		<File RelativePath="..\Scripts\Main.f90"/>
 		<File RelativePath="..\Scripts\physicalConstants.f90"/>
+		<File RelativePath="..\Scripts\dataClass.f90"/>
 		<File RelativePath="..\Scripts\smallFns.f90"/></Filter>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl"/></Files>
 	<Globals/></VisualStudioProject>

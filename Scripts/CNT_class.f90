@@ -1,4 +1,4 @@
-module cnt_class
+module cntClass
     use physicalConstants
     implicit none
     
@@ -7,27 +7,32 @@ module cnt_class
     public  :: cnt
     
     type cnt
-      integer, private :: n_ch,m_ch !chiral vector parameters
-      integer :: i_sub !subband index used in exciton energy calculation
+      integer, public :: n_ch,m_ch !chiral vector parameters
+      integer, public :: i_sub !subband index used in exciton energy calculation
     
       !Geometrical properties
       real*8, dimension(2) :: a1,a2,b1,b2,ch_vec,t_vec,aCC_vec
       real*8 :: len_ch,radius
       integer :: Nu
-      real*8, dimension(:,:), allocatable :: posA,posB,posAA,posBB,posAB,posBA
+      real*8, dimension(:,:), allocatable, public :: posA,posB,posAA,posBB,posAB,posBA
     
       !Reciprocal lattice properties
-      real*8 :: dk
+      real*8, public :: dk
       real*8, dimension(2) :: K1, K2
       
       !CNT band structure properties
       integer, dimension(:), allocatable :: min_sub
-      integer :: ikc_max, ikc_min, ik_max, ik_min, iKcm_max, iKcm_min, ik_high, ik_low, ikr_high, ikr_low, iq_max, iq_min
+      integer, public :: ikc_max, ikc_min, ik_max, ik_min, iKcm_max, iKcm_min, ik_high, ik_low, ikr_high, ikr_low, iq_max, iq_min
       
       !CNT self energy and tight binding coefficients
-      real*8, dimension(:,:,:), allocatable:: Ek  !Tight-binding energy
+      real*8, dimension(:,:,:), allocatable, public :: Ek  !Tight-binding energy
       real*8, dimension(:,:,:), allocatable:: Sk  !Self-energy 
       complex*16, dimension(:,:,:), allocatable:: Cc,Cv !Tight-binding wavefunction coefficients
+      
+      !Exciton wavefunction and energies
+      real*8, dimension(:,:), allocatable, public :: Ex_A1, Ex0_A2, Ex1_A2 !the first index is subband, the second index is iKcm
+      complex*16, dimension(:,:,:), allocatable, public :: Psi_A1, Psi0_A2, Psi1_A2 !the first index is ikr, the scond index is the subband, the third index is iKcm
+      integer, public :: nX
       
     contains
         procedure :: calculateBands
@@ -263,17 +268,10 @@ module cnt_class
         enddo
       
       end subroutine calculateBands
-      
-      !**************************************************************************************************************************
-      ! print properties of CNT to the console
-      !**************************************************************************************************************************
-      subroutine printProperties(self)
-        class(cnt), intent(in) :: self
-        print *, self.n_ch
-        print *, self.m_ch
-        print *, 2*self.n_ch+self.m_ch,2*self.m_ch+self.n_ch
-      end subroutine printProperties
     
+      !**************************************************************************************************************************
+      ! private subroutine to calculate Bloch functions and energy in graphene
+      !**************************************************************************************************************************
       subroutine grapheneEnergy(currCNT,E,Cc,Cv,k)
         type(cnt), intent(in) :: currCNT
         complex*16 :: f_k
@@ -292,5 +290,15 @@ module cnt_class
         Cv(1)=+1.d0/sqrt(2.d0)
         Cv(2)=-1.d0/sqrt(2.d0)*conjg(f_k)/abs(f_k)
       end subroutine grapheneEnergy
+
+      !**************************************************************************************************************************
+      ! print properties of CNT to the console
+      !**************************************************************************************************************************
+      subroutine printProperties(self)
+        class(cnt), intent(in) :: self
+        print *, self.n_ch
+        print *, self.m_ch
+        print *, 2*self.n_ch+self.m_ch,2*self.m_ch+self.n_ch
+      end subroutine printProperties
     
-end module cnt_class
+end module cntClass

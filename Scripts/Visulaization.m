@@ -1,7 +1,7 @@
 %% This file visualizes the results of the fortran program for CNT bethe salpeter equation
 clear all; clc; fig=10;
-% close all;
-dir='C:\Amirhossein\DataTestFiles\CNT_10_00_0501_0200_1.5_1\';
+close all;
+dir='C:\Users\amirhossein\Documents\GitHub\CarbonNanotube-ForsterEnergyTransfer\CNT_ForsterEnergyTransfer\x64\Release\CNT_07_06_0500_0200_0.0_1\';
 eV=1.6e-19;
 
 %% plot CNT unit cell
@@ -14,28 +14,28 @@ fig=fig+1; figure(fig); hold on; box on;
 plot(posA(:,1),posA(:,2),'b.','MarkerSize',20);
 plot(posB(:,1),posB(:,2),'r.','MarkerSize',20);
 
-% plot(posA(1,1),posA(1,2),'g.','MarkerSize',20);
-% plot(posB(1,1),posB(1,2),'k.','MarkerSize',20);
+plot(posA(1,1),posA(1,2),'g.','MarkerSize',20);
+plot(posB(1,1),posB(1,2),'k.','MarkerSize',20);
 
 axis equal; axis tight;
-
+return;
 %% plot CNT energy dispersion
-FileName=[dir,'CondBand.dat'];
-Ec_tmp=load(FileName);
-FileName=[dir,'ValeBand.dat'];
-Ev_tmp=load(FileName);
-
-[Nu,nkc]=size(Ec_tmp);
-Nu=Nu-1;
-k_vec=Ec_tmp(1,:);
-
-E_c=Ec_tmp(2:Nu+1,:);
-E_v=Ev_tmp(2:Nu+1,:);
-
-fig=fig+1; figure(fig); hold on; box on;
-plot(k_vec,E_c/eV,'-','LineWidth',3);
-plot(k_vec,E_v/eV,'-','LineWidth',3);
-axis tight;
+% FileName=[dir,'CondBand.dat'];
+% Ec_tmp=load(FileName);
+% FileName=[dir,'ValeBand.dat'];
+% Ev_tmp=load(FileName);
+% 
+% [Nu,nkc]=size(Ec_tmp);
+% Nu=Nu-1;
+% k_vec=Ec_tmp(1,:);
+% 
+% E_c=Ec_tmp(2:Nu+1,:);
+% E_v=Ev_tmp(2:Nu+1,:);
+% 
+% fig=fig+1; figure(fig); hold on; box on;
+% plot(k_vec,E_c/eV,'-','LineWidth',3);
+% plot(k_vec,E_v/eV,'-','LineWidth',3);
+% axis tight;
 
 %% plot energy dispersion of the considered subbands
 FileName=[dir,'CondBand_Sub.dat'];
@@ -54,7 +54,7 @@ figure(fig); hold on; box on;
 plot(k_vec,E_c/eV,'-','LineWidth',3);
 plot(k_vec,E_v/eV,'-','LineWidth',3);
 axis tight;
-
+return;
 %% plot self-energy corrections
 FileName=[dir,'CondSelfEnergy_Sub.dat'];
 S_c=load(FileName);
