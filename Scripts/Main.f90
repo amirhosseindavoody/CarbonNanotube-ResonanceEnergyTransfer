@@ -8,6 +8,7 @@ program cntForsterEnergyTransfer
   use cntClass
   use inputParameters
   use dataClass
+  use forsterClass
   implicit none
   
   type (cnt) :: firstCNT, secondCNT
@@ -28,6 +29,9 @@ program cntForsterEnergyTransfer
   
   call loadExcitonWavefunction(firstCNT)
   call loadExcitonWavefunction(secondCNT)
+  
+  call findCrossings(firstCNT,secondCNT)
+  call saveCrossingPoints(firstCNT,secondCNT)
 
   print *,'Finish!!!!'
   pause

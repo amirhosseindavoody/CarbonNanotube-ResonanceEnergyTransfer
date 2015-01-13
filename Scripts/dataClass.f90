@@ -4,7 +4,7 @@ module dataClass
     
     private
     
-    public  :: saveCNTProperties, loadExcitonWavefunction
+    public  :: saveCNTProperties, loadExcitonWavefunction, saveCrossingPoints
     
     contains
       !**************************************************************************************************************************
@@ -244,5 +244,85 @@ module dataClass
         
       end subroutine loadMiscData
     
+      
+      !**************************************************************************************************************************
+      ! save CNT dispersions and the crossing points
+      !**************************************************************************************************************************
+      subroutine saveCrossingPoints(cnt1,cnt2)
+        use ifport
+        use forsterClass
+        type(cnt), intent(in) :: cnt1,cnt2
+        character*100 :: dirname
+        integer(4) :: istat
+        logical(4) :: result
+        
+        integer :: iKcm, iX, i
+        
+        !create and change the directory to that of the CNT
+        write(dirname,"('ForsterFiles')")
+        result=makedirqq(dirname)
+        if (result) print *,'Directory creation successful!!'
+        istat=chdir(dirname)
+        if (istat .ne. 0) then
+            print *, 'Directory did not changed!!!'
+            pause
+            stop
+        end if
+        
+        !write carbon nanotube 1 k_vector
+        open(unit=100,file='cnt1_kvec.dat',status="unknown")
+        do iKcm=cnt1.iKcm_min,cnt1.iKcm_max
+          write(100,10, advance='no') dble(iKcm)*cnt1.dk
+        enddo
+        close(100)
+        
+        !write carbon nanotube 2 k_vector
+        open(unit=100,file='cnt2_kvec.dat',status="unknown")
+        do iKcm=cnt2.iKcm_min,cnt2.iKcm_max
+          write(100,10, advance='no') dble(iKcm)*cnt2.dk
+        enddo
+        close(100)
+        
+        !write carbon nanotube 1 Ex0_A2 dispersion
+        open(unit=100,file='cnt1_Ex0_A2.dat',status="unknown")
+        do iKcm=cnt1.iKcm_min,cnt1.iKcm_max
+          do iX=1,cnt1.nX
+            write(100,10, advance='no') cnt1.Ex0_A2(iX,iKcm)
+          enddo
+          write(100,10)
+        enddo
+        close(100)
+    
+        !write carbon nanotube 2 Ex0_A2 dispersion
+        open(unit=100,file='cnt2_Ex0_A2.dat',status="unknown")
+        do iKcm=cnt2.iKcm_min,cnt2.iKcm_max
+          do iX=1,cnt2.nX
+            write(100,10, advance='no') cnt2.Ex0_A2(iX,iKcm)
+          enddo
+          write(100,10)
+        enddo
+        close(100) 
+        
+        !write crossing points indexes
+        open(unit=100,file='crossingPoints.dat',status="unknown")
+        do i=1,ubound(finalCrossingPoints,1)
+          write(100,11) finalCrossingPoints(i,1), finalCrossingPoints(i,2), finalCrossingPoints(i,3)
+        enddo
+        close(100) 
+        
+        10 FORMAT (E16.8)
+        11 FORMAT (4I8, 4I8, 4I8)
+  
+       
+        
+        !change the directory back
+        istat=chdir('..')
+        if (istat .ne. 0) then
+            print *, 'Directory did not changed!!!'
+            pause
+            stop
+        end if
+        
+      end subroutine saveCrossingPoints
     
 end module dataClass

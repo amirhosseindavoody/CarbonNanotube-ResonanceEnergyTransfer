@@ -48,6 +48,7 @@
 		<Filter Name="Header Files" Filter="fi;fd"/>
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
 		<File RelativePath="..\Scripts\CNT_class.f90"/>
+		<File RelativePath="..\Scripts\forsterClass.f90"/>
 		<File RelativePath="..\Scripts\inputParameters.f90"/>
 		<File RelativePath="..\Scripts\Main.f90"/>
 		<File RelativePath="..\Scripts\physicalConstants.f90"/>
