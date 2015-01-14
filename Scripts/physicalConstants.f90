@@ -11,6 +11,7 @@ module physicalConstants
   !Physical constants
   real*8, parameter :: eV=1.6d-19 ![Joules]
   real*8, parameter :: hb=6.5d-16*eV ![eV.s]
+  real*8, parameter :: kb=1.3865d-23 ![J/K]
   
   real*8, parameter :: a_cc=1.42d-10 !carbon-carbon distance [meters] 
   real*8, parameter :: a_l=dsqrt(3.d0)*a_cc !lattice constants

@@ -32,6 +32,9 @@ program cntForsterEnergyTransfer
   
   call findCrossings(firstCNT,secondCNT)
   call saveCrossingPoints(firstCNT,secondCNT)
+  
+  call calculatePartitionFunction(firstCNT)
+  call calculatePartitionFunction(secondCNT)
 
   print *,'Finish!!!!'
   pause

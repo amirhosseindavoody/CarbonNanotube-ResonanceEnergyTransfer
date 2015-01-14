@@ -15,6 +15,7 @@ module cntClass
       real*8 :: len_ch,radius
       integer :: Nu
       real*8, dimension(:,:), allocatable, public :: posA,posB,posAA,posBB,posAB,posBA
+      real*8, dimension(:,:), allocatable, public :: posA3, posB3
     
       !Reciprocal lattice properties
       real*8, public :: dk
@@ -146,8 +147,24 @@ module cntClass
           if (init_cnt.posAB(i,1) .gt. init_cnt.ch_vec(1)/2.d0) init_cnt.posAB(i,1)=init_cnt.posAB(i,1)-init_cnt.ch_vec(1)
           if (init_cnt.posBA(i,1) .gt. init_cnt.ch_vec(1)/2.d0) init_cnt.posBA(i,1)=init_cnt.posBA(i,1)-init_cnt.ch_vec(1)
           if (init_cnt.posBB(i,1) .gt. init_cnt.ch_vec(1)/2.d0) init_cnt.posBB(i,1)=init_cnt.posBB(i,1)-init_cnt.ch_vec(1)
-          
         end do
+        
+        ! calculate coordinates of atoms in 3D unit cell
+        allocate(init_cnt.posA3(init_cnt.Nu,3))
+        allocate(init_cnt.posB3(init_cnt.Nu,3))
+        
+        do i=1,init_cnt.Nu
+          init_cnt.posA3(i,1) = init_cnt.radius*sin(2*pi*init_cnt.posA(i,1)/init_cnt.len_ch)
+          init_cnt.posA3(i,2) = init_cnt.posA(i,2)
+          init_cnt.posA3(i,3) = -init_cnt.radius*cos(2*pi*init_cnt.posA(i,1)/init_cnt.len_ch)
+        end do
+        
+        do i=1,init_cnt.Nu
+          init_cnt.posB3(i,1) = init_cnt.radius*sin(2*pi*init_cnt.posB(i,1)/init_cnt.len_ch)
+          init_cnt.posB3(i,2) = init_cnt.posB(i,2)
+          init_cnt.posB3(i,3) = -init_cnt.radius*cos(2*pi*init_cnt.posB(i,1)/init_cnt.len_ch)
+        end do
+        
       end function init_cnt
     
     
