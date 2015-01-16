@@ -4,9 +4,10 @@ module forsterClass
     private
     
     integer, dimension(:,:), allocatable, public :: finalCrossingPoints
-    real*8, public :: partitionFunction
+		real*8, dimension(:,:), allocatable, public :: totalDOS
+		real*8, public :: totalTransitionRate12, totalTransitionRate21
     
-    public  :: findCrossings, calculatePartitionFunction
+    public  :: findCrossings, testCalculateDOS, calculateTransferRate
     
     contains
       !**************************************************************************************************************************
@@ -61,10 +62,11 @@ module forsterClass
       !**************************************************************************************************************************
       ! calculate the partition function for a given carbon nanotube
       !**************************************************************************************************************************
-      subroutine calculatePartitionFunction(currcnt)
+      subroutine calculatePartitionFunction(currcnt, partitionFunction)
         use physicalConstants, only : kb
         use inputParameters, only : Temperature
         type(cnt), intent(in) :: currcnt
+				real*8, intent(out) :: partitionFunction
         integer :: ix, iKcm
         
         partitionFunction = 0.d0
@@ -82,48 +84,153 @@ module forsterClass
       !**************************************************************************************************************************
       ! calculate the matrix element for the crossing point number iC
       !**************************************************************************************************************************
-      subroutine calculateMatrixElement(cnt1,cnt2,iC)
+      subroutine calculateMatrixElement(cnt1,cnt2,iC,matrixElementFinal)
         use inputParameters
-        use physicalConstants, only : i1
+        use physicalConstants, only : i1, pi, eps0
         type(cnt), intent(in) :: cnt1,cnt2
         integer, intent(in) :: iC
+				complex*16, intent(out) :: matrixElementFinal
         integer :: ix1,ix2
         integer :: iKcm
         integer :: mu1,mu2
         integer :: ikr1, ikr2
-        integer :: iv, ivp
+        integer :: iv, ivp, iw
         integer :: imu1,imu2
         integer :: is,isp
-        complex*16 :: matrixElement
-        
-        matrixElement = (0.d0,0.d0)
+        real*8 :: Rwpp
+        real*8, dimension(3) :: tmp_vec
+        complex*16 :: tmpc
+				complex*16, dimension(2,2) :: matrixElementTemp
         
         ix1 = finalCrossingPoints(iC,1)
         ix2 = finalCrossingPoints(iC,2)
         iKcm = finalCrossingPoints(iC,3)
-        
-        mu1 = cnt1.min_sub(i_sub1)
-        mu2 = cnt2.min_sub(i_sub2)
-        
-        ! Calculate matrix element for mu1 = + and mu2 = +
-        imu1 = 1
-        imu2 = 1
+				
+				matrixElementFinal = (0.d0,0.d0)
         
         do ikr1 = cnt1.ikr_low, cnt1.ikr_high
           do ikr2 = cnt2.ikr_low, cnt2.ikr_high
-              do iv = 1, cnt1.Nu
-                do ivp = 1,cnt2.Nu
-                  is = 1
-                  isp = 1
-                  matrixElement = matrixElement + conjg(cnt1.Cc(imu1,ikr1+iKcm,is))*cnt1.Cv(imu1,ikr1-iKcm,is)*cnt2.Cc(imu2,ikr2+iKcm,isp)*conjg(cnt2.Cv(imu2,ikr2-iKcm,isp))* &
-                      exp(i1*dcmplx(2.d0*(-dot_product(cnt1.K1,cnt1.posA(iv,:))+dot_product(cnt2.K1,cnt1.posA(iv,:)))))
-                
-                end do  
-              end do
+						print *, "ikr1 = ", ikr1
+						print *, "ikr2 = ", ikr2
+						print *, "iC = ", iC
+						matrixElementTemp(1,1) = (0.d0,0.d0)
+						matrixElementTemp(1,2) = (0.d0,0.d0)
+						matrixElementTemp(2,1) = (0.d0,0.d0)
+						matrixElementTemp(2,2) = (0.d0,0.d0)
+            do iv = 1, cnt1.Nu
+              do ivp = 1,cnt2.Nu
+								do is = 1,2
+									do isp = 1,2
+										tmpc = 0
+										do iw = -nr,nr
+											Rwpp = dble(iw)*cnt2.t_vec(2)
+											tmp_vec(1) = 0.d0
+											tmp_vec(2) = Rwpp
+											tmp_vec(3) = c2cDistance
+											tmpc = tmpc+exp(i1*dcmplx(2.d0*dble(iKcm)*cnt2.dk*Rwpp))/norm2(tmp_vec+cnt1.pos3d(is,iv,:)-cnt2.pos3d(isp,ivp,:))
+										end do
+										
+										matrixElementTemp(1,1) = matrixElementTemp(1,1) + &
+													conjg(cnt1.Cc(1,ikr1+iKcm,is))*cnt1.Cv(1,ikr1-iKcm,is)*cnt2.Cc(1,ikr2+iKcm,isp)*conjg(cnt2.Cv(1,ikr2-iKcm,isp))* &
+													exp(i1*dcmplx(2.d0*dble(iKcm)*(-cnt1.dk*cnt1.pos2d(is,iv,2)+cnt2.dk*cnt2.pos2d(isp,ivp,2))))*tmpc
+										matrixElementTemp(1,2) = matrixElementTemp(1,2) + &
+													conjg(cnt1.Cc(1,ikr1+iKcm,is))*cnt1.Cv(1,ikr1-iKcm,is)*cnt2.Cc(2,-ikr2+iKcm,isp)*conjg(cnt2.Cv(2,-ikr2-iKcm,isp))* &
+													exp(i1*dcmplx(2.d0*dble(iKcm)*(-cnt1.dk*cnt1.pos2d(is,iv,2)+cnt2.dk*cnt2.pos2d(isp,ivp,2))))*tmpc
+										matrixElementTemp(2,1) = matrixElementTemp(2,1) + &
+													conjg(cnt1.Cc(2,-ikr1+iKcm,is))*cnt1.Cv(2,-ikr1-iKcm,is)*cnt2.Cc(1,ikr2+iKcm,isp)*conjg(cnt2.Cv(1,ikr2-iKcm,isp))* &
+													exp(i1*dcmplx(2.d0*dble(iKcm)*(-cnt1.dk*cnt1.pos2d(is,iv,2)+cnt2.dk*cnt2.pos2d(isp,ivp,2))))*tmpc
+										matrixElementTemp(2,2) = matrixElementTemp(2,2) + &
+													conjg(cnt1.Cc(2,-ikr1+iKcm,is))*cnt1.Cv(2,-ikr1-iKcm,is)*cnt2.Cc(2,-ikr2+iKcm,isp)*conjg(cnt2.Cv(2,-ikr2-iKcm,isp))* &
+													exp(i1*dcmplx(2.d0*dble(iKcm)*(-cnt1.dk*cnt1.pos2d(is,iv,2)+cnt2.dk*cnt2.pos2d(isp,ivp,2))))*tmpc
+									end do
+								end do
+              end do  
+						end do
+						matrixElementFinal = matrixElementFinal + (matrixElementTemp(1,1) + matrixElementTemp(1,2) + matrixElementTemp(2,1) + matrixElementTemp(2,2)) &
+																											* conjg(cnt1.Psi0_A2(ikr1,ix1,iKcm))*cnt2.Psi0_A2(ikr2,ix2,iKcm) / (2.d0,0.d0)
           end do
-        end do
+				end do
+        
+        matrixElementFinal = matrixElementFinal / dcmplx(4.d0*pi*eps0*dble(cnt1.Nu*cnt2.Nu)*sqrt(cnt1.dk*cnt1.t_vec(2)/2.d0/pi)*sqrt(cnt2.dk*cnt2.t_vec(2)/2.d0/pi))
         
       end subroutine calculateMatrixElement
+      
+      !**************************************************************************************************************************
+      ! calculate the density of states at a given point
+      !**************************************************************************************************************************
+      subroutine calculateDOS(currcnt,iKcm,iX,DOS)
+        type(cnt), intent(in) :: currcnt
+        integer, intent(in) :: iKcm,iX
+        real*8, intent(out) :: DOS
+        
+        if (iKcm == currcnt.iKcm_min) then
+          DOS = currcnt.dk/abs(currcnt.Ex0_A2(iX,iKcm)-currcnt.Ex0_A2(iX,iKcm+1))
+				else if(iKcm == currcnt.iKcm_max) then
+					DOS = currcnt.dk/abs(currcnt.Ex0_A2(iX,iKcm-1)-currcnt.Ex0_A2(iX,iKcm))
+				else if(iKcm == 0) then
+					DOS = currcnt.dk/abs(currcnt.Ex0_A2(iX,iKcm-1)-currcnt.Ex0_A2(iX,iKcm))
+				else
+					DOS = 2.d0*currcnt.dk/abs(currcnt.Ex0_A2(iX,iKcm-1)-currcnt.Ex0_A2(iX,iKcm+1))
+				end if
+			end subroutine calculateDOS
+			
+			!**************************************************************************************************************************
+      ! calculate the density of states for a given cnt
+      !**************************************************************************************************************************
+      subroutine testCalculateDOS(currcnt)
+        type(cnt), intent(in) :: currcnt
+				integer :: iX, iKcm
+				
+        allocate(totalDOS(1:currcnt.nX,currcnt.iKcm_min:currcnt.iKcm_max))
+				
+				do iX = 1,currcnt.nX
+					do iKcm = currcnt.iKcm_min,currcnt.iKcm_max
+						call calculateDOS(currcnt,iKcm,iX,totalDOS(iX,iKcm))
+					end do
+				end do
+			end subroutine testCalculateDOS
+			
+			!**************************************************************************************************************************
+      ! calculate scattering rate from cnt1 to cnt2
+      !**************************************************************************************************************************
+      subroutine calculateTransferRate(cnt1, cnt2)
+				use physicalConstants, only : kb
+				use inputParameters, only : Temperature
+        type(cnt), intent(in) :: cnt1, cnt2
+				integer :: iC
+				integer :: ix1, ix2, iKcm
+				integer :: nCrossing
+				real*8 :: partitionFunction1, partitionFunction2
+				real*8 :: dos1, dos2
+				complex*16 :: matrixElement
+				
+        call calculatePartitionFunction(cnt1, partitionFunction1)
+				call calculatePartitionFunction(cnt2, partitionFunction2)
+				
+				totalTransitionRate12 = 0.d0
+				totalTransitionRate21 = 0.d0
+				nCrossing = size(finalCrossingPoints,1)
+				
+				do iC = 1,nCrossing
+					
+					!print *, "iC = ", iC
+					
+					ix1 = finalCrossingPoints(iC,1)
+					ix2 = finalCrossingPoints(iC,2)
+					iKcm = finalCrossingPoints(iC,3)
+					
+					call calculateMatrixElement(cnt1,cnt2,iC,matrixElement)
+					call calculateDOS(cnt1,ix1,iKcm,dos1)
+					call calculateDOS(cnt2,ix2,iKcm,dos2)
+
+					totalTransitionRate12 = totalTransitionRate12 + exp(-cnt1.Ex0_A2(ix1,iKcm)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos1 / partitionFunction1
+					totalTransitionRate21 = totalTransitionRate21 + exp(-cnt2.Ex0_A2(ix2,iKcm)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos2 / partitionFunction2
+				end do
+				
+				print *, "totalTransitionRate12 = ", totalTransitionRate12
+				print *, "totalTransitionRate21 = ", totalTransitionRate21
+				
+      end subroutine calculateTransferRate
       
     
 end module forsterClass

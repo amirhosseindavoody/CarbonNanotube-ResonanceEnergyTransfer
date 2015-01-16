@@ -16,6 +16,7 @@ module cntClass
       integer :: Nu
       real*8, dimension(:,:), allocatable, public :: posA,posB,posAA,posBB,posAB,posBA
       real*8, dimension(:,:), allocatable, public :: posA3, posB3
+			real*8, dimension(:,:,:), allocatable, public :: pos2d, pos3d
     
       !Reciprocal lattice properties
       real*8, public :: dk
@@ -128,7 +129,11 @@ module cntClass
               
             endif
           enddo
-        enddo
+				enddo
+				
+				allocate(init_cnt.pos2d(2,init_cnt.Nu,2))
+				init_cnt.pos2d(1,:,:) = init_cnt.posA(:,:)
+				init_cnt.pos2d(2,:,:) = init_cnt.posB(:,:)
     
         if (k .ne. init_cnt.Nu) stop "*** Error in calculating atom positions ***"
   
@@ -163,7 +168,11 @@ module cntClass
           init_cnt.posB3(i,1) = init_cnt.radius*sin(2*pi*init_cnt.posB(i,1)/init_cnt.len_ch)
           init_cnt.posB3(i,2) = init_cnt.posB(i,2)
           init_cnt.posB3(i,3) = -init_cnt.radius*cos(2*pi*init_cnt.posB(i,1)/init_cnt.len_ch)
-        end do
+				end do
+				
+				allocate(init_cnt.pos3d(2,init_cnt.Nu,3))
+				init_cnt.pos3d(1,:,:) = init_cnt.posA3(:,:)
+				init_cnt.pos3d(2,:,:) = init_cnt.posB3(:,:)
         
       end function init_cnt
     
@@ -273,8 +282,6 @@ module cntClass
   
         
         do ik=self.ik_low,self.ik_high
-          print *,'tight-binding energy: ik=',ik
-
           mu=self.min_sub(i_sub) !first band
           k=dble(mu)*self.K1+dble(ik)*self.dk*self.K2
           call grapheneEnergy(self,self.Ek(1,ik,:),self.Cc(1,ik,:),self.Cv(1,ik,:),k)
@@ -313,9 +320,9 @@ module cntClass
       !**************************************************************************************************************************
       subroutine printProperties(self)
         class(cnt), intent(in) :: self
-        print *, self.n_ch
-        print *, self.m_ch
-        print *, 2*self.n_ch+self.m_ch,2*self.m_ch+self.n_ch
+        print *, "chirality = (", self.n_ch, ",", self.m_ch,")"
+        print *, "radius = ", self.radius
+        print *, "t_vec = ", self.t_vec
       end subroutine printProperties
     
 end module cntClass

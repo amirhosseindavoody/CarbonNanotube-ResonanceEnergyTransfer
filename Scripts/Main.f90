@@ -18,24 +18,29 @@ program cntForsterEnergyTransfer
   firstCNT = cnt( n_ch1, m_ch1, nkg)
   secondCNT = cnt (n_ch2, m_ch2, nkg)
   
+  call firstCNT.printProperties()
+  call secondCNT.printProperties()
+  
   call firstCNT.calculateBands(i_sub1, E_th, Kcm_max)
-  !call firstCNT.printProperties()
-  
   call secondCNT.calculateBands(i_sub2, E_th, Kcm_max)
-  !call secondCNT.printProperties()
   
-  !call saveCNTProperties(firstCNT)
-  !call saveCNTProperties(secondCNT)
+  call saveCNTProperties(firstCNT)
+  call saveCNTProperties(secondCNT)
+	
+	!pause
+	!stop
   
   call loadExcitonWavefunction(firstCNT)
   call loadExcitonWavefunction(secondCNT)
   
   call findCrossings(firstCNT,secondCNT)
   call saveCrossingPoints(firstCNT,secondCNT)
-  
-  call calculatePartitionFunction(firstCNT)
-  call calculatePartitionFunction(secondCNT)
-
+	
+	!call calculateDOStest(firstCNT)
+	!call saveDOS(firstCNT)
+	
+	call calculateTransferRate(firstCNT,secondCNT)
+	
   print *,'Finish!!!!'
   pause
   

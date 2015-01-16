@@ -56,24 +56,17 @@ for i = 1:nC
 end
 
 axis tight;
-
+return;
 
 %% plot exciton energy dispersion of the first cnt
 FileName=[dir,'cnt1_kvec.dat'];
 k_vec1=load(FileName);
 nKcm1 = numel(k_vec1);
-FileName=[dir,'cnt1_DOS.dat'];
-cnt1_DOS=load(FileName);
+FileName=[dir,'cnt1_Ex0_A2.dat'];
+cnt1_Ex0_A2=load(FileName);
 
 fig=fig+1; figure(fig); hold on; box on;
-plot(k_vec1,cnt1_DOS,'-','LineWidth',3);
-axis tight;
-% for iX = 1:size(cnt1_DOS,2)
-%     plot(k_vec1,cnt1_DOS(:,iX),'-','LineWidth',3);
-%     pause;
-% end;
-
-return;
+plot(k_vec1,cnt1_Ex0_A2/eV,'-b','LineWidth',3);
 
 %% plot exciton energy Ex0_A2
 FileName=[dir,'Ex0_A2.dat'];

@@ -4,7 +4,7 @@ module dataClass
     
     private
     
-    public  :: saveCNTProperties, loadExcitonWavefunction, saveCrossingPoints
+    public  :: saveCNTProperties, loadExcitonWavefunction, saveCrossingPoints, saveDOS
     
     contains
       !**************************************************************************************************************************
@@ -323,6 +323,52 @@ module dataClass
             stop
         end if
         
-      end subroutine saveCrossingPoints
+			end subroutine saveCrossingPoints
+			
+			!**************************************************************************************************************************
+      ! save total exciton density of states for a given cnt
+      !**************************************************************************************************************************
+      subroutine saveDOS(currcnt)
+				use ifport
+        use forsterClass
+        type(cnt), intent(in) :: currcnt
+        character*100 :: dirname
+        integer(4) :: istat
+        logical(4) :: result
+        
+        integer :: iKcm, iX
+        
+        !create and change the directory to that of the CNT
+        write(dirname,"('ForsterFiles')")
+        result=makedirqq(dirname)
+        if (result) print *,'Directory creation successful!!'
+        istat=chdir(dirname)
+        if (istat .ne. 0) then
+            print *, 'Directory did not changed!!!'
+            pause
+            stop
+        end if
+        
+        !write carbon nanotube 1 Ex0_A2 dispersion
+        open(unit=100,file='cnt1_DOS.dat',status="unknown")
+        do iKcm=currcnt.iKcm_min,currcnt.iKcm_max
+          do iX=1,currcnt.nX
+            write(100,10, advance='no') totalDOS(iX,iKcm)
+          enddo
+          write(100,10)
+        enddo
+        close(100)
+        
+        10 FORMAT (E16.8)
+        
+        !change the directory back
+        istat=chdir('..')
+        if (istat .ne. 0) then
+            print *, 'Directory did not changed!!!'
+            pause
+            stop
+        end if
+        
+			end subroutine saveDOS
     
 end module dataClass
