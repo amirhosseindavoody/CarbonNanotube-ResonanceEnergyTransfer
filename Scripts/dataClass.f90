@@ -89,6 +89,7 @@ module dataClass
         integer(4) :: istat
         logical(4) :: result
         integer :: iX, iKcm, ikr
+				real*8 :: tmpr1, tmpr2, tmpr3
         
         call loadMiscData(currcnt)
         
@@ -152,7 +153,24 @@ module dataClass
             print *, 'Directory did not changed!!!'
             pause
             stop
-        end if
+				end if
+				
+				!make sure the exciton wavefunctions are normalized
+				do iX=1,currcnt.nX
+					do iKcm=currcnt.iKcm_min,currcnt.iKcm_max
+						tmpr1 = 0.d0
+						tmpr2 = 0.d0
+						tmpr3 = 0.d0
+						do ikr=currcnt.ikr_low,currcnt.ikr_high
+              tmpr1 = tmpr1 + dble(conjg(currcnt.Psi_A1(ikr,iX,iKcm)*currcnt.Psi_A1(ikr,iX,iKcm)))
+							tmpr2 = tmpr2 + dble(conjg(currcnt.Psi0_A2(ikr,iX,iKcm)*currcnt.Psi0_A2(ikr,iX,iKcm)))
+							tmpr3 = tmpr3 + dble(conjg(currcnt.Psi1_A2(ikr,iX,iKcm)*currcnt.Psi1_A2(ikr,iX,iKcm)))
+						enddo
+						currcnt.Psi_A1(:,iX,iKcm) = currcnt.Psi_A1(:,iX,iKcm) / dcmplx(tmpr1)
+						currcnt.Psi0_A2(:,iX,iKcm) = currcnt.Psi0_A2(:,iX,iKcm) / dcmplx(tmpr2)
+						currcnt.Psi1_A2(:,iX,iKcm) = currcnt.Psi1_A2(:,iX,iKcm) / dcmplx(tmpr3)
+          enddo
+        enddo
         
       end subroutine loadExcitonWavefunction
       
@@ -328,13 +346,14 @@ module dataClass
 			!**************************************************************************************************************************
       ! save total exciton density of states for a given cnt
       !**************************************************************************************************************************
-      subroutine saveDOS(currcnt)
+      subroutine saveDOS(cnt1, cnt2)
 				use ifport
         use forsterClass
-        type(cnt), intent(in) :: currcnt
+        type(cnt), intent(in) :: cnt1, cnt2
         character*100 :: dirname
         integer(4) :: istat
         logical(4) :: result
+				real*8 :: dos
         
         integer :: iKcm, iX
         
@@ -349,16 +368,28 @@ module dataClass
             stop
         end if
         
-        !write carbon nanotube 1 Ex0_A2 dispersion
+        !write cnt1 Ex0_A2 dispersion
         open(unit=100,file='cnt1_DOS.dat',status="unknown")
-        do iKcm=currcnt.iKcm_min,currcnt.iKcm_max
-          do iX=1,currcnt.nX
-            write(100,10, advance='no') totalDOS(iX,iKcm)
+        do iKcm=cnt1.iKcm_min,cnt1.iKcm_max
+          do iX=1,cnt1.nX
+						call calculateDOS(cnt1,iKcm,iX,DOS)
+            write(100,10, advance='no') dos
           enddo
           write(100,10)
         enddo
         close(100)
         
+				!write cnt2 Ex0_A2 dispersion
+        open(unit=100,file='cnt2_DOS.dat',status="unknown")
+        do iKcm=cnt2.iKcm_min,cnt2.iKcm_max
+          do iX=1,cnt2.nX
+						call calculateDOS(cnt2,iKcm,iX,DOS)
+            write(100,10, advance='no') dos
+          enddo
+          write(100,10)
+        enddo
+        close(100)
+				
         10 FORMAT (E16.8)
         
         !change the directory back

@@ -11,35 +11,40 @@ program cntForsterEnergyTransfer
   use forsterClass
   implicit none
   
-  type (cnt) :: firstCNT, secondCNT
+  type (cnt) :: cnt1, cnt2
   
   
   
-  firstCNT = cnt( n_ch1, m_ch1, nkg)
-  secondCNT = cnt (n_ch2, m_ch2, nkg)
+  cnt1 = cnt( n_ch1, m_ch1, nkg)
+  cnt2 = cnt (n_ch2, m_ch2, nkg)
   
-  call firstCNT.printProperties()
-  call secondCNT.printProperties()
+  call cnt1.printProperties()
+  call cnt2.printProperties()
   
-  call firstCNT.calculateBands(i_sub1, E_th, Kcm_max)
-  call secondCNT.calculateBands(i_sub2, E_th, Kcm_max)
+  call cnt1.calculateBands(i_sub1, E_th, Kcm_max)
+  call cnt2.calculateBands(i_sub2, E_th, Kcm_max)
   
-  call saveCNTProperties(firstCNT)
-  call saveCNTProperties(secondCNT)
+  !call saveCNTProperties(cnt1)
+  !call saveCNTProperties(cnt2)
 	
 	!pause
 	!stop
   
-  call loadExcitonWavefunction(firstCNT)
-  call loadExcitonWavefunction(secondCNT)
+  call loadExcitonWavefunction(cnt1)
+  call loadExcitonWavefunction(cnt2)
+	
+	!pause
+	!stop
   
-  call findCrossings(firstCNT,secondCNT)
-  call saveCrossingPoints(firstCNT,secondCNT)
+  call findCrossings(cnt1,cnt2)
+  call saveCrossingPoints(cnt1,cnt2)
 	
-	!call calculateDOStest(firstCNT)
-	!call saveDOS(firstCNT)
+	call saveDOS(cnt1,cnt2)
 	
-	call calculateTransferRate(firstCNT,secondCNT)
+	!pause
+	!stop
+	
+	call calculateTransferRate(cnt1,cnt2)
 	
   print *,'Finish!!!!'
   pause
