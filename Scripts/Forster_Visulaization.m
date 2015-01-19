@@ -1,7 +1,7 @@
 %% This file visualizes the results of the fortran program for CNT bethe salpeter equation
 clear all; clc; fig=10;
 close all;
-dir='C:\Users\amirhossein\Google Drive\Research\Exciton\Data\ForsterFiles\';
+dir='C:\Users\amirhossein\Google Drive\Research\Exciton\test Data\ForsterFiles\';
 eV=1.6e-19;
 
 %% plot CNT unit cell
@@ -30,7 +30,7 @@ cnt1_Ex0_A2=load(FileName);
 fig=fig+1; figure(fig); hold on; box on;
 plot(k_vec1,cnt1_Ex0_A2/eV,'-b','LineWidth',3);
 % return;
-%% plot exciton energy dispersion of the first cnt
+%% plot exciton energy dispersion of the second cnt
 FileName=[dir,'cnt2_kvec.dat'];
 k_vec2=load(FileName);
 nKcm2 = numel(k_vec2);
@@ -56,9 +56,9 @@ for i = 1:nC
 end
 
 axis tight;
+% return;
 
-
-%% plot exciton energy dispersion of the first cnt
+%% plot exciton density of states of the first cnt
 FileName=[dir,'cnt1_kvec.dat'];
 k_vec1=load(FileName);
 nKcm1 = numel(k_vec1);
@@ -66,10 +66,33 @@ FileName=[dir,'cnt1_DOS.dat'];
 cnt1_DOS=load(FileName);
 
 fig=fig+1; figure(fig); hold on; box on;
-plot(k_vec1,cnt1_DOS,'-','LineWidth',3);
+plot(k_vec1,cnt1_DOS*eV,'-','LineWidth',3);
+for i = 1:nC
+    plot(k_vec1(tmp+crossingPoints(i,3)),cnt1_DOS(tmp+crossingPoints(i,3),crossingPoints(i,1))*eV,'*-k','LineWidth',4);
+end
 axis tight;
 % for iX = 1:size(cnt1_DOS,2)
 %     plot(k_vec1,cnt1_DOS(:,iX),'-','LineWidth',3);
+%     pause;
+% end;
+
+% return;
+
+%% plot exciton density of states of the first cnt
+FileName=[dir,'cnt2_kvec.dat'];
+k_vec2=load(FileName);
+nKcm2 = numel(k_vec2);
+FileName=[dir,'cnt2_DOS.dat'];
+cnt2_DOS=load(FileName);
+
+fig=fig+1; figure(fig); hold on; box on;
+plot(k_vec2,cnt2_DOS*eV,'-','LineWidth',3);
+for i = 1:nC
+    plot(k_vec2(tmp+crossingPoints(i,3)),cnt2_DOS(tmp+crossingPoints(i,3),crossingPoints(i,2))*eV,'*-k','LineWidth',4);
+end
+axis tight;
+% for iX = 1:size(cnt2_DOS,2)
+%     plot(k_vec2,cnt2_DOS(:,iX),'-','LineWidth',3);
 %     pause;
 % end;
 

@@ -4,10 +4,9 @@ module forsterClass
     private
     
     integer, dimension(:,:), allocatable, public :: finalCrossingPoints
-		real*8, dimension(:,:), allocatable, public :: totalDOS
 		real*8, public :: totalTransitionRate12, totalTransitionRate21
     
-    public  :: findCrossings, testCalculateDOS, calculateTransferRate
+    public  :: findCrossings, calculateDOS, calculateTransferRate
     
     contains
       !**************************************************************************************************************************
@@ -77,8 +76,6 @@ module forsterClass
           end do
         end do
         
-        print *, "partitionFunction = ", partitionFunction
-        
       end subroutine calculatePartitionFunction
       
       !**************************************************************************************************************************
@@ -86,7 +83,7 @@ module forsterClass
       !**************************************************************************************************************************
       subroutine calculateMatrixElement(cnt1,cnt2,iC,matrixElementFinal)
         use inputParameters
-        use physicalConstants, only : i1, pi, eps0
+        use physicalConstants, only : i1, pi, eps0, q0
         type(cnt), intent(in) :: cnt1,cnt2
         integer, intent(in) :: iC
 				complex*16, intent(out) :: matrixElementFinal
@@ -108,28 +105,26 @@ module forsterClass
 				
 				matrixElementFinal = (0.d0,0.d0)
         
-        do ikr1 = cnt1.ikr_low, cnt1.ikr_high
-          do ikr2 = cnt2.ikr_low, cnt2.ikr_high
-						print *, "ikr1 = ", ikr1
-						print *, "ikr2 = ", ikr2
-						print *, "iC = ", iC
-						matrixElementTemp(1,1) = (0.d0,0.d0)
-						matrixElementTemp(1,2) = (0.d0,0.d0)
-						matrixElementTemp(2,1) = (0.d0,0.d0)
-						matrixElementTemp(2,2) = (0.d0,0.d0)
-            do iv = 1, cnt1.Nu
-              do ivp = 1,cnt2.Nu
-								do is = 1,2
-									do isp = 1,2
-										tmpc = 0
-										do iw = -nr,nr
-											Rwpp = dble(iw)*cnt2.t_vec(2)
-											tmp_vec(1) = 0.d0
-											tmp_vec(2) = Rwpp
-											tmp_vec(3) = c2cDistance
-											tmpc = tmpc+exp(i1*dcmplx(2.d0*dble(iKcm)*cnt2.dk*Rwpp))/norm2(tmp_vec+cnt1.pos3d(is,iv,:)-cnt2.pos3d(isp,ivp,:))
-										end do
-										
+        matrixElementTemp(1,1) = (0.d0,0.d0)
+				matrixElementTemp(1,2) = (0.d0,0.d0)
+				matrixElementTemp(2,1) = (0.d0,0.d0)
+				matrixElementTemp(2,2) = (0.d0,0.d0)
+				do iv = 1, cnt1.Nu
+					print *, "iC = ", iC
+					print *, "iv = ", iv
+					do ivp = 1,cnt2.Nu
+						do is = 1,2
+							do isp = 1,2
+								tmpc = 0
+								do iw = -nr,nr
+									Rwpp = dble(iw)*cnt2.t_vec(2)
+									tmp_vec(1) = 0.d0
+									tmp_vec(2) = Rwpp
+									tmp_vec(3) = c2cDistance
+									tmpc = tmpc+exp(i1*dcmplx(2.d0*dble(iKcm)*cnt2.dk*Rwpp))/norm2(tmp_vec+cnt1.pos3d(is,iv,:)-cnt2.pos3d(isp,ivp,:))
+								end do
+								do ikr1 = cnt1.ikr_low, cnt1.ikr_high
+									do ikr2 = cnt2.ikr_low, cnt2.ikr_high					
 										matrixElementTemp(1,1) = matrixElementTemp(1,1) + &
 													conjg(cnt1.Cc(1,ikr1+iKcm,is))*cnt1.Cv(1,ikr1-iKcm,is)*cnt2.Cc(1,ikr2+iKcm,isp)*conjg(cnt2.Cv(1,ikr2-iKcm,isp))* &
 													exp(i1*dcmplx(2.d0*dble(iKcm)*(-cnt1.dk*cnt1.pos2d(is,iv,2)+cnt2.dk*cnt2.pos2d(isp,ivp,2))))*tmpc
@@ -146,12 +141,13 @@ module forsterClass
 								end do
               end do  
 						end do
-						matrixElementFinal = matrixElementFinal + (matrixElementTemp(1,1) + matrixElementTemp(1,2) + matrixElementTemp(2,1) + matrixElementTemp(2,2)) &
-																											* conjg(cnt1.Psi0_A2(ikr1,ix1,iKcm))*cnt2.Psi0_A2(ikr2,ix2,iKcm) / (2.d0,0.d0)
-          end do
+					end do
 				end do
+				matrixElementFinal = matrixElementFinal + (matrixElementTemp(1,1) + matrixElementTemp(1,2) + matrixElementTemp(2,1) + matrixElementTemp(2,2)) &
+																											* conjg(cnt1.Psi0_A2(ikr1,ix1,iKcm))*cnt2.Psi0_A2(ikr2,ix2,iKcm) / (2.d0,0.d0)
+          
         
-        matrixElementFinal = matrixElementFinal / dcmplx(4.d0*pi*eps0*dble(cnt1.Nu*cnt2.Nu)*sqrt(cnt1.dk*cnt1.t_vec(2)/2.d0/pi)*sqrt(cnt2.dk*cnt2.t_vec(2)/2.d0/pi))
+        matrixElementFinal = matrixElementFinal * dcmplx(q0*q0) / dcmplx(4.d0*pi*eps0*dble(cnt1.Nu*cnt2.Nu)*sqrt(cnt1.dk*cnt1.t_vec(2)/2.d0/pi)*sqrt(cnt2.dk*cnt2.t_vec(2)/2.d0/pi))
         
       end subroutine calculateMatrixElement
       
@@ -175,26 +171,10 @@ module forsterClass
 			end subroutine calculateDOS
 			
 			!**************************************************************************************************************************
-      ! calculate the density of states for a given cnt
-      !**************************************************************************************************************************
-      subroutine testCalculateDOS(currcnt)
-        type(cnt), intent(in) :: currcnt
-				integer :: iX, iKcm
-				
-        allocate(totalDOS(1:currcnt.nX,currcnt.iKcm_min:currcnt.iKcm_max))
-				
-				do iX = 1,currcnt.nX
-					do iKcm = currcnt.iKcm_min,currcnt.iKcm_max
-						call calculateDOS(currcnt,iKcm,iX,totalDOS(iX,iKcm))
-					end do
-				end do
-			end subroutine testCalculateDOS
-			
-			!**************************************************************************************************************************
       ! calculate scattering rate from cnt1 to cnt2
       !**************************************************************************************************************************
       subroutine calculateTransferRate(cnt1, cnt2)
-				use physicalConstants, only : kb
+				use physicalConstants, only : kb, pi, hb
 				use inputParameters, only : Temperature
         type(cnt), intent(in) :: cnt1, cnt2
 				integer :: iC
@@ -206,6 +186,13 @@ module forsterClass
 				
         call calculatePartitionFunction(cnt1, partitionFunction1)
 				call calculatePartitionFunction(cnt2, partitionFunction2)
+				
+				print *, "partitionFunction1 = ", partitionFunction1
+				print *, "partitionFunction2 = ", partitionFunction2
+				
+				!pause
+				!stop
+				
 				
 				totalTransitionRate12 = 0.d0
 				totalTransitionRate21 = 0.d0
@@ -223,8 +210,8 @@ module forsterClass
 					call calculateDOS(cnt1,ix1,iKcm,dos1)
 					call calculateDOS(cnt2,ix2,iKcm,dos2)
 
-					totalTransitionRate12 = totalTransitionRate12 + exp(-cnt1.Ex0_A2(ix1,iKcm)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos1 / partitionFunction1
-					totalTransitionRate21 = totalTransitionRate21 + exp(-cnt2.Ex0_A2(ix2,iKcm)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos2 / partitionFunction2
+					totalTransitionRate12 = totalTransitionRate12 + exp(-cnt1.Ex0_A2(ix1,iKcm)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos1 * 2.d0 * pi / hb / partitionFunction1
+					totalTransitionRate21 = totalTransitionRate21 + exp(-cnt2.Ex0_A2(ix2,iKcm)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos2 * 2.d0 * pi / hb / partitionFunction2
 				end do
 				
 				print *, "totalTransitionRate12 = ", totalTransitionRate12
