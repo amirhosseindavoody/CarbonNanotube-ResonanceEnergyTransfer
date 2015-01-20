@@ -84,70 +84,64 @@ module forsterClass
       subroutine calculateMatrixElement(cnt1,cnt2,iC,matrixElementFinal)
         use inputParameters
         use physicalConstants, only : i1, pi, eps0, q0
+				use smallFunctions
         type(cnt), intent(in) :: cnt1,cnt2
         integer, intent(in) :: iC
 				complex*16, intent(out) :: matrixElementFinal
         integer :: ix1,ix2
         integer :: iKcm
-        integer :: mu1,mu2
         integer :: ikr1, ikr2
-        integer :: iv, ivp, iw
         integer :: imu1,imu2
         integer :: is,isp
-        real*8 :: Rwpp
-        real*8, dimension(3) :: tmp_vec
-        complex*16 :: tmpc
+				real*8 :: dk
 				complex*16, dimension(2,2) :: matrixElementTemp
+				real*8 :: Ck
+				real*8 :: phi1, phi2, dPhi
+				integer :: iPhi1, iPhi2, nPhi
+				real*8 :: radius1, radius2
+				real*8 :: tmpr
+				
         
         ix1 = finalCrossingPoints(iC,1)
         ix2 = finalCrossingPoints(iC,2)
         iKcm = finalCrossingPoints(iC,3)
 				
+				radius1 = cnt1.radius
+				radius2	= cnt2.radius
+				dk = cnt1.dk
+				
 				matrixElementFinal = (0.d0,0.d0)
         
-        matrixElementTemp(1,1) = (0.d0,0.d0)
-				matrixElementTemp(1,2) = (0.d0,0.d0)
-				matrixElementTemp(2,1) = (0.d0,0.d0)
-				matrixElementTemp(2,2) = (0.d0,0.d0)
-				do iv = 1, cnt1.Nu
-					print *, "iC = ", iC
-					print *, "iv = ", iv
-					do ivp = 1,cnt2.Nu
-						do is = 1,2
-							do isp = 1,2
-								tmpc = 0
-								do iw = -nr,nr
-									Rwpp = dble(iw)*cnt2.t_vec(2)
-									tmp_vec(1) = 0.d0
-									tmp_vec(2) = Rwpp
-									tmp_vec(3) = c2cDistance
-									tmpc = tmpc+exp(i1*dcmplx(2.d0*dble(iKcm)*cnt2.dk*Rwpp))/norm2(tmp_vec+cnt1.pos3d(is,iv,:)-cnt2.pos3d(isp,ivp,:))
-								end do
-								do ikr1 = cnt1.ikr_low, cnt1.ikr_high
-									do ikr2 = cnt2.ikr_low, cnt2.ikr_high					
-										matrixElementTemp(1,1) = matrixElementTemp(1,1) + &
-													conjg(cnt1.Cc(1,ikr1+iKcm,is))*cnt1.Cv(1,ikr1-iKcm,is)*cnt2.Cc(1,ikr2+iKcm,isp)*conjg(cnt2.Cv(1,ikr2-iKcm,isp))* &
-													exp(i1*dcmplx(2.d0*dble(iKcm)*(-cnt1.dk*cnt1.pos2d(is,iv,2)+cnt2.dk*cnt2.pos2d(isp,ivp,2))))*tmpc
-										matrixElementTemp(1,2) = matrixElementTemp(1,2) + &
-													conjg(cnt1.Cc(1,ikr1+iKcm,is))*cnt1.Cv(1,ikr1-iKcm,is)*cnt2.Cc(2,-ikr2+iKcm,isp)*conjg(cnt2.Cv(2,-ikr2-iKcm,isp))* &
-													exp(i1*dcmplx(2.d0*dble(iKcm)*(-cnt1.dk*cnt1.pos2d(is,iv,2)+cnt2.dk*cnt2.pos2d(isp,ivp,2))))*tmpc
-										matrixElementTemp(2,1) = matrixElementTemp(2,1) + &
-													conjg(cnt1.Cc(2,-ikr1+iKcm,is))*cnt1.Cv(2,-ikr1-iKcm,is)*cnt2.Cc(1,ikr2+iKcm,isp)*conjg(cnt2.Cv(1,ikr2-iKcm,isp))* &
-													exp(i1*dcmplx(2.d0*dble(iKcm)*(-cnt1.dk*cnt1.pos2d(is,iv,2)+cnt2.dk*cnt2.pos2d(isp,ivp,2))))*tmpc
-										matrixElementTemp(2,2) = matrixElementTemp(2,2) + &
-													conjg(cnt1.Cc(2,-ikr1+iKcm,is))*cnt1.Cv(2,-ikr1-iKcm,is)*cnt2.Cc(2,-ikr2+iKcm,isp)*conjg(cnt2.Cv(2,-ikr2-iKcm,isp))* &
-													exp(i1*dcmplx(2.d0*dble(iKcm)*(-cnt1.dk*cnt1.pos2d(is,iv,2)+cnt2.dk*cnt2.pos2d(isp,ivp,2))))*tmpc
-									end do
-								end do
-              end do  
-						end do
+				nPhi = 200
+				Ck = 0.d0
+				dPhi = 2.d0*pi/dble(nPhi)
+				do iPhi1 = 0,nPhi
+					do iPhi2 = 0,nPhi
+						tmpr = dble(iKcm)*dk*sqrt((radius1*sin(iPhi1*dPhi)-radius2*sin(iPhi2*dPhi))**2+(c2cDistance-radius1*cos(iPhi1*dPhi)+radius2*cos(iPhi2*dPhi))**2)
+						Ck = Ck + sqrt(2/pi) * dPhi * dPhi * bessk0(abs(tmpr))
 					end do
 				end do
-				matrixElementFinal = matrixElementFinal + (matrixElementTemp(1,1) + matrixElementTemp(1,2) + matrixElementTemp(2,1) + matrixElementTemp(2,2)) &
+				
+				do ikr1 = cnt1.ikr_low, cnt1.ikr_high
+					do ikr2 = cnt2.ikr_low, cnt2.ikr_high					
+						do is = 1,2
+							do isp = 1,2
+								matrixElementTemp(1,1) = matrixElementTemp(1,1) +	conjg(cnt1.Cc(1,ikr1+iKcm,is))*cnt1.Cv(1,ikr1-iKcm,is)*cnt2.Cc(1,ikr2+iKcm,isp)*conjg(cnt2.Cv(1,ikr2-iKcm,isp))
+								matrixElementTemp(1,2) = matrixElementTemp(1,2) + conjg(cnt1.Cc(1,ikr1+iKcm,is))*cnt1.Cv(1,ikr1-iKcm,is)*cnt2.Cc(2,-ikr2+iKcm,isp)*conjg(cnt2.Cv(2,-ikr2-iKcm,isp))
+								matrixElementTemp(2,1) = matrixElementTemp(2,1) + conjg(cnt1.Cc(2,-ikr1+iKcm,is))*cnt1.Cv(2,-ikr1-iKcm,is)*cnt2.Cc(1,ikr2+iKcm,isp)*conjg(cnt2.Cv(1,ikr2-iKcm,isp))
+								matrixElementTemp(2,2) = matrixElementTemp(2,2) + conjg(cnt1.Cc(2,-ikr1+iKcm,is))*cnt1.Cv(2,-ikr1-iKcm,is)*cnt2.Cc(2,-ikr2+iKcm,isp)*conjg(cnt2.Cv(2,-ikr2-iKcm,isp))
+              end do  
+						end do
+						matrixElementFinal = matrixElementFinal + (matrixElementTemp(1,1) + matrixElementTemp(1,2) + matrixElementTemp(2,1) + matrixElementTemp(2,2)) &
 																											* conjg(cnt1.Psi0_A2(ikr1,ix1,iKcm))*cnt2.Psi0_A2(ikr2,ix2,iKcm) / (2.d0,0.d0)
-          
-        
-        matrixElementFinal = matrixElementFinal * dcmplx(q0*q0) / dcmplx(4.d0*pi*eps0*dble(cnt1.Nu*cnt2.Nu)*sqrt(cnt1.dk*cnt1.t_vec(2)/2.d0/pi)*sqrt(cnt2.dk*cnt2.t_vec(2)/2.d0/pi))
+						matrixElementTemp(1,1) = (0.d0,0.d0)
+						matrixElementTemp(1,2) = (0.d0,0.d0)
+						matrixElementTemp(2,1) = (0.d0,0.d0)
+						matrixElementTemp(2,2) = (0.d0,0.d0)
+					end do
+				end do
+				
+        matrixElementFinal = matrixElementFinal * dcmplx(q0*q0 * Ck / (4.d0*pi*eps0*2.d0*pi/dk))
         
       end subroutine calculateMatrixElement
       
