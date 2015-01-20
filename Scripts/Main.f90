@@ -12,9 +12,7 @@ program cntForsterEnergyTransfer
   implicit none
   
   type (cnt) :: cnt1, cnt2
-  
-  
-  
+	
   cnt1 = cnt( n_ch1, m_ch1, nkg)
   cnt2 = cnt (n_ch2, m_ch2, nkg)
   
