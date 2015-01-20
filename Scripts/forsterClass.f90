@@ -111,13 +111,19 @@ module forsterClass
 				dk = cnt1.dk
 				
 				matrixElementFinal = (0.d0,0.d0)
+				matrixElementTemp(1,1) = (0.d0,0.d0)
+				matrixElementTemp(1,2) = (0.d0,0.d0)
+				matrixElementTemp(2,1) = (0.d0,0.d0)
+				matrixElementTemp(2,2) = (0.d0,0.d0)
         
-				nPhi = 200
+				nPhi = 1000
 				Ck = 0.d0
 				dPhi = 2.d0*pi/dble(nPhi)
 				do iPhi1 = 0,nPhi
 					do iPhi2 = 0,nPhi
-						tmpr = dble(iKcm)*dk*sqrt((radius1*sin(iPhi1*dPhi)-radius2*sin(iPhi2*dPhi))**2+(c2cDistance-radius1*cos(iPhi1*dPhi)+radius2*cos(iPhi2*dPhi))**2)
+						phi1=dble(iPhi1)*dPhi
+						phi2=dble(iPhi2)*dPhi
+						tmpr = 2.d0*dble(iKcm)*dk*sqrt((radius1*sin(phi1)-radius2*sin(phi2))**2+(c2cDistance-radius1*cos(phi1)+radius2*cos(phi2))**2)
 						Ck = Ck + sqrt(2/pi) * dPhi * dPhi * bessk0(abs(tmpr))
 					end do
 				end do
@@ -139,7 +145,7 @@ module forsterClass
 						matrixElementTemp(2,1) = (0.d0,0.d0)
 						matrixElementTemp(2,2) = (0.d0,0.d0)
 					end do
-				end do
+				end do				
 				
         matrixElementFinal = matrixElementFinal * dcmplx(q0*q0 * Ck / (4.d0*pi*eps0*2.d0*pi/dk))
         
@@ -194,22 +200,23 @@ module forsterClass
 				
 				do iC = 1,nCrossing
 					
-					!print *, "iC = ", iC
-					
 					ix1 = finalCrossingPoints(iC,1)
 					ix2 = finalCrossingPoints(iC,2)
 					iKcm = finalCrossingPoints(iC,3)
 					
 					call calculateMatrixElement(cnt1,cnt2,iC,matrixElement)
-					call calculateDOS(cnt1,ix1,iKcm,dos1)
-					call calculateDOS(cnt2,ix2,iKcm,dos2)
+					call calculateDOS(cnt1,iKcm,ix1,dos1)
+					call calculateDOS(cnt2,iKcm,ix2,dos2)
 
 					totalTransitionRate12 = totalTransitionRate12 + exp(-cnt1.Ex0_A2(ix1,iKcm)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos1 * 2.d0 * pi / hb / partitionFunction1
 					totalTransitionRate21 = totalTransitionRate21 + exp(-cnt2.Ex0_A2(ix2,iKcm)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos2 * 2.d0 * pi / hb / partitionFunction2
+										
 				end do
 				
-				print *, "totalTransitionRate12 = ", totalTransitionRate12
-				print *, "totalTransitionRate21 = ", totalTransitionRate21
+				write(*,10) "totalTransitionRate12 = ", totalTransitionRate12
+				write(*,10) "totalTransitionRate21 = ", totalTransitionRate21
+				
+10			FORMAT (A,E16.8)
 				
       end subroutine calculateTransferRate
       
