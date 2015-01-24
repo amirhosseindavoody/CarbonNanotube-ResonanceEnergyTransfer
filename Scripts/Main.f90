@@ -35,14 +35,19 @@ program cntForsterEnergyTransfer
 	!stop
   
   call findCrossings(cnt1,cnt2)
+	call findSameEnergy(cnt1,cnt2)
   call saveCrossingPoints(cnt1,cnt2)
+	
+	
 	
 	call saveDOS(cnt1,cnt2)
 	
 	!pause
 	!stop
 	
-	call calculateTransferRate(cnt1,cnt2)
+	call calculateTransferRateParallel(cnt1,cnt2)
+	
+	call calculateTransferRatePerpendicular(cnt1,cnt2)
 	
   print *,'Finish!!!!'
   pause

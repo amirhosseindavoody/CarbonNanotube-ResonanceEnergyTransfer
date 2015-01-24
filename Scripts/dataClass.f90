@@ -328,8 +328,17 @@ module dataClass
         enddo
         close(100) 
         
-        10 FORMAT (E16.8)
-        11 FORMAT (4I8, 4I8, 4I8)
+				!write crossing points indexes
+        open(unit=100,file='sameEnergy.dat',status="unknown")
+        do i=1,ubound(finalSameEnergy,1)
+          write(100,12) finalSameEnergy(i,1), finalSameEnergy(i,2), finalSameEnergy(i,3), finalSameEnergy(i,4)
+        enddo
+        close(100) 
+				
+10			FORMAT (E16.8)
+11			FORMAT (4I8, 4I8, 4I8)
+12			FORMAT (4I8, 4I8, 4I8, 4I8)
+					 
   
        
         

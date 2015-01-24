@@ -11,10 +11,11 @@ module inputParameters
   real*8 :: Kcm_max = 1.5d9 !Maximum value of center of mass k-vector
   integer :: nkg = 501 !number of k points along b1 vector in graphene Brillouin zone.
   integer :: nr = 200 !number of cnt unit cells in real space that are considered in calculating the overlap integrals in ExcitonEnergy program.
-  real*8 :: c2cDistance = 12.0d-10 !center to center distance between carbon nanotubes
+  real*8 :: c2cDistance = 12.0d-10 !center to center distance between parallel carbon nanotubes
+	real*8 :: ppLen = 20.d-10 !length per perpendicular tubes
   
   
   integer :: n_ch1 = 7, m_ch1 = 5, i_sub1 = 1
-  integer :: n_ch2 = 8, m_ch2 = 6, i_sub2 = 1
+  integer :: n_ch2 = 7, m_ch2 = 5, i_sub2 = 1
   
 end module inputParameters
