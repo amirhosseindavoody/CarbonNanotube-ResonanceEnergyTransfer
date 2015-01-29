@@ -4,7 +4,7 @@ module dataClass
     
     private
     
-    public  :: saveCNTProperties, loadExcitonWavefunction, saveCrossingPoints, saveDOS
+    public  :: saveCNTProperties, loadExcitonWavefunction, saveTransitionPoints, saveDOS
     
     contains
       !**************************************************************************************************************************
@@ -264,11 +264,11 @@ module dataClass
     
       
       !**************************************************************************************************************************
-      ! save CNT dispersions and the crossing points
+      ! save CNT dispersions and the crossing points and the same energy points
       !**************************************************************************************************************************
-      subroutine saveCrossingPoints(cnt1,cnt2)
+      subroutine saveTransitionPoints(cnt1,cnt2)
         use ifport
-        use forsterClass
+        use prepareForster_module
         type(cnt), intent(in) :: cnt1,cnt2
         character*100 :: dirname
         integer(4) :: istat
@@ -323,15 +323,15 @@ module dataClass
         
         !write crossing points indexes
         open(unit=100,file='crossingPoints.dat',status="unknown")
-        do i=1,ubound(finalCrossingPoints,1)
-          write(100,11) finalCrossingPoints(i,1), finalCrossingPoints(i,2), finalCrossingPoints(i,3)
+        do i=1,ubound(crossingPoints,1)
+          write(100,11) crossingPoints(i,1), crossingPoints(i,2), crossingPoints(i,3)
         enddo
         close(100) 
         
 				!write crossing points indexes
         open(unit=100,file='sameEnergy.dat',status="unknown")
-        do i=1,ubound(finalSameEnergy,1)
-          write(100,12) finalSameEnergy(i,1), finalSameEnergy(i,2), finalSameEnergy(i,3), finalSameEnergy(i,4)
+        do i=1,ubound(sameEnergy,1)
+          write(100,12) sameEnergy(i,1), sameEnergy(i,2), sameEnergy(i,3), sameEnergy(i,4)
         enddo
         close(100) 
 				
@@ -350,14 +350,14 @@ module dataClass
             stop
         end if
         
-			end subroutine saveCrossingPoints
+			end subroutine saveTransitionPoints
 			
 			!**************************************************************************************************************************
       ! save total exciton density of states for a given cnt
       !**************************************************************************************************************************
       subroutine saveDOS(cnt1, cnt2)
 				use ifport
-        use forsterClass
+        use prepareForster_module
         type(cnt), intent(in) :: cnt1, cnt2
         character*100 :: dirname
         integer(4) :: istat

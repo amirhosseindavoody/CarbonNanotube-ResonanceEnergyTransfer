@@ -56,27 +56,27 @@ for i = 1:nC
 end
 
 axis tight;
-return;
+% return;
 
 %% plot points with equal energies
-FileName=[dir,'sameEnergy.dat'];
-sameEnergy=load(FileName);
-
-nS = size(sameEnergy,1);
-tmp = (nKcm1-1)/2+1;
-
-fig = fig+1; figure(fig); hold on; box on;
-for i = 1:nS
-    plot(k_vec1,cnt1_Ex0_A2/eV,'-b','LineWidth',3); hold on;
-    plot(k_vec2,cnt2_Ex0_A2/eV,'-r','LineWidth',4);
-    plot(k_vec1(tmp+sameEnergy(i,3)),cnt1_Ex0_A2(tmp+sameEnergy(i,3),sameEnergy(i,1))/eV,'*-g','LineWidth',3);
-    plot(k_vec2(tmp+sameEnergy(i,4)),cnt2_Ex0_A2(tmp+sameEnergy(i,4),sameEnergy(i,2))/eV,'*-k','LineWidth',4);
-    hold off;
-    pause;
-end
-
-axis tight;
-return;
+% FileName=[dir,'sameEnergy.dat'];
+% sameEnergy=load(FileName);
+% 
+% nS = size(sameEnergy,1);
+% tmp = (nKcm1-1)/2+1;
+% 
+% fig = fig+1; figure(fig); hold on; box on;
+% for i = 1:nS
+%     plot(k_vec1,cnt1_Ex0_A2/eV,'-b','LineWidth',3); hold on;
+%     plot(k_vec2,cnt2_Ex0_A2/eV,'-r','LineWidth',4);
+%     plot(k_vec1(tmp+sameEnergy(i,3)),cnt1_Ex0_A2(tmp+sameEnergy(i,3),sameEnergy(i,1))/eV,'*-g','LineWidth',3);
+%     plot(k_vec2(tmp+sameEnergy(i,4)),cnt2_Ex0_A2(tmp+sameEnergy(i,4),sameEnergy(i,2))/eV,'*-k','LineWidth',4);
+%     hold off;
+%     pause;
+% end
+% 
+% axis tight;
+% return;
 
 %% plot exciton density of states of the first cnt
 FileName=[dir,'cnt1_kvec.dat'];

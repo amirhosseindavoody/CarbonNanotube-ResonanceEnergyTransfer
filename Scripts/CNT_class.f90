@@ -322,7 +322,6 @@ module cntClass
         class(cnt), intent(in) :: self
         print *, "chirality = (", self.n_ch, ",", self.m_ch,")"
         print *, "radius = ", self.radius
-        print *, "t_vec = ", self.t_vec
       end subroutine printProperties
     
 end module cntClass

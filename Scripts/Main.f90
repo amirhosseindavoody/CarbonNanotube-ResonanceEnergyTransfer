@@ -8,10 +8,16 @@ program cntForsterEnergyTransfer
   use cntClass
   use inputParameters
   use dataClass
-  use forsterClass
+	use prepareForster_module
+  use perpendicularForster_module
+	use parallelForster_module
+	use arbitraryAngleForster_module
+	
   implicit none
   
   type (cnt) :: cnt1, cnt2
+	integer :: iTheta, nTheta
+	real*8 :: dTheta
 	
   cnt1 = cnt( n_ch1, m_ch1, nkg)
   cnt2 = cnt (n_ch2, m_ch2, nkg)
@@ -36,20 +42,37 @@ program cntForsterEnergyTransfer
   
   call findCrossings(cnt1,cnt2)
 	call findSameEnergy(cnt1,cnt2)
-  call saveCrossingPoints(cnt1,cnt2)
-	
-	
-	
+  call saveTransitionPoints(cnt1,cnt2)
+
 	call saveDOS(cnt1,cnt2)
 	
 	!pause
 	!stop
 	
-	call calculateTransferRateParallel(cnt1,cnt2)
+	call calculateParallelForsterRate(cnt1,cnt2)
 	
-	call calculateTransferRatePerpendicular(cnt1,cnt2)
+	print *, ''
+	print *, 'Press Enter to continue ...'
+	pause
 	
-  print *,'Finish!!!!'
+	!call calculatePerpendicularForsterRate(cnt1,cnt2)
+	!
+	!print *, ''
+ ! print *, 'Press Enter to continue ...'
+ ! pause
+	
+	nTheta = 10
+	dTheta = pi/2.d0/dble(nTheta)
+	
+	do iTheta = 1, nTheta
+	
+		theta = dble(iTheta)*dTheta
+		
+		call calculateArbitraryForsterRate(cnt1,cnt2)
+	end do
+	
+	print *, ''
+  print *, 'Press Enter to continue ...'
   pause
   
 end program cntForsterEnergyTransfer
