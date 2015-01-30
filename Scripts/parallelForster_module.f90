@@ -88,7 +88,7 @@ module parallelForster_module
       !**************************************************************************************************************************
       subroutine calculateParallelForsterRate(cnt1, cnt2)
 				use physicalConstants, only : kb, pi, hb
-				use inputParameters, only : Temperature
+				use inputParameters, only : Temperature, transitionRate
 				use prepareForster_module
         type(cnt), intent(in) :: cnt1, cnt2
 				integer :: iC
@@ -131,6 +131,9 @@ module parallelForster_module
 					end if
 										
 				end do
+				
+				transitionRate(1,1) = totalTransitionRate12
+				transitionRate(2,1) = totalTransitionRate21
 				
 				write(*,*)
 				write(*,*) "*** Forster transfer rate calculated for PARALLEL geometry ***"

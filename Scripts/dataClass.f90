@@ -4,7 +4,7 @@ module dataClass
     
     private
     
-    public  :: saveCNTProperties, loadExcitonWavefunction, saveTransitionPoints, saveDOS
+    public  :: saveCNTProperties, loadExcitonWavefunction, saveTransitionPoints, saveDOS, saveTransitionRates
     
     contains
       !**************************************************************************************************************************
@@ -410,5 +410,57 @@ module dataClass
         end if
         
 			end subroutine saveDOS
+			
+			!**************************************************************************************************************************
+      ! save total exciton density of states for a given cnt
+      !**************************************************************************************************************************
+      subroutine saveTransitionRates()
+				use ifport
+        use inputParameters, only : transitionRate, nTheta, iTheta
+        character*100 :: dirname
+        integer(4) :: istat
+        logical(4) :: result
+        
+        !create and change the directory to that of the CNT
+        write(dirname,"('ForsterFiles')")
+        result=makedirqq(dirname)
+        if (result) print *,'Directory creation successful!!'
+        istat=chdir(dirname)
+        if (istat .ne. 0) then
+            print *, 'Directory did not changed!!!'
+            pause
+            stop
+        end if
+        
+        !write transition rates to the file
+        open(unit=100,file='transitionRates.dat',status="unknown")
+        do iTheta=0,nTheta
+            write(100,10, advance='no') dble(iTheta)*3.14/nTheta
+				enddo
+        write(100,10)
+        
+				open(unit=100,file='transitionRates.dat',status="unknown")
+        do iTheta=0,nTheta
+            write(100,10, advance='no') transitionRate(1,iTheta+1)
+				enddo
+        write(100,10)
+				
+				open(unit=100,file='transitionRates.dat',status="unknown")
+        do iTheta=0,nTheta
+            write(100,10, advance='no') transitionRate(2,iTheta+1)
+				enddo
+				close(100)
+				
+        10 FORMAT (E16.8)
+        
+        !change the directory back
+        istat=chdir('..')
+        if (istat .ne. 0) then
+            print *, 'Directory did not changed!!!'
+            pause
+            stop
+        end if
+        
+			end subroutine saveTransitionRates
     
 end module dataClass

@@ -16,8 +16,6 @@ program cntForsterEnergyTransfer
   implicit none
   
   type (cnt) :: cnt1, cnt2
-	integer :: iTheta, nTheta
-	real*8 :: dTheta
 	
   cnt1 = cnt( n_ch1, m_ch1, nkg)
   cnt2 = cnt (n_ch2, m_ch2, nkg)
@@ -49,6 +47,11 @@ program cntForsterEnergyTransfer
 	!pause
 	!stop
 	
+	nTheta = 10
+	dTheta = pi/2.d0/dble(nTheta)
+	
+	allocate(transitionRate(2,nTheta+1))
+	
 	call calculateParallelForsterRate(cnt1,cnt2)
 	
 	print *, ''
@@ -61,15 +64,14 @@ program cntForsterEnergyTransfer
  ! print *, 'Press Enter to continue ...'
  ! pause
 	
-	nTheta = 10
-	dTheta = pi/2.d0/dble(nTheta)
-	
 	do iTheta = 1, nTheta
 	
 		theta = dble(iTheta)*dTheta
 		
 		call calculateArbitraryForsterRate(cnt1,cnt2)
 	end do
+	
+	call saveTransitionRates()
 	
 	print *, ''
   print *, 'Press Enter to continue ...'

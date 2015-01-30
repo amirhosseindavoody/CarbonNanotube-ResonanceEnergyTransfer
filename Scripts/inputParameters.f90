@@ -14,6 +14,10 @@ module inputParameters
   real*8 :: c2cDistance = 12.0d-10 !center to center distance between parallel carbon nanotubes
 	real*8 :: ppLen = 20.d-10 !length per perpendicular tubes
 	real*8 :: theta = pi/2.d0
+	
+	integer :: iTheta, nTheta
+	real*8 :: dTheta
+	real*8, dimension(:,:), allocatable :: transitionRate
   
   
   integer :: n_ch1 = 7, m_ch1 = 5, i_sub1 = 1

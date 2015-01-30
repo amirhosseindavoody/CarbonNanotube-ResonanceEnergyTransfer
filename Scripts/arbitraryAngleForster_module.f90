@@ -31,6 +31,7 @@ module arbitraryAngleForster_module
 			real*8 :: x, y, dx, dy, x_max, y_max
 			real*8 :: radius1, radius2
 			real*8 :: bessArg, expArg
+			real*8 :: arg1, arg2, arg3, argA, argB
 				
 			radius1 = cnt1.radius
 			radius2	= cnt2.radius
@@ -52,20 +53,34 @@ module arbitraryAngleForster_module
 				
 			Jk = (0.d0,0.d0)
 
+			!do iPhi1 = 0,nPhi
+			!	phi1=dble(iPhi1)*dPhi
+			!	do iPhi2 = 0,nPhi
+			!		phi2=dble(iPhi2)*dPhi
+			!		do iy = -ny , ny
+			!			y = dble(iy)*dy
+			!			bessArg = 2.d0*abs(K1)*sqrt((y*sin(theta)+radius2*cos(phi2)*cos(theta)-radius1*cos(phi1))**2+(c2cDistance+radius2*sin(phi2)-radius1*sin(phi1))**2)
+			!			expArg = 2.d0*K2*y-2.d0*K1*(y*cos(theta)-radius2*cos(phi2)*sin(theta))
+			!			Jk = Jk + exp(i1*expArg) * bessk0(bessArg)	
+			!		end do
+			!	end do
+			!end do
+			!	
+			!Jk = Jk * dPhi * dPhi * dx * 2.d0
+			
+			arg1 = sqrt(K2-K1*cos(theta)**2+(K1*sin(theta))**2)
+			
 			do iPhi1 = 0,nPhi
 				phi1=dble(iPhi1)*dPhi
 				do iPhi2 = 0,nPhi
 					phi2=dble(iPhi2)*dPhi
-					do iy = -ny , ny
-						y = dble(iy)*dy
-						bessArg = 2.d0*abs(K1)*sqrt((y*sin(theta)+radius2*cos(phi2)*cos(theta)-radius1*cos(phi1))**2+(c2cDistance+radius2*sin(phi2)-radius1*sin(phi1))**2)
-						expArg = 2.d0*K2*y-2.d0*K1*(y*cos(theta)-radius2*cos(phi2)*sin(theta))
-						Jk = Jk + exp(i1*expArg) * bessk0(bessArg)	
-					end do
+					argA = radius2*cos(phi2)*cos(theta)-radius1*cos(phi1)
+					argB = c2cDistance + radius2*sin(phi2)-radius1*sin(phi1)
+					Jk = Jk + exp(i1*((2.d0*K1*radius2*cos(theta))+(2.d0*argA*(K1*cos(theta)-K2)/sin(theta)))) * exp(-2.d0*argB*arg1/sin(theta))
 				end do
 			end do
 				
-			Jk = Jk * dPhi * dPhi * dx * 2.d0
+			Jk = Jk * dPhi * dPhi * pi / arg1
 			
 			matrixElementFinal = (0.d0,0.d0)
 			matrixElementTemp = (0.d0,0.d0)
@@ -94,7 +109,7 @@ module arbitraryAngleForster_module
 		!**************************************************************************************************************************
 		subroutine calculateArbitraryForsterRate(cnt1, cnt2)
 			use physicalConstants, only : kb, pi, hb
-			use inputParameters, only : Temperature, ppLen, theta
+			use inputParameters, only : Temperature, ppLen, theta, itheta, transitionRate
 			use prepareForster_module
 			type(cnt), intent(in) :: cnt1, cnt2
 			integer :: iC
@@ -134,7 +149,10 @@ module arbitraryAngleForster_module
 				end if
 
 			end do
-
+			
+			transitionRate(1,iTheta+1) = totalTransitionRate12
+			transitionRate(2,iTheta+1) = totalTransitionRate21
+			
 			!write(*,*) "*** Forster transfer rate calculated for ARBITRARY angle geometry ***"
 			!write(*,*) "Theta Angle = ", theta
 			write(*,10) " totalTransitionRate12 = ", totalTransitionRate12
