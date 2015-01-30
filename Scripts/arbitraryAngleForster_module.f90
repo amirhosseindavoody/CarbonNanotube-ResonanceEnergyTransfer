@@ -78,7 +78,7 @@ module arbitraryAngleForster_module
 								matrixElementTemp = matrixElementTemp + conjg(cnt1.Cc(1,ikr1+iKcm1,is))*cnt1.Cv(1,ikr1-iKcm1,is)*cnt2.Cc(2,-ikr2+iKcm2,isp)*conjg(cnt2.Cv(2,-ikr2-iKcm2,isp))
 								matrixElementTemp = matrixElementTemp + conjg(cnt1.Cc(2,-ikr1+iKcm1,is))*cnt1.Cv(2,-ikr1-iKcm1,is)*cnt2.Cc(1,ikr2+iKcm2,isp)*conjg(cnt2.Cv(1,ikr2-iKcm2,isp))
 								matrixElementTemp = matrixElementTemp + conjg(cnt1.Cc(2,-ikr1+iKcm1,is))*cnt1.Cv(2,-ikr1-iKcm1,is)*cnt2.Cc(2,-ikr2+iKcm2,isp)*conjg(cnt2.Cv(2,-ikr2-iKcm2,isp))
-              end do  
+                            end do  
 						end do
 						matrixElementFinal = matrixElementFinal + matrixElementTemp	* conjg(cnt1.Psi0_A2(ikr1,ix1,iKcm1))*cnt2.Psi0_A2(ikr2,ix2,iKcm2) / (2.d0,0.d0)
 						matrixElementTemp = (0.d0,0.d0)
@@ -96,7 +96,7 @@ module arbitraryAngleForster_module
 				use physicalConstants, only : kb, pi, hb
 				use inputParameters, only : Temperature, ppLen, theta
 				use prepareForster_module
-        type(cnt), intent(in) :: cnt1, cnt2
+                type(cnt), intent(in) :: cnt1, cnt2
 				integer :: iC
 				integer :: ix1, ix2, iKcm1, iKcm2
 				integer :: nSameEnergy
@@ -105,7 +105,7 @@ module arbitraryAngleForster_module
 				complex*16 :: matrixElement
 				real*8 :: totalTransitionRate12, totalTransitionRate21
 				
-        write(*,*) "*** Forster transfer rate calculated for ARBITRARY angle geometry ***"
+                write(*,*) "*** Forster transfer rate calculated for ARBITRARY angle geometry ***"
 				write(*,*) "Theta Angle = ", theta
 				
 				call calculatePartitionFunction(cnt1, partitionFunction1)
@@ -130,8 +130,8 @@ module arbitraryAngleForster_module
 						call calculateDOS(cnt1,iKcm1,ix1,dos1)
 						call calculateDOS(cnt2,iKcm2,ix2,dos2)
 
-						totalTransitionRate12 = totalTransitionRate12 + exp(-cnt1.Ex0_A2(ix1,iKcm1)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos2 / hb / ppLen/ partitionFunction1
-						totalTransitionRate21 = totalTransitionRate21 + exp(-cnt2.Ex0_A2(ix1,iKcm1)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos1 / hb / ppLen/ partitionFunction2
+						totalTransitionRate12 = totalTransitionRate12 + exp(-cnt1.Ex0_A2(ix1,iKcm1)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos2 / hb / ppLen/ (partitionFunction1 / cnt1.dk) !the multiplication of cnt.dk is because the way partitionFunction is calculated it has units of 1/L while it should be unitless.
+						totalTransitionRate21 = totalTransitionRate21 + exp(-cnt2.Ex0_A2(ix1,iKcm1)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos1 / hb / ppLen/ (partitionFunction2 / cnt2.dk) !the multiplication of cnt.dk is because the way partitionFunction is calculated it has units of 1/L while it should be unitless.
 					end if
 										
 				end do
