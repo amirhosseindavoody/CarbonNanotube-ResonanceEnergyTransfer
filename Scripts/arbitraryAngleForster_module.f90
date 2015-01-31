@@ -31,7 +31,7 @@ module arbitraryAngleForster_module
 			real*8 :: x, y, dx, dy, x_max, y_max
 			real*8 :: radius1, radius2
 			real*8 :: bessArg, expArg
-			real*8 :: arg1, arg2, arg3, argA, argB
+			real*8 :: arg1, arg2, arg3
 				
 			radius1 = cnt1.radius
 			radius2	= cnt2.radius
@@ -68,15 +68,15 @@ module arbitraryAngleForster_module
 			!	
 			!Jk = Jk * dPhi * dPhi * dx * 2.d0
 			
-			arg1 = sqrt(K2-K1*cos(theta)**2+(K1*sin(theta))**2)
+			arg1 = sqrt(K1**2+K2**2-2.d0*K1*K2*cos(theta))
 			
 			do iPhi1 = 0,nPhi
 				phi1=dble(iPhi1)*dPhi
 				do iPhi2 = 0,nPhi
 					phi2=dble(iPhi2)*dPhi
-					argA = radius2*cos(phi2)*cos(theta)-radius1*cos(phi1)
-					argB = c2cDistance + radius2*sin(phi2)-radius1*sin(phi1)
-					Jk = Jk + exp(i1*((2.d0*K1*radius2*cos(theta))+(2.d0*argA*(K1*cos(theta)-K2)/sin(theta)))) * exp(-2.d0*argB*arg1/sin(theta))
+					arg2 = 2.d0 * (K1*(radius2*cos(phi2)-radius1*cos(phi1)*cos(theta))+K2*(radius1*cos(phi1)-radius2*cos(phi2)*cos(theta))) / (sin(theta))
+					arg3 = 2.d0 * abs((c2cDistance+radius2*sin(phi2)-radius1*sin(phi1))/(sin(theta)))
+					Jk = Jk + exp(i1*arg2) * exp(-arg3 * arg1)
 				end do
 			end do
 				
@@ -100,7 +100,7 @@ module arbitraryAngleForster_module
 				end do
 			end do				
 
-			matrixElementFinal = matrixElementFinal * dcmplx(q0*q0*abs(Jk) / (4.d0*pi*eps0*4.d0*pi**2*2.d0*pi/dk))
+			matrixElementFinal = matrixElementFinal * dcmplx(q0*q0*abs(Jk) / (4.d0*pi*eps0*4.d0*(pi*pi)*2.d0*pi/dk))
         
 		end subroutine calculateMatrixElement
 			
@@ -109,7 +109,7 @@ module arbitraryAngleForster_module
 		!**************************************************************************************************************************
 		subroutine calculateArbitraryForsterRate(cnt1, cnt2)
 			use physicalConstants, only : kb, pi, hb
-			use inputParameters, only : Temperature, ppLen, theta, itheta, transitionRate
+			use inputParameters, only : Temperature, ppLen, theta, itheta, transitionRate, ic2c
 			use prepareForster_module
 			type(cnt), intent(in) :: cnt1, cnt2
 			integer :: iC
@@ -120,8 +120,8 @@ module arbitraryAngleForster_module
 			complex*16 :: matrixElement
 			real*8 :: totalTransitionRate12, totalTransitionRate21
 
-			write(*,*) "*** Forster transfer rate calculated for ARBITRARY angle geometry ***"
-			write(*,*) "Theta Angle = ", theta
+			!write(*,*) "*** Forster transfer rate calculated for ARBITRARY angle geometry ***"
+			!write(*,*) "Theta Angle = ", theta
 				
 			call calculatePartitionFunction(cnt1, partitionFunction1)
 			call calculatePartitionFunction(cnt2, partitionFunction2)
@@ -144,21 +144,21 @@ module arbitraryAngleForster_module
 					call calculateDOS(cnt1,iKcm1,ix1,dos1)
 					call calculateDOS(cnt2,iKcm2,ix2,dos2)
 
-					totalTransitionRate12 = totalTransitionRate12 + exp(-cnt1.Ex0_A2(ix1,iKcm1)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos2 / hb / ppLen/ (partitionFunction1 / cnt1.dk) !the multiplication of cnt.dk is because the way partitionFunction is calculated it has units of 1/L while it should be unitless.
-					totalTransitionRate21 = totalTransitionRate21 + exp(-cnt2.Ex0_A2(ix1,iKcm1)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos1 / hb / ppLen/ (partitionFunction2 / cnt2.dk) !the multiplication of cnt.dk is because the way partitionFunction is calculated it has units of 1/L while it should be unitless.
+					totalTransitionRate12 = totalTransitionRate12 + exp(-(cnt1.Ex0_A2(ix1,iKcm1))/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos2 / hb / ppLen/ (partitionFunction1 / cnt1.dk) !the multiplication of cnt.dk is because the way partitionFunction is calculated it has units of 1/L while it should be unitless.
+					totalTransitionRate21 = totalTransitionRate21 + exp(-(cnt2.Ex0_A2(ix2,iKcm2))/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos1 / hb / ppLen/ (partitionFunction2 / cnt2.dk) !the multiplication of cnt.dk is because the way partitionFunction is calculated it has units of 1/L while it should be unitless.
 				end if
 
 			end do
 			
-			transitionRate(1,iTheta+1) = totalTransitionRate12
-			transitionRate(2,iTheta+1) = totalTransitionRate21
+			transitionRate(1,iTheta+1,ic2c) = totalTransitionRate12
+			transitionRate(2,iTheta+1,ic2c) = totalTransitionRate21
 			
 			!write(*,*) "*** Forster transfer rate calculated for ARBITRARY angle geometry ***"
 			!write(*,*) "Theta Angle = ", theta
-			write(*,10) " totalTransitionRate12 = ", totalTransitionRate12
-			write(*,10) " totalTransitionRate21 = ", totalTransitionRate21
-			write(*,*) "*********************************************************************"
-			write(*,*)
+			!write(*,10) " totalTransitionRate12 = ", totalTransitionRate12
+			!write(*,10) " totalTransitionRate21 = ", totalTransitionRate21
+			!write(*,*) "*********************************************************************"
+			!write(*,*)
 				
 10			FORMAT (A,E16.8)
 				

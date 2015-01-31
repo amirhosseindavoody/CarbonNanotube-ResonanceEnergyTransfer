@@ -46,29 +46,26 @@ program cntForsterEnergyTransfer
 	
 	!pause
 	!stop
+
+	dTheta = thetaMax/dble(nTheta)
+	dc2c = (c2cMax-c2cMin)/dble(nc2c)
 	
-	nTheta = 10
-	dTheta = pi/2.d0/dble(nTheta)
+	allocate(transitionRate(2,nTheta+1,nc2c+1))
 	
-	allocate(transitionRate(2,nTheta+1))
+	do ic2c = 1, nc2c+1
 	
-	call calculateParallelForsterRate(cnt1,cnt2)
-	
-	print *, ''
-	print *, 'Press Enter to continue ...'
-	pause
-	
-	!call calculatePerpendicularForsterRate(cnt1,cnt2)
-	!
-	!print *, ''
- ! print *, 'Press Enter to continue ...'
- ! pause
-	
-	do iTheta = 1, nTheta
-	
-		theta = dble(iTheta)*dTheta
+		c2cDistance = c2cMin+dble(ic2c-1)*dc2c
 		
-		call calculateArbitraryForsterRate(cnt1,cnt2)
+		call calculateParallelForsterRate(cnt1,cnt2)
+	
+		print *, 'iTheta=', 0, ', nTheta=', nTheta, 'iC2C=', ic2c-1, ', nC2C=', nc2c
+	
+		do iTheta = 1, nTheta
+
+			theta = dble(iTheta)*dTheta
+			print *, 'iTheta=', iTheta, ', nTheta=', nTheta, 'iC2C=', ic2c-1, ', nC2C=', nc2c		
+			call calculateArbitraryForsterRate(cnt1,cnt2)
+		end do
 	end do
 	
 	call saveTransitionRates()

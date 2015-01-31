@@ -416,7 +416,7 @@ module dataClass
       !**************************************************************************************************************************
       subroutine saveTransitionRates()
 				use ifport
-        use inputParameters, only : transitionRate, nTheta, iTheta
+        use inputParameters, only : transitionRate, nTheta, iTheta, thetaMax, ic2c, dc2c, nc2c
         character*100 :: dirname
         integer(4) :: istat
         logical(4) :: result
@@ -433,21 +433,33 @@ module dataClass
         end if
         
         !write transition rates to the file
-        open(unit=100,file='transitionRates.dat',status="unknown")
-        do iTheta=0,nTheta
-            write(100,10, advance='no') dble(iTheta)*3.14/nTheta
-				enddo
-        write(100,10)
+        open(unit=100,file='transitionRates12.dat',status="unknown")
+        do ic2c = 1,nc2c+1
+					do iTheta=1,nTheta+1
+						write(100,10, advance='no') transitionRate(1,iTheta,ic2c)
+					end do
+					write(100,10)
+				end do
+        close(100)
         
-				open(unit=100,file='transitionRates.dat',status="unknown")
-        do iTheta=0,nTheta
-            write(100,10, advance='no') transitionRate(1,iTheta+1)
+				open(unit=100,file='transitionRates21.dat',status="unknown")
+        do ic2c = 1,nc2c+1
+					do iTheta=1,nTheta+1
+						write(100,10, advance='no') transitionRate(2,iTheta,ic2c)
+					end do
+					write(100,10)
+				end do
+        close(100)
+				
+				open(unit=100,file='theta.dat',status="unknown")
+        do iTheta=1,nTheta+1
+            write(100,10, advance='no') dble(iTheta-1)/dble(nTheta)*thetaMax
 				enddo
         write(100,10)
 				
-				open(unit=100,file='transitionRates.dat',status="unknown")
-        do iTheta=0,nTheta
-            write(100,10, advance='no') transitionRate(2,iTheta+1)
+				open(unit=100,file='c2c.dat',status="unknown")
+        do ic2c=1,nc2c+1
+            write(100,10, advance='no') dble(ic2c-1)*dc2c
 				enddo
 				close(100)
 				
