@@ -52,7 +52,6 @@ module prepareForster_module
         
         allocate(crossingPoints(nCrossing ,3))
         crossingPoints(:,:) = tempCrossingPoints(1:nCrossing,:)
-        print *, "nCrossing = ", nCrossing
         
 			end subroutine findCrossings
 			
@@ -106,7 +105,6 @@ module prepareForster_module
         
         allocate(sameEnergy(nSameEnergy ,4))
         sameEnergy(:,:) = tempSameEnergy(1:nSameEnergy,:)
-        print *, "nSameEnergy = ", nSameEnergy
         
       end subroutine findSameEnergy
       

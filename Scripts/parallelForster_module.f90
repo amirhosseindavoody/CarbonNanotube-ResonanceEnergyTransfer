@@ -48,7 +48,7 @@ module parallelForster_module
 				matrixElementTemp(2,1) = (0.d0,0.d0)
 				matrixElementTemp(2,2) = (0.d0,0.d0)
         
-				nPhi = 1000
+				nPhi = 200
 				Ck = 0.d0
 				dPhi = 2.d0*pi/dble(nPhi)
 				do iPhi1 = 0,nPhi
@@ -86,28 +86,22 @@ module parallelForster_module
 			!**************************************************************************************************************************
       ! calculate scattering rate from cnt1 to cnt2 when they are parallel
       !**************************************************************************************************************************
-      subroutine calculateParallelForsterRate(cnt1, cnt2)
+      subroutine calculateParallelForsterRate(cnt1, cnt2, totalTransitionRate12, totalTransitionRate21)
 				use physicalConstants, only : kb, pi, hb
-				use inputParameters, only : Temperature, transitionRate, ic2c
+				use inputParameters, only : Temperature
 				use prepareForster_module
         type(cnt), intent(in) :: cnt1, cnt2
+				real*8, intent(out) :: totalTransitionRate12, totalTransitionRate21
 				integer :: iC
 				integer :: ix1, ix2, iKcm1, iKcm2
 				integer :: nCrossing
 				real*8 :: partitionFunction1, partitionFunction2
 				real*8 :: dos1, dos2
 				complex*16 :: matrixElement
-				real*8 :: totalTransitionRate12, totalTransitionRate21
+				
 				
         call calculatePartitionFunction(cnt1, partitionFunction1)
 				call calculatePartitionFunction(cnt2, partitionFunction2)
-				
-				!print *, "partitionFunction1 = ", partitionFunction1
-				!print *, "partitionFunction2 = ", partitionFunction2
-				
-				!pause
-				!stop
-				
 				
 				totalTransitionRate12 = 0.d0
 				totalTransitionRate21 = 0.d0
@@ -131,15 +125,6 @@ module parallelForster_module
 					end if
 										
 				end do
-				
-				transitionRate(1,1,ic2c) = totalTransitionRate12
-				transitionRate(2,1,ic2c) = totalTransitionRate21
-				
-				!write(*,*)
-				!write(*,*) "*** Forster transfer rate calculated for PARALLEL geometry ***"
-				!write(*,10) " totalTransitionRate12 = ", totalTransitionRate12
-				!write(*,10) " totalTransitionRate21 = ", totalTransitionRate21
-				!write(*,*) "**************************************************************"
 				
 10			FORMAT (A,E16.8)
 				

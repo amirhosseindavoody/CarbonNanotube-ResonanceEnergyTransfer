@@ -9,9 +9,10 @@ program cntForsterEnergyTransfer
   use inputParameters
   use dataClass
 	use prepareForster_module
-  use perpendicularForster_module
 	use parallelForster_module
 	use arbitraryAngleForster_module
+	use kappaMatrix_module
+	use transitionTable_module
 	
   implicit none
   
@@ -28,15 +29,9 @@ program cntForsterEnergyTransfer
   
   !call saveCNTProperties(cnt1)
   !call saveCNTProperties(cnt2)
-	
-	!pause
-	!stop
   
   call loadExcitonWavefunction(cnt1)
   call loadExcitonWavefunction(cnt2)
-	
-	!pause
-	!stop
   
   call findCrossings(cnt1,cnt2)
 	call findSameEnergy(cnt1,cnt2)
@@ -44,31 +39,9 @@ program cntForsterEnergyTransfer
 
 	call saveDOS(cnt1,cnt2)
 	
-	!pause
-	!stop
-
-	dTheta = thetaMax/dble(nTheta)
-	dc2c = (c2cMax-c2cMin)/dble(nc2c)
+	!call calculateTransitionTable(cnt1,cnt2)
 	
-	allocate(transitionRate(2,nTheta+1,nc2c+1))
-	
-	do ic2c = 1, nc2c+1
-	
-		c2cDistance = c2cMin+dble(ic2c-1)*dc2c
-		
-		call calculateParallelForsterRate(cnt1,cnt2)
-	
-		print *, 'iTheta=', 0, ', nTheta=', nTheta, 'iC2C=', ic2c-1, ', nC2C=', nc2c
-	
-		do iTheta = 1, nTheta
-
-			theta = dble(iTheta)*dTheta
-			print *, 'iTheta=', iTheta, ', nTheta=', nTheta, 'iC2C=', ic2c-1, ', nC2C=', nc2c		
-			call calculateArbitraryForsterRate(cnt1,cnt2)
-		end do
-	end do
-	
-	call saveTransitionRates()
+	call calculateKappaMatrix(cnt1,cnt2)
 	
 	print *, ''
   print *, 'Press Enter to continue ...'

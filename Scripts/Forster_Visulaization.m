@@ -1,7 +1,7 @@
 %% This file visualizes the results of the fortran program for CNT bethe salpeter equation
-clear all; clc; fig=10;
+clear all; clc; fig=30;
 close all;
-dir='C:\Users\amirhossein\Google Drive\Research\Exciton\test Data\ForsterFiles\';
+dir='C:\Users\amirhossein\Google Drive\Research\Exciton\Data\ForsterFiles\';
 eV=1.6e-19;
 
 %% plot CNT unit cell
@@ -56,7 +56,7 @@ for i = 1:nC
 end
 
 axis tight;
-% return;
+return;
 
 %% plot points with equal energies
 % FileName=[dir,'sameEnergy.dat'];

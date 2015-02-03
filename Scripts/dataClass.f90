@@ -4,7 +4,7 @@ module dataClass
     
     private
     
-    public  :: saveCNTProperties, loadExcitonWavefunction, saveTransitionPoints, saveDOS, saveTransitionRates
+    public  :: saveCNTProperties, loadExcitonWavefunction, saveTransitionPoints, saveDOS
     
     contains
       !**************************************************************************************************************************
@@ -269,6 +269,7 @@ module dataClass
       subroutine saveTransitionPoints(cnt1,cnt2)
         use ifport
         use prepareForster_module
+				use inputParameters
         type(cnt), intent(in) :: cnt1,cnt2
         character*100 :: dirname
         integer(4) :: istat
@@ -277,7 +278,7 @@ module dataClass
         integer :: iKcm, iX, i
         
         !create and change the directory to that of the CNT
-        write(dirname,"('ForsterFiles')")
+        write(dirname,"('ForsterRate (',I2.2,',',I2.2,') to (',I2.2,',',I2.2,')')") n_ch1, m_ch1, n_ch2, m_ch2
         result=makedirqq(dirname)
         if (result) print *,'Directory creation successful!!'
         istat=chdir(dirname)
@@ -358,6 +359,7 @@ module dataClass
       subroutine saveDOS(cnt1, cnt2)
 				use ifport
         use prepareForster_module
+				use inputParameters
         type(cnt), intent(in) :: cnt1, cnt2
         character*100 :: dirname
         integer(4) :: istat
@@ -367,7 +369,7 @@ module dataClass
         integer :: iKcm, iX
         
         !create and change the directory to that of the CNT
-        write(dirname,"('ForsterFiles')")
+        write(dirname,"('ForsterRate (',I2.2,',',I2.2,') to (',I2.2,',',I2.2,')')") n_ch1, m_ch1, n_ch2, m_ch2
         result=makedirqq(dirname)
         if (result) print *,'Directory creation successful!!'
         istat=chdir(dirname)
@@ -410,69 +412,5 @@ module dataClass
         end if
         
 			end subroutine saveDOS
-			
-			!**************************************************************************************************************************
-      ! save total exciton density of states for a given cnt
-      !**************************************************************************************************************************
-      subroutine saveTransitionRates()
-				use ifport
-        use inputParameters, only : transitionRate, nTheta, iTheta, thetaMax, ic2c, dc2c, nc2c
-        character*100 :: dirname
-        integer(4) :: istat
-        logical(4) :: result
-        
-        !create and change the directory to that of the CNT
-        write(dirname,"('ForsterFiles')")
-        result=makedirqq(dirname)
-        if (result) print *,'Directory creation successful!!'
-        istat=chdir(dirname)
-        if (istat .ne. 0) then
-            print *, 'Directory did not changed!!!'
-            pause
-            stop
-        end if
-        
-        !write transition rates to the file
-        open(unit=100,file='transitionRates12.dat',status="unknown")
-        do ic2c = 1,nc2c+1
-					do iTheta=1,nTheta+1
-						write(100,10, advance='no') transitionRate(1,iTheta,ic2c)
-					end do
-					write(100,10)
-				end do
-        close(100)
-        
-				open(unit=100,file='transitionRates21.dat',status="unknown")
-        do ic2c = 1,nc2c+1
-					do iTheta=1,nTheta+1
-						write(100,10, advance='no') transitionRate(2,iTheta,ic2c)
-					end do
-					write(100,10)
-				end do
-        close(100)
-				
-				open(unit=100,file='theta.dat',status="unknown")
-        do iTheta=1,nTheta+1
-            write(100,10, advance='no') dble(iTheta-1)/dble(nTheta)*thetaMax
-				enddo
-        write(100,10)
-				
-				open(unit=100,file='c2c.dat',status="unknown")
-        do ic2c=1,nc2c+1
-            write(100,10, advance='no') dble(ic2c-1)*dc2c
-				enddo
-				close(100)
-				
-        10 FORMAT (E16.8)
-        
-        !change the directory back
-        istat=chdir('..')
-        if (istat .ne. 0) then
-            print *, 'Directory did not changed!!!'
-            pause
-            stop
-        end if
-        
-			end subroutine saveTransitionRates
     
 end module dataClass

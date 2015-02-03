@@ -107,21 +107,18 @@ module arbitraryAngleForster_module
 		!**************************************************************************************************************************
 		! calculate scattering rate from cnt1 to cnt2 when they are perpendicular
 		!**************************************************************************************************************************
-		subroutine calculateArbitraryForsterRate(cnt1, cnt2)
+		subroutine calculateArbitraryForsterRate(cnt1, cnt2, totalTransitionRate12, totalTransitionRate21)
 			use physicalConstants, only : kb, pi, hb
-			use inputParameters, only : Temperature, ppLen, theta, itheta, transitionRate, ic2c
+			use inputParameters, only : Temperature, ppLen
 			use prepareForster_module
 			type(cnt), intent(in) :: cnt1, cnt2
+			real*8, intent(out) :: totalTransitionRate12, totalTransitionRate21
 			integer :: iC
 			integer :: ix1, ix2, iKcm1, iKcm2
 			integer :: nSameEnergy
 			real*8 :: partitionFunction1, partitionFunction2
 			real*8 :: dos1, dos2
 			complex*16 :: matrixElement
-			real*8 :: totalTransitionRate12, totalTransitionRate21
-
-			!write(*,*) "*** Forster transfer rate calculated for ARBITRARY angle geometry ***"
-			!write(*,*) "Theta Angle = ", theta
 				
 			call calculatePartitionFunction(cnt1, partitionFunction1)
 			call calculatePartitionFunction(cnt2, partitionFunction2)
@@ -149,18 +146,8 @@ module arbitraryAngleForster_module
 				end if
 
 			end do
-			
-			transitionRate(1,iTheta+1,ic2c) = totalTransitionRate12
-			transitionRate(2,iTheta+1,ic2c) = totalTransitionRate21
-			
-			!write(*,*) "*** Forster transfer rate calculated for ARBITRARY angle geometry ***"
-			!write(*,*) "Theta Angle = ", theta
-			!write(*,10) " totalTransitionRate12 = ", totalTransitionRate12
-			!write(*,10) " totalTransitionRate21 = ", totalTransitionRate21
-			!write(*,*) "*********************************************************************"
-			!write(*,*)
 				
-10			FORMAT (A,E16.8)
+10		FORMAT (A,E16.8)
 				
 		end subroutine calculateArbitraryForsterRate
 

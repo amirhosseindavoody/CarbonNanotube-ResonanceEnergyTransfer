@@ -56,6 +56,8 @@
 		<File RelativePath="..\Scripts\perpendicularForster_module.f90"/>
 		<File RelativePath="..\Scripts\physicalConstants.f90"/>
 		<File RelativePath="..\Scripts\prepareForster_module.f90"/>
-		<File RelativePath="..\Scripts\smallFns.f90"/></Filter>
+		<File RelativePath="..\Scripts\smallFns.f90"/>
+		<File RelativePath="..\Scripts\kappaMatrix_module.f90"/>
+		<File RelativePath="..\Scripts\transitionTable_module.f90"/></Filter>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl"/></Files>
 	<Globals/></VisualStudioProject>
