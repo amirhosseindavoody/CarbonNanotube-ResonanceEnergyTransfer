@@ -8,29 +8,26 @@ module arbitraryAngleForster_module
 	contains
 	
 		!**************************************************************************************************************************
-		! calculate the matrix element for the crossing point number iC in two perpendicular tube
+		! calculate the matrix element for the crossing point number iC in two unparallel tube
 		!**************************************************************************************************************************
-		subroutine calculateMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2 ,matrixElementFinal)
+		subroutine calculateMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2, iC ,matrixElementFinal)
 			use inputParameters
 			use physicalConstants, only : i1, pi, eps0, q0
 			use smallFunctions
+			use prepareForster_module, only : kSpaceMatrixElement
 			type(cnt), intent(in) :: cnt1,cnt2
 			complex*16, intent(out) :: matrixElementFinal
 			integer, intent(in) :: ix1,ix2
 			integer, intent(in) :: iKcm1, iKcm2
-				
-			integer :: ikr1, ikr2
-			integer :: imu1,imu2
-			integer :: is,isp
+			integer, intent(in) :: iC
+	
 			real*8 :: dk, K1, K2
-			complex*16 :: matrixElementTemp
 			complex*16 :: Jk
 			real*8 :: phi1, phi2, dPhi
 			integer :: iPhi1, iPhi2, nPhi
 			integer :: ix, iy, nx, ny
 			real*8 :: x, y, dx, dy, x_max, y_max
 			real*8 :: radius1, radius2
-			real*8 :: bessArg, expArg
 			real*8 :: arg1, arg2, arg3
 				
 			radius1 = cnt1.radius
@@ -52,27 +49,12 @@ module arbitraryAngleForster_module
 			ny = nx
 				
 			Jk = (0.d0,0.d0)
-
-			!do iPhi1 = 0,nPhi
-			!	phi1=dble(iPhi1)*dPhi
-			!	do iPhi2 = 0,nPhi
-			!		phi2=dble(iPhi2)*dPhi
-			!		do iy = -ny , ny
-			!			y = dble(iy)*dy
-			!			bessArg = 2.d0*abs(K1)*sqrt((y*sin(theta)+radius2*cos(phi2)*cos(theta)-radius1*cos(phi1))**2+(c2cDistance+radius2*sin(phi2)-radius1*sin(phi1))**2)
-			!			expArg = 2.d0*K2*y-2.d0*K1*(y*cos(theta)-radius2*cos(phi2)*sin(theta))
-			!			Jk = Jk + exp(i1*expArg) * bessk0(bessArg)	
-			!		end do
-			!	end do
-			!end do
-			!	
-			!Jk = Jk * dPhi * dPhi * dx * 2.d0
 			
 			arg1 = sqrt(K1**2+K2**2-2.d0*K1*K2*cos(theta))
 			
-			do iPhi1 = 0,nPhi
+			do iPhi1 = 1,nPhi
 				phi1=dble(iPhi1)*dPhi
-				do iPhi2 = 0,nPhi
+				do iPhi2 = 1,nPhi
 					phi2=dble(iPhi2)*dPhi
 					arg2 = 2.d0 * (K1*(radius2*cos(phi2)-radius1*cos(phi1)*cos(theta))+K2*(radius1*cos(phi1)-radius2*cos(phi2)*cos(theta))) / (sin(theta))
 					arg3 = 2.d0 * abs((c2cDistance+radius2*sin(phi2)-radius1*sin(phi1))/(sin(theta)))
@@ -81,26 +63,8 @@ module arbitraryAngleForster_module
 			end do
 				
 			Jk = Jk * dPhi * dPhi * pi / arg1
-			
-			matrixElementFinal = (0.d0,0.d0)
-			matrixElementTemp = (0.d0,0.d0)
 				
-			do ikr1 = cnt1.ikr_low, cnt1.ikr_high
-				do ikr2 = cnt2.ikr_low, cnt2.ikr_high					
-					do is = 1,2
-						do isp = 1,2
-							matrixElementTemp = matrixElementTemp +	conjg(cnt1.Cc(1,ikr1+iKcm1,is))*cnt1.Cv(1,ikr1-iKcm1,is)*cnt2.Cc(1,ikr2+iKcm2,isp)*conjg(cnt2.Cv(1,ikr2-iKcm2,isp))
-							matrixElementTemp = matrixElementTemp + conjg(cnt1.Cc(1,ikr1+iKcm1,is))*cnt1.Cv(1,ikr1-iKcm1,is)*cnt2.Cc(2,-ikr2+iKcm2,isp)*conjg(cnt2.Cv(2,-ikr2-iKcm2,isp))
-							matrixElementTemp = matrixElementTemp + conjg(cnt1.Cc(2,-ikr1+iKcm1,is))*cnt1.Cv(2,-ikr1-iKcm1,is)*cnt2.Cc(1,ikr2+iKcm2,isp)*conjg(cnt2.Cv(1,ikr2-iKcm2,isp))
-							matrixElementTemp = matrixElementTemp + conjg(cnt1.Cc(2,-ikr1+iKcm1,is))*cnt1.Cv(2,-ikr1-iKcm1,is)*cnt2.Cc(2,-ikr2+iKcm2,isp)*conjg(cnt2.Cv(2,-ikr2-iKcm2,isp))
-						end do  
-					end do
-					matrixElementFinal = matrixElementFinal + matrixElementTemp	* conjg(cnt1.Psi0_A2(ikr1,ix1,iKcm1))*cnt2.Psi0_A2(ikr2,ix2,iKcm2) / (2.d0,0.d0)
-					matrixElementTemp = (0.d0,0.d0)
-				end do
-			end do				
-
-			matrixElementFinal = matrixElementFinal * dcmplx(q0*q0*abs(Jk) / (4.d0*pi*eps0*4.d0*(pi*pi)*2.d0*pi/dk))
+			matrixElementFinal = kSpaceMatrixElement(iC) * dcmplx(q0*q0*abs(Jk) / (4.d0*pi*eps0*4.d0*(pi*pi)*2.d0*pi/dk))
         
 		end subroutine calculateMatrixElement
 			
@@ -109,7 +73,7 @@ module arbitraryAngleForster_module
 		!**************************************************************************************************************************
 		subroutine calculateArbitraryForsterRate(cnt1, cnt2, totalTransitionRate12, totalTransitionRate21)
 			use physicalConstants, only : kb, pi, hb
-			use inputParameters, only : Temperature, ppLen
+			use inputParameters, only : Temperature, ppLen, theta
 			use prepareForster_module
 			type(cnt), intent(in) :: cnt1, cnt2
 			real*8, intent(out) :: totalTransitionRate12, totalTransitionRate21
@@ -137,12 +101,12 @@ module arbitraryAngleForster_module
 					
 				if ((iKcm1 .ne. 0) .and. (iKcm2 .ne. 0)) then
 
-					call calculateMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2, matrixElement)
+					call calculateMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2, iC, matrixElement)
 					call calculateDOS(cnt1,iKcm1,ix1,dos1)
 					call calculateDOS(cnt2,iKcm2,ix2,dos2)
 
-					totalTransitionRate12 = totalTransitionRate12 + exp(-(cnt1.Ex0_A2(ix1,iKcm1))/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos2 / hb / ppLen/ (partitionFunction1 / cnt1.dk) !the multiplication of cnt.dk is because the way partitionFunction is calculated it has units of 1/L while it should be unitless.
-					totalTransitionRate21 = totalTransitionRate21 + exp(-(cnt2.Ex0_A2(ix2,iKcm2))/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos1 / hb / ppLen/ (partitionFunction2 / cnt2.dk) !the multiplication of cnt.dk is because the way partitionFunction is calculated it has units of 1/L while it should be unitless.
+					totalTransitionRate12 = totalTransitionRate12 + exp(-(cnt1.Ex0_A2(ix1,iKcm1))/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos2 * (sin(theta))**3 / hb / ppLen/ (partitionFunction1 / cnt1.dk) !the multiplication of cnt.dk is because the way partitionFunction is calculated it has units of 1/L while it should be unitless.
+					totalTransitionRate21 = totalTransitionRate21 + exp(-(cnt2.Ex0_A2(ix2,iKcm2))/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos1 * (sin(theta))**3 / hb / ppLen/ (partitionFunction2 / cnt2.dk) !the multiplication of cnt.dk is because the way partitionFunction is calculated it has units of 1/L while it should be unitless.
 				end if
 
 			end do

@@ -29,7 +29,7 @@ module inputParameters
 	real*8 :: dTheta
   
   
-  integer :: n_ch1 = 8, m_ch1 = 6, i_sub1 = 1
+  integer :: n_ch1 = 7, m_ch1 = 5, i_sub1 = 1
   integer :: n_ch2 = 8, m_ch2 = 6, i_sub2 = 1
   
 	

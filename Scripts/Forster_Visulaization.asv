@@ -1,7 +1,7 @@
 %% This file visualizes the results of the fortran program for CNT bethe salpeter equation
-clear all; clc; fig=40;
+clear all; clc; fig=30;
 % close all;
-dir='C:\Users\amirhossein\Google Drive\Research\Exciton\Data\ForsterRate (07,05) to (08,06)\';
+dir='C:\Users\amirhossein\Google Drive\Research\Exciton\Data\ForsterRate (07,06) to (08,06)\';
 eV=1.6e-19;
 
 %% plot CNT unit cell

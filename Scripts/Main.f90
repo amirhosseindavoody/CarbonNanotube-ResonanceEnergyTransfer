@@ -39,9 +39,9 @@ program cntForsterEnergyTransfer
 
 	call saveDOS(cnt1,cnt2)
 	
-	!call calculateTransitionTable(cnt1,cnt2)
+	call calculateTransitionTable(cnt1,cnt2)
 	
-	call calculateKappaMatrix(cnt1,cnt2)
+	!call calculateKappaMatrix(cnt1,cnt2)
 	
 	print *, ''
   print *, 'Press Enter to continue ...'

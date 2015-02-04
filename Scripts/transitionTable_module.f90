@@ -23,9 +23,9 @@ module transitionTable_module
 			type(cnt), intent(in) :: cnt1,cnt2
 			
 			! set seperation properties
-			c2cMin = 1.2d-9
-			c2cMax = 10.d-9
-			nc2c = 10
+			c2cMin = 30.0d-9
+			c2cMax = 30.0d-9
+			nc2c = 1
 			if (nc2c .ne. 1) then
 				dc2c = (c2cMax-c2cMin)/dble(nc2c-1)
 			else
