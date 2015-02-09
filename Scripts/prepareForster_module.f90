@@ -49,8 +49,9 @@ module prepareForster_module
               end if
             end do
           end do
-        end do
+				end do
         
+				if(allocated(crossingPoints))	deallocate(crossingPoints)
         allocate(crossingPoints(nCrossing ,3))
         crossingPoints(:,:) = tempCrossingPoints(1:nCrossing,:)
         
@@ -77,67 +78,40 @@ module prepareForster_module
 					tempSameEnergy(i,4) = 0
 				end do
         
-    !    nSameEnergy = 0
-    !    do ix1 = 1,cnt1.nX
-				!	do iKcm1 = cnt1.iKcm_min , cnt1.iKcm_max
-				!		do ix2 = 1,cnt2.nX
-				!			do iKcm2 = cnt2.iKcm_min+1 , cnt2.iKcm_max
-				!				rtmp1 = (cnt1.Ex0_A2(ix1,iKcm1)-cnt2.Ex0_A2(ix2,iKcm2))
-				!				rtmp2 = (cnt1.Ex0_A2(ix1,iKcm1)-cnt2.Ex0_A2(ix2,iKcm2-1))
-				!				if ((rtmp1 * rtmp2) .le. 0.d0) then
-				!					if ((iKcm2 .eq. iKcm1) .and. (rtmp2 .ne. 0.d0)) then
-				!						nSameEnergy = nSameEnergy+1
-				!						tempSameEnergy(nSameEnergy,1) = ix1
-				!						tempSameEnergy(nSameEnergy,2) = ix2
-				!						tempSameEnergy(nSameEnergy,3) = iKcm1
-				!						tempSameEnergy(nSameEnergy,4) = iKcm2
-				!					else if (((iKcm2-1) .eq. iKcm1) .and. (rtmp1 .ne. 0.d0)) then
-				!						nSameEnergy = nSameEnergy+1
-				!						tempSameEnergy(nSameEnergy,1) = ix1
-				!						tempSameEnergy(nSameEnergy,2) = ix2
-				!						tempSameEnergy(nSameEnergy,3) = iKcm1
-				!						tempSameEnergy(nSameEnergy,4) = iKcm2-1
-				!					else
-				!						if ((abs(rtmp1) .le. abs(rtmp2)) .or. (abs(rtmp1) .eq. 0.d0)) then
-				!							nSameEnergy = nSameEnergy+1
-				!							tempSameEnergy(nSameEnergy,1) = ix1
-				!							tempSameEnergy(nSameEnergy,2) = ix2
-				!							tempSameEnergy(nSameEnergy,3) = iKcm1
-				!							tempSameEnergy(nSameEnergy,4) = iKcm2
-				!						else
-				!							nSameEnergy = nSameEnergy+1
-				!							tempSameEnergy(nSameEnergy,1) = ix1
-				!							tempSameEnergy(nSameEnergy,2) = ix2
-				!							tempSameEnergy(nSameEnergy,3) = iKcm1
-				!							tempSameEnergy(nSameEnergy,4) = iKcm2-1
-				!						endif
-				!					endif
-				!				end if
-				!			end do
-				!	  end do
-				!	end do
-				!end do
-				
 				nSameEnergy = 0
-        do ix1 = 1,cnt1.nX
+				do ix1 = 1,cnt1.nX
 					do iKcm1 = cnt1.iKcm_min , cnt1.iKcm_max
 						do ix2 = 1,cnt2.nX
 							do iKcm2 = cnt2.iKcm_min+1 , cnt2.iKcm_max
 								rtmp1 = (cnt1.Ex0_A2(ix1,iKcm1)-cnt2.Ex0_A2(ix2,iKcm2))
 								rtmp2 = (cnt1.Ex0_A2(ix1,iKcm1)-cnt2.Ex0_A2(ix2,iKcm2-1))
 								if ((rtmp1 * rtmp2) .le. 0.d0) then
-									if ((abs(iKcm2-iKcm1) .le. abs(iKcm2-1-iKcm1)) .or. (abs(iKcm2-iKcm1) .eq. 0)) then
+									if ((iKcm2 .eq. iKcm1) .and. (rtmp2 .ne. 0.d0)) then
 										nSameEnergy = nSameEnergy+1
 										tempSameEnergy(nSameEnergy,1) = ix1
 										tempSameEnergy(nSameEnergy,2) = ix2
 										tempSameEnergy(nSameEnergy,3) = iKcm1
 										tempSameEnergy(nSameEnergy,4) = iKcm2
-									else
+									else if (((iKcm2-1) .eq. iKcm1) .and. (rtmp1 .ne. 0.d0)) then
 										nSameEnergy = nSameEnergy+1
 										tempSameEnergy(nSameEnergy,1) = ix1
 										tempSameEnergy(nSameEnergy,2) = ix2
 										tempSameEnergy(nSameEnergy,3) = iKcm1
 										tempSameEnergy(nSameEnergy,4) = iKcm2-1
+									else
+										if ((abs(rtmp1) .le. abs(rtmp2)) .or. (abs(rtmp1) .eq. 0.d0)) then
+											nSameEnergy = nSameEnergy+1
+											tempSameEnergy(nSameEnergy,1) = ix1
+											tempSameEnergy(nSameEnergy,2) = ix2
+											tempSameEnergy(nSameEnergy,3) = iKcm1
+											tempSameEnergy(nSameEnergy,4) = iKcm2
+										else
+											nSameEnergy = nSameEnergy+1
+											tempSameEnergy(nSameEnergy,1) = ix1
+											tempSameEnergy(nSameEnergy,2) = ix2
+											tempSameEnergy(nSameEnergy,3) = iKcm1
+											tempSameEnergy(nSameEnergy,4) = iKcm2-1
+										endif
 									endif
 								end if
 							end do
@@ -145,23 +119,52 @@ module prepareForster_module
 					end do
 				end do
 				
+				!nSameEnergy = 0
+				!do ix1 = 1,cnt1.nX
+				!	do iKcm1 = cnt1.iKcm_min , cnt1.iKcm_max
+				!		do ix2 = 1,cnt2.nX
+				!			do iKcm2 = cnt2.iKcm_min+1 , cnt2.iKcm_max
+				!				rtmp1 = (cnt1.Ex0_A2(ix1,iKcm1)-cnt2.Ex0_A2(ix2,iKcm2))
+				!				rtmp2 = (cnt1.Ex0_A2(ix1,iKcm1)-cnt2.Ex0_A2(ix2,iKcm2-1))
+				!				if ((rtmp1 * rtmp2) .le. 0.d0) then
+				!					if ((abs(iKcm2-iKcm1) .le. abs(iKcm2-1-iKcm1)) .or. (abs(iKcm2-iKcm1) .eq. 0)) then
+				!						nSameEnergy = nSameEnergy+1
+				!						tempSameEnergy(nSameEnergy,1) = ix1
+				!						tempSameEnergy(nSameEnergy,2) = ix2
+				!						tempSameEnergy(nSameEnergy,3) = iKcm1
+				!						tempSameEnergy(nSameEnergy,4) = iKcm2
+				!					else
+				!						nSameEnergy = nSameEnergy+1
+				!						tempSameEnergy(nSameEnergy,1) = ix1
+				!						tempSameEnergy(nSameEnergy,2) = ix2
+				!						tempSameEnergy(nSameEnergy,3) = iKcm1
+				!						tempSameEnergy(nSameEnergy,4) = iKcm2-1
+				!					endif
+				!				end if
+				!			end do
+				!	  end do
+				!	end do
+				!end do
+				
         
+				if(allocated(sameEnergy))	deallocate(sameEnergy)
         allocate(sameEnergy(nSameEnergy ,4))
 				sameEnergy(:,:) = tempSameEnergy(1:nSameEnergy,:)
 				
+				if(allocated(kSpaceMatrixElement))	deallocate(kSpaceMatrixElement)
 				allocate(kSpaceMatrixElement(nSameEnergy))
 				kSpaceMatrixElement = kSpaceMatrixElement * 0.d0
 				
-				!do iC = 1,nSameEnergy
-				!	
-				!	ix1 = sameEnergy(iC,1)
-				!	ix2 = sameEnergy(iC,2)
-				!	iKcm1 = sameEnergy(iC,3)
-				!	iKcm2 = sameEnergy(iC,4)
-				!	if ((iKcm1 .ne. 0) .and. (iKcm2 .ne. 0)) then
-				!		call calculateKSpaceMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2, kSpaceMatrixElement(iC))
-				!	end if
-				!end do
+				do iC = 1,nSameEnergy
+					
+					ix1 = sameEnergy(iC,1)
+					ix2 = sameEnergy(iC,2)
+					iKcm1 = sameEnergy(iC,3)
+					iKcm2 = sameEnergy(iC,4)
+					if ((iKcm1 .ne. 0) .and. (iKcm2 .ne. 0)) then
+						call calculateKSpaceMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2, kSpaceMatrixElement(iC))
+					end if
+				end do
         
       end subroutine findSameEnergy
       

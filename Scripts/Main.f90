@@ -32,12 +32,6 @@ program cntForsterEnergyTransfer
   
   call loadExcitonWavefunction(cnt1)
   call loadExcitonWavefunction(cnt2)
-  
-  call findCrossings(cnt1,cnt2)
-	call findSameEnergy(cnt1,cnt2)
-  call saveTransitionPoints(cnt1,cnt2)
-
-	call saveDOS(cnt1,cnt2)
 	
 	call calculateTransitionTable(cnt1,cnt2)
 	

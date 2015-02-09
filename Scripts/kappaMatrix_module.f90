@@ -19,40 +19,97 @@ module kappaMatrix_module
 			use inputParameters
 			use parallelForster_module
 			use arbitraryAngleForster_module
-			
+			use prepareForster_module
 			
 			type(cnt), intent(in) :: cnt1,cnt2
 			integer :: iTheta1, iTheta2
 			
+			print *, 'Calculating kappa matrix ...'
+			
 			! set seperation properties
-			c2cDistance = 10.d-9
+			c2cDistance = 5.0d-9
+			ppLen = 40.0d-9
   
 			! set orientation properties
-			thetaMax = 3.d0*pi/4.d0
+			nTheta = 10
+			thetaMax = pi
 			thetaMin = 0.d0
-			nTheta = 4
 			if (nTheta .ne. 1) then
-				dTheta = (thetaMax-thetaMin)/dble(nTheta-1)
+				dTheta = (thetaMax-thetaMin)/dble(nTheta)
 			else
 				dTheta = 0.d0
 			end if
+			
+			ppLen  = ppLen*dble(nTheta-1)
 	
-			allocate(kappaMatrix(nTheta, nTheta))
-	
+			!! calculate kappa matrix for only one type of CNT in the system
+			!allocate(kappaMatrix(nTheta, nTheta))
+			!kappaMatrix = 0.d0 * kappaMatrix
+			!
+			!! calculate crossing points and same energy points between cnt1 and cnt2
+			!call findCrossings(cnt1,cnt2)
+			!call findSameEnergy(cnt1,cnt2)
+			!
+			!! calculate scattering between cnt1 and cnt2
+			!do iTheta1 = 1, nTheta
+			!	do iTheta2 = 1, nTheta
+			!		theta = abs(dble(iTheta1-iTheta2))*dTheta
+			!		if ((iTheta1-iTheta2) .ne. 0) then
+			!			call calculateArbitraryForsterRate(cnt1,cnt2, kappaMatrix(iTheta1,iTheta2), kappaMatrix(iTheta2,iTheta1))
+			!		end if
+			!		print *, 'iTheta1=', iTheta1, ', iTheta2=', iTheta2
+			!	end do
+			!end do
+			
+			
+			! calculate kappa matrix for two types of CNT in the system
+			allocate(kappaMatrix(2*nTheta, 2*nTheta))
 			kappaMatrix = 0.d0 * kappaMatrix
-	
+			
+			! calculate crossing points and same energy points between cnt1 and cnt1
+			call findCrossings(cnt1,cnt1)
+			call findSameEnergy(cnt1,cnt1)
+			
+			! calculate scattering between cnt1 and cnt1
 			do iTheta1 = 1, nTheta
 				do iTheta2 = 1, nTheta
-	
-				theta = dble(iTheta1-iTheta2)*dTheta
-		
-				if ((iTheta1-iTheta2) .eq. 0) then
-					!call calculateParallelForsterRate(cnt1,cnt2, kappaMatrix(iTheta1,iTheta2), kappaMatrix(iTheta2,iTheta1))
-				else
-					call calculateArbitraryForsterRate(cnt1,cnt2, kappaMatrix(iTheta1,iTheta2), kappaMatrix(iTheta2,iTheta1))
-				end if
+					theta = abs(dble(iTheta1-iTheta2))*dTheta
+					if ((iTheta1-iTheta2) .ne. 0) then
+						call calculateArbitraryForsterRate(cnt1,cnt1, kappaMatrix(iTheta1,iTheta2), kappaMatrix(iTheta2,iTheta1))
+					end if
+					print *, 'iTheta1=', iTheta1, ', iTheta2=', iTheta2
+				end do
+			end do
 			
-				print *, 'iTheta1=', iTheta1, ', iTheta2=', iTheta2
+			! calculate crossing points and same energy points between cnt2 and cnt2
+			call findCrossings(cnt2,cnt2)
+			call findSameEnergy(cnt2,cnt2)
+			
+			! calculate scattering between cnt2 and cnt2
+			do iTheta1 = 1, nTheta
+				do iTheta2 = 1, nTheta
+					theta = abs(dble(iTheta1-iTheta2))*dTheta
+					if ((iTheta1-iTheta2) .ne. 0) then
+						call calculateArbitraryForsterRate(cnt2,cnt2, kappaMatrix(nTheta+iTheta1,nTheta+iTheta2), kappaMatrix(nTheta+iTheta2,nTheta+iTheta1))
+					end if
+					print *, 'iTheta1=', iTheta1, ', iTheta2=', iTheta2
+				end do
+			end do
+			
+			! calculate crossing points and same energy points between cnt1 and cnt2
+			call findCrossings(cnt1,cnt2)
+			call findSameEnergy(cnt1,cnt2)			
+			
+			! calculate scattering between cnt1 and cnt2
+			do iTheta1 = 1, nTheta
+				do iTheta2 = 1, nTheta
+					theta = abs(dble(iTheta1-iTheta2))*dTheta
+					if ((iTheta1-iTheta2) .eq. 0) then
+						call calculateParallelForsterRate(cnt1,cnt2, kappaMatrix(iTheta1,nTheta+iTheta2), kappaMatrix(nTheta+iTheta2,iTheta1))
+					else
+						call calculateArbitraryForsterRate(cnt1,cnt2, kappaMatrix(iTheta1,nTheta+iTheta2), kappaMatrix(nTheta+iTheta2,iTheta1))
+					end if
+					print *, 'iTheta1=', iTheta1, ', iTheta2=', iTheta2
 				end do
 			end do
 			
@@ -70,6 +127,7 @@ module kappaMatrix_module
 			integer(4) :: istat
 			logical(4) :: result
 			integer :: iTheta1, iTheta2
+			integer :: nKappaMatrix
 			
 			!create and change the directory to that of the CNT
 			write(dirname,"('ForsterRate (',I2.2,',',I2.2,') to (',I2.2,',',I2.2,')')") n_ch1, m_ch1, n_ch2, m_ch2
@@ -81,11 +139,13 @@ module kappaMatrix_module
 				pause
 				stop
 			end if
-        
+			
+			nKappaMatrix = size(kappaMatrix,1)
+			
 			!write transition rates to the file
 			open(unit=100,file='kappaMatrix.dat',status="unknown")
-			do iTheta1 = 1,nTheta
-				do iTheta2 = 1,nTheta
+			do iTheta1 = 1,nKappaMatrix
+				do iTheta2 = 1,nKappaMatrix
 					write(100,10, advance='no') kappaMatrix(iTheta1,iTheta2)
 				end do
 				write(100,10)

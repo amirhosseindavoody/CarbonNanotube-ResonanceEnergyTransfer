@@ -12,7 +12,7 @@ module inputParameters
   integer :: nkg = 501 !number of k points along b1 vector in graphene Brillouin zone.
   integer :: nr = 200 !number of cnt unit cells in real space that are considered in calculating the overlap integrals in ExcitonEnergy program.
   
-	real*8 :: ppLen = 30.d-9 !length per perpendicular tubes
+	real*8 :: ppLen = 40.d-9 !length per perpendicular tubes
 	
 	real*8 :: c2cDistance !center to center distance between parallel carbon nanotubes
 	real*8 :: c2cMin
@@ -29,7 +29,7 @@ module inputParameters
 	real*8 :: dTheta
   
   
-  integer :: n_ch1 = 7, m_ch1 = 5, i_sub1 = 1
+  integer :: n_ch1 = 8, m_ch1 = 6, i_sub1 = 1
   integer :: n_ch2 = 8, m_ch2 = 6, i_sub2 = 1
   
 	

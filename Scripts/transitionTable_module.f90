@@ -13,18 +13,21 @@ module transitionTable_module
     
 	contains
 		!**************************************************************************************************************************
-		! calculate kappa matrix
+		! calculate transition table
     !**************************************************************************************************************************
 		subroutine calculateTransitionTable (cnt1,cnt2)
 			use inputParameters
 			use parallelForster_module
 			use arbitraryAngleForster_module
+			use prepareForster_module
 			
 			type(cnt), intent(in) :: cnt1,cnt2
 			
+			print *, "Start calculating transitionTable"
+			
 			! set seperation properties
-			c2cMin = 30.0d-9
-			c2cMax = 30.0d-9
+			c2cMin = 01.2d-9
+			c2cMax = 01.2d-9
 			nc2c = 1
 			if (nc2c .ne. 1) then
 				dc2c = (c2cMax-c2cMin)/dble(nc2c-1)
@@ -35,24 +38,27 @@ module transitionTable_module
 			! set orientation properties
 			thetaMax = pi/2.d0
 			thetaMin = 0.d0
-			nTheta = 30
+			nTheta = 100
 			if (nTheta .ne. 1) then
 				dTheta = (thetaMax-thetaMin)/dble(nTheta-1)
 			else
 				dTheta = 0.d0
 			end if
 			
+			!calculate the crossing points and points with the same energy between cnt1 and cnt2
+			call findCrossings(cnt1,cnt2)
+			call findSameEnergy(cnt1,cnt2)
 			
-			
+			!allocate the transition rate table
 			allocate(transitionRate(2,nTheta,nc2c))
 			
 			do ic2c = 1, nc2c
 				do iTheta = 1, nTheta
 			
 					c2cDistance = c2cMin+dble(ic2c-1)*dc2c
-					theta = dble(iTheta-1)*dTheta
+					theta = thetaMin + dble(iTheta-1)*dTheta
 				
-					if (iTheta .eq. 1) then
+					if (theta .eq. 0.d0) then
 						call calculateParallelForsterRate(cnt1,cnt2, transitionRate(1,iTheta,ic2c), transitionRate(2,iTheta,ic2c))
 					else
 						call calculateArbitraryForsterRate(cnt1,cnt2, transitionRate(1,iTheta,ic2c), transitionRate(2,iTheta,ic2c))
