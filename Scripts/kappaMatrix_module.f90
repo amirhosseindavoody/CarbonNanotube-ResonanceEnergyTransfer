@@ -123,14 +123,14 @@ module kappaMatrix_module
 		subroutine saveKappaMatrix()
 			use ifport
 			use inputParameters
-			character*100 :: dirname
+			character(len=100) :: dirname
 			integer(4) :: istat
 			logical(4) :: result
 			integer :: iTheta1, iTheta2
 			integer :: nKappaMatrix
 			
 			!create and change the directory to that of the CNT
-			write(dirname,"('ForsterRate (',I2.2,',',I2.2,') to (',I2.2,',',I2.2,')')") n_ch1, m_ch1, n_ch2, m_ch2
+			dirname=outputDirectory
 			result=makedirqq(dirname)
 			if (result) print *,'Directory creation successful!!'
 			istat=chdir(dirname)

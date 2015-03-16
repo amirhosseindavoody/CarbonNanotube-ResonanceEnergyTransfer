@@ -14,13 +14,13 @@ module dataClass
         use ifport
         use inputParameters
         type(cnt), intent(in) :: currCNT
-        character*100 :: dirname
+        character(len=100) :: dirname
         integer(4) :: istat
         logical(4) :: result
         integer :: i, j
         
         !change the directory to that of the CNT
-        write(dirname,"('CNT_',I2.2,'_',I2.2,'_',I4.4,'_',I4.4,'_',F3.1,'_',I1.1)") currcnt.n_ch, currcnt.m_ch, nkg, nr, E_th, currcnt.i_sub
+				dirname = currcnt.excitonDirectory
         result=makedirqq(dirname)
         if (result) print *,'Directory creation successful!!'
     
@@ -85,16 +85,16 @@ module dataClass
         use ifport
         use inputParameters
         type(cnt), intent(inout) :: currCNT
-        character*100 :: dirname
+        character(len=100) :: dirname
         integer(4) :: istat
         logical(4) :: result
         integer :: iX, iKcm, ikr
 				real*8 :: tmpr1, tmpr2, tmpr3
-        
+				
         call loadMiscData(currcnt)
-        
+				
         !change the directory to that of the CNT
-        write(dirname,"('CNT_',I2.2,'_',I2.2,'_',I4.4,'_',I4.4,'_',F3.1,'_',I1.1)") currcnt.n_ch, currcnt.m_ch, nkg, nr, E_th/eV, currcnt.i_sub
+        dirname=currcnt.excitonDirectory
         istat=chdir(dirname)
         if (istat .ne. 0) then
             print *, 'Directory did not changed!!!'
@@ -170,7 +170,7 @@ module dataClass
 						currcnt.Psi0_A2(:,iX,iKcm) = currcnt.Psi0_A2(:,iX,iKcm) / dcmplx(tmpr2)
 						currcnt.Psi1_A2(:,iX,iKcm) = currcnt.Psi1_A2(:,iX,iKcm) / dcmplx(tmpr3)
           enddo
-        enddo
+				enddo
         
       end subroutine loadExcitonWavefunction
       
@@ -181,21 +181,21 @@ module dataClass
         use ifport
         use inputParameters
         type(cnt), intent(inout) :: currCNT
-        character*100 :: dirname
+        character(len=100) :: dirname
         integer(4) :: istat
         logical(4) :: result
         integer :: min_sub, ik_max, iKcm_max, ikr_high, ik_high, iq_max, nX
         real*8 :: dk
         
         !change the directory to that of the CNT
-        write(dirname,"('CNT_',I2.2,'_',I2.2,'_',I4.4,'_',I4.4,'_',F3.1,'_',I1.1)") currcnt.n_ch, currcnt.m_ch, nkg, nr, E_th/eV, currcnt.i_sub
+        dirname=currcnt.excitonDirectory
         istat=chdir(dirname)
         if (istat .ne. 0) then
             print *, 'Directory did not changed!!!'
             pause
             stop
-        end if
-        
+				end if
+				
         open(unit=100,file='miscellaneous.dat',status="old")
         read(100,10) min_sub
         read(100,10) ik_max
@@ -271,14 +271,14 @@ module dataClass
         use prepareForster_module
 				use inputParameters
         type(cnt), intent(in) :: cnt1,cnt2
-        character*100 :: dirname
+        character(len=100) :: dirname
         integer(4) :: istat
         logical(4) :: result
         
         integer :: iKcm, iX, i
         
         !create and change the directory to that of the CNT
-        write(dirname,"('ForsterRate (',I2.2,',',I2.2,') to (',I2.2,',',I2.2,')')") n_ch1, m_ch1, n_ch2, m_ch2
+        dirname=outputDirectory
         result=makedirqq(dirname)
         if (result) print *,'Directory creation successful!!'
         istat=chdir(dirname)
@@ -361,7 +361,7 @@ module dataClass
         use prepareForster_module
 				use inputParameters
         type(cnt), intent(in) :: cnt1, cnt2
-        character*100 :: dirname
+        character(len=100) :: dirname
         integer(4) :: istat
         logical(4) :: result
 				real*8 :: dos
@@ -369,7 +369,7 @@ module dataClass
         integer :: iKcm, iX
         
         !create and change the directory to that of the CNT
-        write(dirname,"('ForsterRate (',I2.2,',',I2.2,') to (',I2.2,',',I2.2,')')") n_ch1, m_ch1, n_ch2, m_ch2
+        dirname=outputDirectory
         result=makedirqq(dirname)
         if (result) print *,'Directory creation successful!!'
         istat=chdir(dirname)

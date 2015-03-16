@@ -1,7 +1,7 @@
 %% This file visualizes the results of the fortran program for CNT bethe salpeter equation
 clear all; clc; fig=40;
 % close all;
-dir='C:\Users\amirhossein\Google Drive\Research\Exciton\Data\ForsterRate (07,05) to (08,06)\';
+dir='C:\Users\amirhossein\Google Drive\Research\Exciton\Data\Environmental Effect\ForsterRate (07,05) to (08,07)\';
 eV=1.6e-19;
 
 %% plot CNT unit cell
@@ -21,42 +21,42 @@ eV=1.6e-19;
 % return;
 
 %% plot exciton energy dispersion of the first cnt
-FileName=[dir,'cnt1_kvec.dat'];
-k_vec1=load(FileName);
-nKcm1 = numel(k_vec1);
-FileName=[dir,'cnt1_Ex0_A2.dat'];
-cnt1_Ex0_A2=load(FileName);
-
-fig=fig+1; figure(fig); hold on; box on;
-plot(k_vec1/1e9,cnt1_Ex0_A2/eV,'-b','LineWidth',3);
+% FileName=[dir,'cnt1_kvec.dat'];
+% k_vec1=load(FileName);
+% nKcm1 = numel(k_vec1);
+% FileName=[dir,'cnt1_Ex0_A2.dat'];
+% cnt1_Ex0_A2=load(FileName);
+% 
+% fig=fig+1; figure(fig); hold on; box on;
+% plot(k_vec1/1e9,cnt1_Ex0_A2/eV,'-b','LineWidth',3);
 % return;
 %% plot exciton energy dispersion of the second cnt
-FileName=[dir,'cnt2_kvec.dat'];
-k_vec2=load(FileName);
-nKcm2 = numel(k_vec2);
-FileName=[dir,'cnt2_Ex0_A2.dat'];
-cnt2_Ex0_A2=load(FileName);
-
-figure(fig); hold on; box on;
-plot(k_vec2/1e9,cnt2_Ex0_A2/eV,'-r','LineWidth',3);
+% FileName=[dir,'cnt2_kvec.dat'];
+% k_vec2=load(FileName);
+% nKcm2 = numel(k_vec2);
+% FileName=[dir,'cnt2_Ex0_A2.dat'];
+% cnt2_Ex0_A2=load(FileName);
+% 
+% figure(fig); hold on; box on;
+% plot(k_vec2/1e9,cnt2_Ex0_A2/eV,'-r','LineWidth',3);
 
 % axis tight;
 % return;
 
 %% plot crossing points
-FileName=[dir,'crossingPoints.dat'];
-crossingPoints=load(FileName);
-
-nC = size(crossingPoints,1);
-tmp = (nKcm1-1)/2+1;
-
-figure(fig); hold on; box on;
-for i = 1:nC
-    plot(k_vec1(tmp+crossingPoints(i,3))/1e9,cnt1_Ex0_A2(tmp+crossingPoints(i,3),crossingPoints(i,1))/eV,'*-k','LineWidth',3);
-end
-
-axis tight;
-return;
+% FileName=[dir,'crossingPoints.dat'];
+% crossingPoints=load(FileName);
+% 
+% nC = size(crossingPoints,1);
+% tmp = (nKcm1-1)/2+1;
+% 
+% figure(fig); hold on; box on;
+% for i = 1:nC
+%     plot(k_vec1(tmp+crossingPoints(i,3))/1e9,cnt1_Ex0_A2(tmp+crossingPoints(i,3),crossingPoints(i,1))/eV,'*-k','LineWidth',3);
+% end
+% 
+% axis tight;
+% return;
 
 %% plot points with equal energies
 % FileName=[dir,'sameEnergy.dat'];
@@ -79,18 +79,18 @@ return;
 % return;
 
 %% plot exciton density of states of the first cnt
-FileName=[dir,'cnt1_kvec.dat'];
-k_vec1=load(FileName);
-nKcm1 = numel(k_vec1);
-FileName=[dir,'cnt1_DOS.dat'];
-cnt1_DOS=load(FileName);
-
-fig=fig+1; figure(fig); hold on; box on;
-plot(k_vec1,cnt1_DOS*eV,'-','LineWidth',3);
-for i = 1:nC
-    plot(k_vec1(tmp+crossingPoints(i,3)),cnt1_DOS(tmp+crossingPoints(i,3),crossingPoints(i,1))*eV,'*-k','LineWidth',4);
-end
-axis tight;
+% FileName=[dir,'cnt1_kvec.dat'];
+% k_vec1=load(FileName);
+% nKcm1 = numel(k_vec1);
+% FileName=[dir,'cnt1_DOS.dat'];
+% cnt1_DOS=load(FileName);
+% 
+% fig=fig+1; figure(fig); hold on; box on;
+% plot(k_vec1,cnt1_DOS*eV,'-','LineWidth',3);
+% for i = 1:nC
+%     plot(k_vec1(tmp+crossingPoints(i,3)),cnt1_DOS(tmp+crossingPoints(i,3),crossingPoints(i,1))*eV,'*-k','LineWidth',4);
+% end
+% axis tight;
 % for iX = 1:size(cnt1_DOS,2)
 %     plot(k_vec1,cnt1_DOS(:,iX),'-','LineWidth',3);
 %     pause;
@@ -99,24 +99,24 @@ axis tight;
 % return;
 
 %% plot exciton density of states of the first cnt
-FileName=[dir,'cnt2_kvec.dat'];
-k_vec2=load(FileName);
-nKcm2 = numel(k_vec2);
-FileName=[dir,'cnt2_DOS.dat'];
-cnt2_DOS=load(FileName);
-
-fig=fig+1; figure(fig); hold on; box on;
-plot(k_vec2,cnt2_DOS*eV,'-','LineWidth',3);
-for i = 1:nC
-    plot(k_vec2(tmp+crossingPoints(i,3)),cnt2_DOS(tmp+crossingPoints(i,3),crossingPoints(i,2))*eV,'*-k','LineWidth',4);
-end
-axis tight;
+% FileName=[dir,'cnt2_kvec.dat'];
+% k_vec2=load(FileName);
+% nKcm2 = numel(k_vec2);
+% FileName=[dir,'cnt2_DOS.dat'];
+% cnt2_DOS=load(FileName);
+% 
+% fig=fig+1; figure(fig); hold on; box on;
+% plot(k_vec2,cnt2_DOS*eV,'-','LineWidth',3);
+% for i = 1:nC
+%     plot(k_vec2(tmp+crossingPoints(i,3)),cnt2_DOS(tmp+crossingPoints(i,3),crossingPoints(i,2))*eV,'*-k','LineWidth',4);
+% end
+% axis tight;
 % for iX = 1:size(cnt2_DOS,2)
 %     plot(k_vec2,cnt2_DOS(:,iX),'-','LineWidth',3);
 %     pause;
 % end;
 
-return;
+% return;
 
 %% plot exciton energy Ex0_A2
 FileName=[dir,'Ex0_A2.dat'];

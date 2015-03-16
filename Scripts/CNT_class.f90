@@ -16,7 +16,7 @@ module cntClass
       integer :: Nu
       real*8, dimension(:,:), allocatable, public :: posA,posB,posAA,posBB,posAB,posBA
       real*8, dimension(:,:), allocatable, public :: posA3, posB3
-            real*8, dimension(:,:,:), allocatable, public :: pos2d, pos3d
+      real*8, dimension(:,:,:), allocatable, public :: pos2d, pos3d
     
       !Reciprocal lattice properties
       real*8, public :: dk
@@ -35,8 +35,11 @@ module cntClass
       real*8, dimension(:,:), allocatable, public :: Ex_A1, Ex0_A2, Ex1_A2 !the first index is subband, the second index is iKcm
       complex*16, dimension(:,:,:), allocatable, public :: Psi_A1, Psi0_A2, Psi1_A2 !the first index is ikr, the scond index is the subband, the third index is iKcm
       integer, public :: nX
+			
+			!Directory name for exciton wavefunction
+			character(len=100) :: excitonDirectory
       
-            contains
+      contains
         procedure :: calculateBands
         procedure :: printProperties
     end type cnt

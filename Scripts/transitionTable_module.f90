@@ -59,7 +59,9 @@ module transitionTable_module
 					theta = thetaMin + dble(iTheta-1)*dTheta
 				
 					if (theta .eq. 0.d0) then
-						call calculateParallelForsterRate(cnt1,cnt2, transitionRate(1,iTheta,ic2c), transitionRate(2,iTheta,ic2c))
+						!call calculateParallelForsterRate(cnt1,cnt2, transitionRate(1,iTheta,ic2c), transitionRate(2,iTheta,ic2c))
+						transitionRate(1,iTheta,ic2c) = 0.d0
+						transitionRate(2,iTheta,ic2c) = 0.d0
 					else
 						call calculateArbitraryForsterRate(cnt1,cnt2, transitionRate(1,iTheta,ic2c), transitionRate(2,iTheta,ic2c))
 					end if
@@ -73,17 +75,17 @@ module transitionTable_module
 		end subroutine calculateTransitionTable
 	
 		!**************************************************************************************************************************
-		! save total exciton density of states for a given cnt
+		! save the calculated transition table
 		!**************************************************************************************************************************
 		subroutine saveTransitionRates()
 			use ifport
 			use inputParameters
-			character*100 :: dirname
+			character(len=100) :: dirname
 			integer(4) :: istat
 			logical(4) :: result
         
 			!create and change the directory to that of the CNT
-			write(dirname,"('ForsterRate (',I2.2,',',I2.2,') to (',I2.2,',',I2.2,')')") n_ch1, m_ch1, n_ch2, m_ch2
+			dirname=outputDirectory
 			result=makedirqq(dirname)
 			if (result) print *,'Directory creation successful!!'
 			istat=chdir(dirname)
