@@ -127,24 +127,24 @@ module forsterClass
 									do ikr2 = cnt2.ikr_low, cnt2.ikr_high					
 										matrixElementTemp(1,1) = matrixElementTemp(1,1) + &
 													conjg(cnt1.Cc(1,ikr1+iKcm,is))*cnt1.Cv(1,ikr1-iKcm,is)*cnt2.Cc(1,ikr2+iKcm,isp)*conjg(cnt2.Cv(1,ikr2-iKcm,isp))* &
-													exp(i1*dcmplx(2.d0*dble(iKcm)*(-cnt1.dk*cnt1.pos2d(is,iv,2)+cnt2.dk*cnt2.pos2d(isp,ivp,2))))*tmpc* conjg(cnt1.Psi0_A2(ikr1,ix1,iKcm))*cnt2.Psi0_A2(ikr2,ix2,iKcm) / (2.d0,0.d0)
+													exp(i1*dcmplx(2.d0*dble(iKcm)*(-cnt1.dk*cnt1.pos2d(is,iv,2)+cnt2.dk*cnt2.pos2d(isp,ivp,2))))*tmpc
 										matrixElementTemp(1,2) = matrixElementTemp(1,2) + &
 													conjg(cnt1.Cc(1,ikr1+iKcm,is))*cnt1.Cv(1,ikr1-iKcm,is)*cnt2.Cc(2,-ikr2+iKcm,isp)*conjg(cnt2.Cv(2,-ikr2-iKcm,isp))* &
-													exp(i1*dcmplx(2.d0*dble(iKcm)*(-cnt1.dk*cnt1.pos2d(is,iv,2)+cnt2.dk*cnt2.pos2d(isp,ivp,2))))*tmpc* conjg(cnt1.Psi0_A2(ikr1,ix1,iKcm))*cnt2.Psi0_A2(ikr2,ix2,iKcm) / (2.d0,0.d0)
+													exp(i1*dcmplx(2.d0*dble(iKcm)*(-cnt1.dk*cnt1.pos2d(is,iv,2)+cnt2.dk*cnt2.pos2d(isp,ivp,2))))*tmpc
 										matrixElementTemp(2,1) = matrixElementTemp(2,1) + &
 													conjg(cnt1.Cc(2,-ikr1+iKcm,is))*cnt1.Cv(2,-ikr1-iKcm,is)*cnt2.Cc(1,ikr2+iKcm,isp)*conjg(cnt2.Cv(1,ikr2-iKcm,isp))* &
-													exp(i1*dcmplx(2.d0*dble(iKcm)*(-cnt1.dk*cnt1.pos2d(is,iv,2)+cnt2.dk*cnt2.pos2d(isp,ivp,2))))*tmpc* conjg(cnt1.Psi0_A2(ikr1,ix1,iKcm))*cnt2.Psi0_A2(ikr2,ix2,iKcm) / (2.d0,0.d0)
+													exp(i1*dcmplx(2.d0*dble(iKcm)*(-cnt1.dk*cnt1.pos2d(is,iv,2)+cnt2.dk*cnt2.pos2d(isp,ivp,2))))*tmpc
 										matrixElementTemp(2,2) = matrixElementTemp(2,2) + &
 													conjg(cnt1.Cc(2,-ikr1+iKcm,is))*cnt1.Cv(2,-ikr1-iKcm,is)*cnt2.Cc(2,-ikr2+iKcm,isp)*conjg(cnt2.Cv(2,-ikr2-iKcm,isp))* &
-													exp(i1*dcmplx(2.d0*dble(iKcm)*(-cnt1.dk*cnt1.pos2d(is,iv,2)+cnt2.dk*cnt2.pos2d(isp,ivp,2))))*tmpc* conjg(cnt1.Psi0_A2(ikr1,ix1,iKcm))*cnt2.Psi0_A2(ikr2,ix2,iKcm) / (2.d0,0.d0)
+													exp(i1*dcmplx(2.d0*dble(iKcm)*(-cnt1.dk*cnt1.pos2d(is,iv,2)+cnt2.dk*cnt2.pos2d(isp,ivp,2))))*tmpc
 									end do
 								end do
               end do  
 						end do
 					end do
 				end do
-				matrixElementFinal = (matrixElementTemp(1,1) + matrixElementTemp(1,2) + matrixElementTemp(2,1) + matrixElementTemp(2,2))
-																											
+				matrixElementFinal = matrixElementFinal + (matrixElementTemp(1,1) + matrixElementTemp(1,2) + matrixElementTemp(2,1) + matrixElementTemp(2,2)) &
+																											* conjg(cnt1.Psi0_A2(ikr1,ix1,iKcm))*cnt2.Psi0_A2(ikr2,ix2,iKcm) / (2.d0,0.d0)
           
         
         matrixElementFinal = matrixElementFinal * dcmplx(q0*q0) / dcmplx(4.d0*pi*eps0*dble(cnt1.Nu*cnt2.Nu)*sqrt(cnt1.dk*cnt1.t_vec(2)/2.d0/pi)*sqrt(cnt2.dk*cnt2.t_vec(2)/2.d0/pi))
