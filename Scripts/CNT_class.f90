@@ -16,7 +16,7 @@ module cntClass
       integer :: Nu
       real*8, dimension(:,:), allocatable, public :: posA,posB,posAA,posBB,posAB,posBA
       real*8, dimension(:,:), allocatable, public :: posA3, posB3
-			real*8, dimension(:,:,:), allocatable, public :: pos2d, pos3d
+      real*8, dimension(:,:,:), allocatable, public :: pos2d, pos3d
     
       !Reciprocal lattice properties
       real*8, public :: dk
@@ -35,8 +35,11 @@ module cntClass
       real*8, dimension(:,:), allocatable, public :: Ex_A1, Ex0_A2, Ex1_A2 !the first index is subband, the second index is iKcm
       complex*16, dimension(:,:,:), allocatable, public :: Psi_A1, Psi0_A2, Psi1_A2 !the first index is ikr, the scond index is the subband, the third index is iKcm
       integer, public :: nX
+			
+			!Directory name for exciton wavefunction
+			character(len=100) :: excitonDirectory
       
-    contains
+      contains
         procedure :: calculateBands
         procedure :: printProperties
     end type cnt
@@ -129,11 +132,11 @@ module cntClass
               
             endif
           enddo
-				enddo
-				
-				allocate(init_cnt.pos2d(2,init_cnt.Nu,2))
-				init_cnt.pos2d(1,:,:) = init_cnt.posA(:,:)
-				init_cnt.pos2d(2,:,:) = init_cnt.posB(:,:)
+                enddo
+
+                allocate(init_cnt.pos2d(2,init_cnt.Nu,2))
+                init_cnt.pos2d(1,:,:) = init_cnt.posA(:,:)
+                init_cnt.pos2d(2,:,:) = init_cnt.posB(:,:)
     
         if (k .ne. init_cnt.Nu) stop "*** Error in calculating atom positions ***"
   
@@ -168,11 +171,11 @@ module cntClass
           init_cnt.posB3(i,1) = init_cnt.radius*sin(2*pi*init_cnt.posB(i,1)/init_cnt.len_ch)
           init_cnt.posB3(i,2) = init_cnt.posB(i,2)
           init_cnt.posB3(i,3) = -init_cnt.radius*cos(2*pi*init_cnt.posB(i,1)/init_cnt.len_ch)
-				end do
-				
-				allocate(init_cnt.pos3d(2,init_cnt.Nu,3))
-				init_cnt.pos3d(1,:,:) = init_cnt.posA3(:,:)
-				init_cnt.pos3d(2,:,:) = init_cnt.posB3(:,:)
+                end do
+
+                allocate(init_cnt.pos3d(2,init_cnt.Nu,3))
+                init_cnt.pos3d(1,:,:) = init_cnt.posA3(:,:)
+                init_cnt.pos3d(2,:,:) = init_cnt.posB3(:,:)
         
       end function init_cnt
     
@@ -276,7 +279,7 @@ module cntClass
         self.iq_min=-self.iq_max                    !the lower limit of the index in v_FT and esp_q
         
         ! calculate the tight-binding energies and coefficients.
-        allocate(self.Ek(2,self.ik_low:self.ik_high,2))        
+        allocate(self.Ek(2,self.ik_low:self.ik_high,2))
         allocate(self.Cc(2,self.ik_low:self.ik_high,2))
         allocate(self.Cv(2,self.ik_low:self.ik_high,2))
   
@@ -304,7 +307,7 @@ module cntClass
         complex*16, dimension(2), intent(out) :: Cv
         complex*16, dimension(2), intent(out) :: Cc
   
-        f_k=exp(i1*dot_product(k,(currCNT.a1+currCNT.a2)/3.d0))+exp(i1*dot_product(k,(currCNT.a1-2.d0*currCNT.a2)/3.d0))+exp(i1*dot_product(k,(currCNT.a2-2.d0*currCNT.a1)/3.d0))  
+        f_k=exp(i1*dot_product(k,(currCNT.a1+currCNT.a2)/3.d0))+exp(i1*dot_product(k,(currCNT.a1-2.d0*currCNT.a2)/3.d0))+exp(i1*dot_product(k,(currCNT.a2-2.d0*currCNT.a1)/3.d0))
   
         E(1)=+t0*abs(f_k)
         E(2)=-t0*abs(f_k)
@@ -322,7 +325,6 @@ module cntClass
         class(cnt), intent(in) :: self
         print *, "chirality = (", self.n_ch, ",", self.m_ch,")"
         print *, "radius = ", self.radius
-        print *, "t_vec = ", self.t_vec
       end subroutine printProperties
     
 end module cntClass

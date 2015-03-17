@@ -47,12 +47,18 @@
 	<Files>
 		<Filter Name="Header Files" Filter="fi;fd"/>
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
+		<File RelativePath="..\Scripts\arbitraryAngleForster_module.f90"/>
 		<File RelativePath="..\Scripts\CNT_class.f90"/>
-		<File RelativePath="..\Scripts\forsterClass.f90"/>
-		<File RelativePath="..\Scripts\inputParameters.f90"/>
-		<File RelativePath="..\Scripts\Main.f90"/>
-		<File RelativePath="..\Scripts\physicalConstants.f90"/>
 		<File RelativePath="..\Scripts\dataClass.f90"/>
-		<File RelativePath="..\Scripts\smallFns.f90"/></Filter>
+		<File RelativePath="..\Scripts\energyCorrection.f90"/>
+		<File RelativePath="..\Scripts\inputParameters.f90"/>
+		<File RelativePath="..\Scripts\kappaMatrix_module.f90"/>
+		<File RelativePath="..\Scripts\Main.f90"/>
+		<File RelativePath="..\Scripts\parallelForster_module.f90"/>
+		<File RelativePath="..\Scripts\perpendicularForster_module.f90"/>
+		<File RelativePath="..\Scripts\physicalConstants.f90"/>
+		<File RelativePath="..\Scripts\prepareForster_module.f90"/>
+		<File RelativePath="..\Scripts\smallFns.f90"/>
+		<File RelativePath="..\Scripts\transitionTable_module.f90"/></Filter>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl"/></Files>
 	<Globals/></VisualStudioProject>
