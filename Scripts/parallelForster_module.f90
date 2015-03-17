@@ -1,16 +1,16 @@
 module parallelForster_module
-    use cntClass
+    use cnt_class
     implicit none
     private
     
     public  :: calculateParallelForsterRate
     
-    contains
-			!**************************************************************************************************************************
-      ! calculate the matrix element for the crossing point number iC in two parallel tube
-      !**************************************************************************************************************************
+contains
+	!**************************************************************************************************************************
+	! calculate the matrix element for the crossing point number iC in two parallel tube
+	!**************************************************************************************************************************
 	subroutine calculateMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2 ,matrixElementFinal)
-        use inputParameters
+        use input_class
         use physicalConstants, only : i1, pi, eps0, q0
 		use smallFunctions
 
@@ -79,7 +79,7 @@ module parallelForster_module
 		end do				
 				
         matrixElementFinal = matrixElementFinal * dcmplx(q0*q0 * Ck / (4.d0*pi*eps0*(4.d0*pi**2)*2.d0*pi/dk))
-        
+        return
     end subroutine calculateMatrixElement
 			
 	!**************************************************************************************************************************
@@ -87,7 +87,7 @@ module parallelForster_module
     !**************************************************************************************************************************
     subroutine calculateParallelForsterRate(cnt1, cnt2, totalTransitionRate12, totalTransitionRate21)
 		use physicalConstants, only : kb, pi, hb
-		use inputParameters, only : Temperature
+		use input_class, only : Temperature
 		use prepareForster_module
         type(cnt), intent(in) :: cnt1, cnt2
 		real*8, intent(out) :: totalTransitionRate12, totalTransitionRate21
@@ -120,7 +120,7 @@ module parallelForster_module
 				totalTransitionRate21 = totalTransitionRate21 + exp(-cnt2%Ex0_A2(ix2,iKcm2)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos2 * 2.d0 * pi / hb / partitionFunction2
 			end if
 		end do
-				
+		return
 	end subroutine calculateParallelForsterRate
 			
 end module parallelForster_module

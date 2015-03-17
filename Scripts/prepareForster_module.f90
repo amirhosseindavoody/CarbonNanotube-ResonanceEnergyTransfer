@@ -1,5 +1,5 @@
 module prepareForster_module
-	use cntClass
+	use cnt_class
 	implicit none
 	private
     
@@ -8,7 +8,7 @@ module prepareForster_module
 		
 	public  :: findCrossings, findSameEnergy, calculateDOS, calculatePartitionFunction
     
-	contains
+contains
 	!**************************************************************************************************************************
 	! find the points that the bands cross each other
 	!**************************************************************************************************************************
@@ -54,7 +54,7 @@ module prepareForster_module
 		if(allocated(crossingPoints))	deallocate(crossingPoints)
 		allocate(crossingPoints(nCrossing ,3))
 		crossingPoints(:,:) = tempCrossingPoints(1:nCrossing,:)
-        
+        return
 	end subroutine findCrossings
 			
 	!**************************************************************************************************************************
@@ -162,16 +162,15 @@ module prepareForster_module
 				call calculateKSpaceMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2, kSpaceMatrixElement(iC))
 			end if
 		end do
-        
+        return
 	end subroutine findSameEnergy
-      
-      
+
 	!**************************************************************************************************************************
 	! calculate the partition function for a given carbon nanotube
 	!**************************************************************************************************************************
 	subroutine calculatePartitionFunction(currcnt, partitionFunction)
 		use physicalConstants, only : kb
-		use inputParameters, only : Temperature
+		use input_class, only : Temperature
 		type(cnt), intent(in) :: currcnt
 		real*8, intent(out) :: partitionFunction
 		integer :: ix, iKcm
@@ -203,13 +202,13 @@ module prepareForster_module
 		else
 			DOS = 2.d0*currcnt%dk/abs(currcnt%Ex0_A2(iX,iKcm-1)-currcnt%Ex0_A2(iX,iKcm+1))
 		end if
+		return
 	end subroutine calculateDOS
 			
 	!**************************************************************************************************************************
 	! calculate the matrix element for the crossing point number iC in two unparallel tube
 	!**************************************************************************************************************************
 	subroutine calculateKSpaceMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2 ,kSpaceMatrixElementTemp)
-		use inputParameters
 		use physicalConstants, only : i1, pi, eps0, q0
 		type(cnt), intent(in) :: cnt1,cnt2
 		complex*16, intent(out) :: kSpaceMatrixElementTemp
@@ -235,7 +234,8 @@ module prepareForster_module
 				kSpaceMatrixElementTemp = kSpaceMatrixElementTemp + tmpc*conjg(cnt1%Psi0_A2(ikr1,ix1,iKcm1))*cnt2%Psi0_A2(ikr2,ix2,iKcm2)/(2.d0,0.d0)
 				tmpc = (0.d0,0.d0)
 			end do
-		end do				
+		end do		
+		return		
 	end subroutine calculateKSpaceMatrixElement
 			
 end module prepareForster_module

@@ -3,7 +3,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     
 module kappaMatrix_module
-	use cntClass
+	use cnt_class
 	implicit none
 	real*8, dimension(:,:), allocatable :: kappaMatrix
 	
@@ -16,7 +16,7 @@ module kappaMatrix_module
 	! calculate kappa matrix
 	!**************************************************************************************************************************
 		subroutine calculateKappaMatrix (cnt1,cnt2)
-			use inputParameters
+			use input_class
 			use parallelForster_module
 			use arbitraryAngleForster_module
 			use prepareForster_module
@@ -126,7 +126,7 @@ module kappaMatrix_module
 		! save kappa matrix
     	!**************************************************************************************************************************
 		subroutine saveKappaMatrix()
-			use inputParameters
+			use comparams
 			use smallFunctions
 
 			character(len=200) :: command
@@ -136,10 +136,10 @@ module kappaMatrix_module
 			integer :: i
 			
 			!create and change the directory to that of the CNT
-			write(command,'("mkdir ",A100)') outputDirectory
+			write(command,'("mkdir ",A100)') outdir
 			call execute_command_line(command,wait=.true.,exitstat=i)
 
-			istat=chdir(outputDirectory)
+			istat=chdir(outdir)
 			if (istat .ne. 0) then
 				write(logInput,*) "Directory did not changed!!!"
 				call writeLog()

@@ -1,10 +1,10 @@
-module cntClass
+module cnt_class
     use physicalConstants
     implicit none
     
     private
     
-    public  :: cnt
+    public  :: cnt, calculateBands
     
     type cnt
       integer, public :: n_ch,m_ch !chiral vector parameters
@@ -38,10 +38,6 @@ module cntClass
 			
 			!Directory name for exciton wavefunction
 			character(len=100) :: excitonDirectory
-      
-      contains
-        procedure :: calculateBands
-        procedure :: printProperties
     end type cnt
     
     interface cnt
@@ -53,11 +49,12 @@ module cntClass
       !**************************************************************************************************************************
       ! initialize CNT by calculating its geometrical properties
       !**************************************************************************************************************************
-      type(cnt) function init_cnt(n_ch,m_ch,nkg)
+      type(cnt) function init_cnt(n_ch, m_ch, nkg, nX)
         use smallFunctions
 
         integer, intent(in) :: n_ch, m_ch
         integer, intent(in) :: nkg
+        integer, intent(in) :: nX
         integer :: dR = 1
         integer :: t1,t2
         real*8 :: cosTh, sinTh
@@ -66,6 +63,7 @@ module cntClass
         
         init_cnt%n_ch = n_ch
         init_cnt%m_ch = m_ch
+        init_cnt%nX = nX
         
         ! unit vectors and reciprocal lattice vectors.
         init_cnt%a1=(/dsqrt(3.d0)/2.d0*a_l, 1.d0/2.d0*a_l/)
@@ -188,8 +186,8 @@ module cntClass
       !**************************************************************************************************************************
       ! calculate band structure of the CNT
       !**************************************************************************************************************************
-      subroutine calculateBands(self, i_sub, E_th, Kcm_max)
-        class(cnt), intent(inout) :: self
+      subroutine calculateBands(currcnt, i_sub, E_th, Kcm_max)
+        type(cnt), intent(inout) :: currcnt
         integer, intent(in) :: i_sub
         real*8, intent(in) :: E_th, Kcm_max
         
@@ -204,42 +202,42 @@ module cntClass
         complex*16, dimension(2) :: Cc_tmp,Cv_tmp
   
         ! set the value of i_sub
-        self%i_sub = i_sub
+        currcnt%i_sub = i_sub
         
         ! calculate CNT energy dispersion.
-        self%ikc_max=floor(pi/norm2(self%t_vec)/self%dk)
-        self%ikc_min=-self%ikc_max
-        nkc=2*self%ikc_max+1
+        currcnt%ikc_max=floor(pi/norm2(currcnt%t_vec)/currcnt%dk)
+        currcnt%ikc_min=-currcnt%ikc_max
+        nkc=2*currcnt%ikc_max+1
   
-        allocate(k_vec(self%ikc_min:self%ikc_max))
-        allocate(E_k(1-self%Nu/2:self%Nu/2,self%ikc_min:self%ikc_max,2))
-        allocate(Cc_k(1-self%Nu/2:self%Nu/2,self%ikc_min:self%ikc_max,2))
-        allocate(Cv_k(1-self%Nu/2:self%Nu/2,self%ikc_min:self%ikc_max,2))
-        allocate(min_loc(0:self%Nu/2))
+        allocate(k_vec(currcnt%ikc_min:currcnt%ikc_max))
+        allocate(E_k(1-currcnt%Nu/2:currcnt%Nu/2,currcnt%ikc_min:currcnt%ikc_max,2))
+        allocate(Cc_k(1-currcnt%Nu/2:currcnt%Nu/2,currcnt%ikc_min:currcnt%ikc_max,2))
+        allocate(Cv_k(1-currcnt%Nu/2:currcnt%Nu/2,currcnt%ikc_min:currcnt%ikc_max,2))
+        allocate(min_loc(0:currcnt%Nu/2))
   
-        do ik=self%ikc_min,self%ikc_max
-          k_vec(ik)=dble(ik)*self%dk
+        do ik=currcnt%ikc_min,currcnt%ikc_max
+          k_vec(ik)=dble(ik)*currcnt%dk
         end do
   
-        do mu=1-self%Nu/2,self%Nu/2
-          do ik=self%ikc_min,self%ikc_max
-            k = dble(mu) * self%K1 + dble(ik) * self%dk * self%K2
-            call grapheneEnergy(self, E_k(mu,ik,:), Cc_k(mu,ik,:), Cv_k(mu,ik,:), k)
+        do mu=1-currcnt%Nu/2,currcnt%Nu/2
+          do ik=currcnt%ikc_min,currcnt%ikc_max
+            k = dble(mu) * currcnt%K1 + dble(ik) * currcnt%dk * currcnt%K2
+            call grapheneEnergy(currcnt, E_k(mu,ik,:), Cc_k(mu,ik,:), Cv_k(mu,ik,:), k)
           enddo
         enddo
   
   
         ! find the subbands with a minimum energy.
-        min_loc=minloc(E_k(0:self%Nu/2,:,1),2)
+        min_loc=minloc(E_k(0:currcnt%Nu/2,:,1),2)
         imin_sub=count((min_loc .lt. nkc) .and. (min_loc .gt. 1))
-        allocate(self%min_sub(imin_sub))
+        allocate(currcnt%min_sub(imin_sub))
         allocate(min_energy(imin_sub))
   
         ! store the value of mu for subbands with minimums in the variable min_sub
         i=1
-        do mu=0,self%Nu/2
+        do mu=0,currcnt%Nu/2
           if ((min_loc(mu) .gt. 1) .and. (min_loc(mu) .lt. nkc)) then
-            self%min_sub(i)=mu
+            currcnt%min_sub(i)=mu
             min_energy(i)=minval(E_k(mu,:,1))
             i=i+1
           end if
@@ -250,53 +248,53 @@ module cntClass
           do j=i-1,1,-1
             if (min_energy(i) .lt. min_energy(j)) then
               tmpr=min_energy(i)
-              tmpi=self%min_sub(i)
+              tmpi=currcnt%min_sub(i)
               min_energy(i)=min_energy(j)
-              self%min_sub(i)=self%min_sub(j)
+              currcnt%min_sub(i)=currcnt%min_sub(j)
               min_energy(j)=tmpr
-              self%min_sub(j)=tmpi
+              currcnt%min_sub(j)=tmpi
             end if    
           end do
         end do
   
         ! find the max k-index that energy is below threshold energy (E_th).
         ik=0
-        E1_tmp=(/ min_energy(self%i_sub),0.d0 /)
-        E2_tmp=(/ min_energy(self%i_sub),0.d0 /)
-        do while ((min(E1_tmp(1),E2_tmp(1))-min_energy(self%i_sub)) .le. E_th )
-          k=dble(self%min_sub(self%i_sub))*self%K1+dble(ik)*self%dk*self%K2
-          call grapheneEnergy(self,E1_tmp,Cc_tmp,Cv_tmp,k)
-          k=dble(self%min_sub(self%i_sub))*self%K1-dble(ik)*self%dk*self%K2
-          call grapheneEnergy(self,E2_tmp(:),Cc_tmp,Cv_tmp,k)
+        E1_tmp=(/ min_energy(currcnt%i_sub),0.d0 /)
+        E2_tmp=(/ min_energy(currcnt%i_sub),0.d0 /)
+        do while ((min(E1_tmp(1),E2_tmp(1))-min_energy(currcnt%i_sub)) .le. E_th )
+          k=dble(currcnt%min_sub(currcnt%i_sub))*currcnt%K1+dble(ik)*currcnt%dk*currcnt%K2
+          call grapheneEnergy(currcnt,E1_tmp,Cc_tmp,Cv_tmp,k)
+          k=dble(currcnt%min_sub(currcnt%i_sub))*currcnt%K1-dble(ik)*currcnt%dk*currcnt%K2
+          call grapheneEnergy(currcnt,E2_tmp(:),Cc_tmp,Cv_tmp,k)
           ik=ik+1
         end do
   
         ! set the index boundaries for some arrays and kernels.
-        self%ik_max=ik                              !the higher limit of k-vector that is below E_th
-        self%ik_min=-ik                             !the lower limit of k-vector that is below E_th
-        self%iKcm_max=floor(Kcm_max/self%dk)        !the higher limit of center of mass wave vector that we calculate
-        self%iKcm_min = - self%iKcm_max             !the lower limit of center of mass wave vector that we calculate
-        self%ikr_high=self%iKcm_max-self%ik_min     !the maximum index that the relative wavenumber in the entire simulation.
-        self%ikr_low=-self%ikr_high                 !the minimum index that the relative wavenumber in the entire simulation.
-        self%ik_high=self%ikr_high+self%iKcm_max    !the maximum index that the wavenumber in the entire simulation.
-        self%ik_low=-self%ik_high                   !the minimum index that the wavenumber in the entire simulation.
-        self%iq_max=2*self%ikr_high                 !the higher limit of the index in v_FT and esp_q
-        self%iq_min=-self%iq_max                    !the lower limit of the index in v_FT and esp_q
+        currcnt%ik_max=ik                              !the higher limit of k-vector that is below E_th
+        currcnt%ik_min=-ik                             !the lower limit of k-vector that is below E_th
+        currcnt%iKcm_max=floor(Kcm_max/currcnt%dk)        !the higher limit of center of mass wave vector that we calculate
+        currcnt%iKcm_min = - currcnt%iKcm_max             !the lower limit of center of mass wave vector that we calculate
+        currcnt%ikr_high=currcnt%iKcm_max-currcnt%ik_min     !the maximum index that the relative wavenumber in the entire simulation.
+        currcnt%ikr_low=-currcnt%ikr_high                 !the minimum index that the relative wavenumber in the entire simulation.
+        currcnt%ik_high=currcnt%ikr_high+currcnt%iKcm_max    !the maximum index that the wavenumber in the entire simulation.
+        currcnt%ik_low=-currcnt%ik_high                   !the minimum index that the wavenumber in the entire simulation.
+        currcnt%iq_max=2*currcnt%ikr_high                 !the higher limit of the index in v_FT and esp_q
+        currcnt%iq_min=-currcnt%iq_max                    !the lower limit of the index in v_FT and esp_q
         
         ! calculate the tight-binding energies and coefficients.
-        allocate(self%Ek(2,self%ik_low:self%ik_high,2))
-        allocate(self%Cc(2,self%ik_low:self%ik_high,2))
-        allocate(self%Cv(2,self%ik_low:self%ik_high,2))
+        allocate(currcnt%Ek(2,currcnt%ik_low:currcnt%ik_high,2))
+        allocate(currcnt%Cc(2,currcnt%ik_low:currcnt%ik_high,2))
+        allocate(currcnt%Cv(2,currcnt%ik_low:currcnt%ik_high,2))
   
         
-        do ik=self%ik_low,self%ik_high
-          mu=self%min_sub(i_sub) !first band
-          k=dble(mu)*self%K1+dble(ik)*self%dk*self%K2
-          call grapheneEnergy(self,self%Ek(1,ik,:),self%Cc(1,ik,:),self%Cv(1,ik,:),k)
+        do ik=currcnt%ik_low,currcnt%ik_high
+          mu=currcnt%min_sub(i_sub) !first band
+          k=dble(mu)*currcnt%K1+dble(ik)*currcnt%dk*currcnt%K2
+          call grapheneEnergy(currcnt,currcnt%Ek(1,ik,:),currcnt%Cc(1,ik,:),currcnt%Cv(1,ik,:),k)
 
-          mu=-self%min_sub(i_sub) !second band
-          k=dble(mu)*self%K1+dble(ik)*self%dk*self%K2
-          call grapheneEnergy(self,self%Ek(2,ik,:),self%Cc(2,ik,:),self%Cv(2,ik,:),k)
+          mu=-currcnt%min_sub(i_sub) !second band
+          k=dble(mu)*currcnt%K1+dble(ik)*currcnt%dk*currcnt%K2
+          call grapheneEnergy(currcnt,currcnt%Ek(2,ik,:),currcnt%Cc(2,ik,:),currcnt%Cv(2,ik,:),k)
         enddo
       
       end subroutine calculateBands
@@ -322,17 +320,4 @@ module cntClass
         Cv(1)=+1.d0/sqrt(2.d0)
         Cv(2)=-1.d0/sqrt(2.d0)*conjg(f_k)/abs(f_k)
       end subroutine grapheneEnergy
-
-      !**************************************************************************************************************************
-      ! print properties of CNT to the console
-      !**************************************************************************************************************************
-      subroutine printProperties(self)
-        use smallFunctions
-        class(cnt), intent(in) :: self
-        write(logInput, '("chirality = (", I2.2 , ",",I2.2 ,")")') self%n_ch, self%m_ch
-        call writeLog()
-        write(logInput, '("radius = ",E10.4)'), self%radius
-        call writeLog()
-      end subroutine printProperties
-    
-end module cntClass
+end module cnt_class
