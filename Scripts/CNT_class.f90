@@ -36,8 +36,6 @@ module cnt_class
       complex*16, dimension(:,:,:), allocatable, public :: Psi_A1, Psi0_A2, Psi1_A2 !the first index is ikr, the scond index is the subband, the third index is iKcm
       integer, public :: nX
 			
-			!Directory name for exciton wavefunction
-			character(len=100) :: excitonDirectory
     end type cnt
     
     interface cnt
