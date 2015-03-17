@@ -4,27 +4,29 @@
     
 module kappaMatrix_module
 	use cntClass
-  implicit none
+	implicit none
 	real*8, dimension(:,:), allocatable :: kappaMatrix
 	
 	private
 	
 	public :: calculateKappaMatrix
-    
+	
 	contains
-		!**************************************************************************************************************************
-		! calculate kappa matrix
-    !**************************************************************************************************************************
+	!**************************************************************************************************************************
+	! calculate kappa matrix
+	!**************************************************************************************************************************
 		subroutine calculateKappaMatrix (cnt1,cnt2)
 			use inputParameters
 			use parallelForster_module
 			use arbitraryAngleForster_module
 			use prepareForster_module
+			use smallFunctions
 			
 			type(cnt), intent(in) :: cnt1,cnt2
 			integer :: iTheta1, iTheta2
 			
-			print *, 'Calculating kappa matrix ...'
+			write(logInput,*) "Calculating kappa matrix ..."
+			call writeLog()
 			
 			! set seperation properties
 			c2cDistance = 5.0d-9
@@ -77,7 +79,8 @@ module kappaMatrix_module
 					if ((iTheta1-iTheta2) .ne. 0) then
 						call calculateArbitraryForsterRate(cnt1,cnt1, kappaMatrix(iTheta1,iTheta2), kappaMatrix(iTheta2,iTheta1))
 					end if
-					print *, 'iTheta1=', iTheta1, ', iTheta2=', iTheta2
+					write(logInput,*) 'iTheta1=', iTheta1, ', iTheta2=', iTheta2
+					call writeLog()
 				end do
 			end do
 			
@@ -92,7 +95,8 @@ module kappaMatrix_module
 					if ((iTheta1-iTheta2) .ne. 0) then
 						call calculateArbitraryForsterRate(cnt2,cnt2, kappaMatrix(nTheta+iTheta1,nTheta+iTheta2), kappaMatrix(nTheta+iTheta2,nTheta+iTheta1))
 					end if
-					print *, 'iTheta1=', iTheta1, ', iTheta2=', iTheta2
+					write(logInput,*) 'iTheta1=', iTheta1, ', iTheta2=', iTheta2
+					call writeLog()
 				end do
 			end do
 			
@@ -109,7 +113,8 @@ module kappaMatrix_module
 					else
 						call calculateArbitraryForsterRate(cnt1,cnt2, kappaMatrix(iTheta1,nTheta+iTheta2), kappaMatrix(nTheta+iTheta2,iTheta1))
 					end if
-					print *, 'iTheta1=', iTheta1, ', iTheta2=', iTheta2
+					write(logInput,*) 'iTheta1=', iTheta1, ', iTheta2=', iTheta2
+					call writeLog()
 				end do
 			end do
 			
@@ -119,25 +124,26 @@ module kappaMatrix_module
 	
 		!**************************************************************************************************************************
 		! save kappa matrix
-    !**************************************************************************************************************************
+    	!**************************************************************************************************************************
 		subroutine saveKappaMatrix()
-			use ifport
 			use inputParameters
-			character(len=100) :: dirname
+			use smallFunctions
+
+			character(len=200) :: command
 			integer(4) :: istat
-			logical(4) :: result
 			integer :: iTheta1, iTheta2
 			integer :: nKappaMatrix
+			integer :: i
 			
 			!create and change the directory to that of the CNT
-			dirname=outputDirectory
-			result=makedirqq(dirname)
-			if (result) print *,'Directory creation successful!!'
-			istat=chdir(dirname)
+			write(command,'("mkdir ",A100)') outputDirectory
+			call execute_command_line(command,wait=.true.,exitstat=i)
+
+			istat=chdir(outputDirectory)
 			if (istat .ne. 0) then
-				print *, 'Directory did not changed!!!'
-				pause
-				stop
+				write(logInput,*) "Directory did not changed!!!"
+				call writeLog()
+				call exit()
 			end if
 			
 			nKappaMatrix = size(kappaMatrix,1)
@@ -152,16 +158,16 @@ module kappaMatrix_module
 			end do
 			close(100)
   
-10		FORMAT (E16.8)
+10			FORMAT (E16.8)
         
 			!change the directory back
 			istat=chdir('..')
 			if (istat .ne. 0) then
-				print *, 'Directory did not changed!!!'
-				pause
-				stop
+				write(logInput,* ) "Directory did not changed!!!"
+				call writeLog()
+				call exit()
 			end if
         
-			end subroutine saveKappaMatrix
+		end subroutine saveKappaMatrix
 	
 end module kappaMatrix_module

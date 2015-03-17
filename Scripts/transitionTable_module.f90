@@ -20,10 +20,12 @@ module transitionTable_module
 			use parallelForster_module
 			use arbitraryAngleForster_module
 			use prepareForster_module
-			
+			use smallFunctions
+
 			type(cnt), intent(in) :: cnt1,cnt2
 			
-			print *, "Start calculating transitionTable"
+			write(logInput,*) "Start calculating transitionTable"
+			call writeLog()
 			
 			! set seperation properties
 			c2cMin = 01.2d-9
@@ -66,7 +68,8 @@ module transitionTable_module
 						call calculateArbitraryForsterRate(cnt1,cnt2, transitionRate(1,iTheta,ic2c), transitionRate(2,iTheta,ic2c))
 					end if
 					
-					print *, 'iTheta=', iTheta, ', nTheta=', nTheta, 'iC2C=', ic2c, ', nC2C=', nc2c		
+					write(logInput,*) 'iTheta=', iTheta, ', nTheta=', nTheta, 'iC2C=', ic2c, ', nC2C=', nc2c
+					call writeLog()		
 				end do
 			end do
 			
@@ -78,21 +81,21 @@ module transitionTable_module
 		! save the calculated transition table
 		!**************************************************************************************************************************
 		subroutine saveTransitionRates()
-			use ifport
 			use inputParameters
-			character(len=100) :: dirname
+			use smallFunctions
+			character(len=200) :: command
 			integer(4) :: istat
-			logical(4) :: result
+			integer :: i
         
 			!create and change the directory to that of the CNT
-			dirname=outputDirectory
-			result=makedirqq(dirname)
-			if (result) print *,'Directory creation successful!!'
-			istat=chdir(dirname)
+			write(command,'("mkdir ",A100)') outputDirectory
+			call execute_command_line(command,wait=.true.,exitstat=i)
+
+			istat=chdir(outputDirectory)
 			if (istat .ne. 0) then
-				print *, 'Directory did not changed!!!'
-				pause
-				stop
+				write(logInput,*) "Directory did not changed!!!"
+				call writeLog()
+				call exit()
 			end if
         
 			!write transition rates to the file
@@ -131,9 +134,9 @@ module transitionTable_module
 			!change the directory back
 			istat=chdir('..')
 			if (istat .ne. 0) then
-				print *, 'Directory did not changed!!!'
-				pause
-				stop
+				write(logInput,*)"Directory did not changed!!!"
+				call writeLog()
+				call exit()
 			end if
         
 		end subroutine saveTransitionRates

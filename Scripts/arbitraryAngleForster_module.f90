@@ -10,14 +10,13 @@ module arbitraryAngleForster_module
 		!**************************************************************************************************************************
 		! calculate the matrix element for the crossing point number iC in two unparallel tube
 		!**************************************************************************************************************************
-		subroutine calculateMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2, iC ,matrixElementFinal)
+		subroutine calculateMatrixElement(cnt1,cnt2, iKcm1, iKcm2, iC ,matrixElementFinal)
 			use inputParameters
 			use physicalConstants, only : i1, pi, eps0, q0
 			use smallFunctions
 			use prepareForster_module, only : kSpaceMatrixElement
 			type(cnt), intent(in) :: cnt1,cnt2
 			complex*16, intent(out) :: matrixElementFinal
-			integer, intent(in) :: ix1,ix2
 			integer, intent(in) :: iKcm1, iKcm2
 			integer, intent(in) :: iC
 	
@@ -25,14 +24,14 @@ module arbitraryAngleForster_module
 			complex*16 :: Jk
 			real*8 :: phi1, phi2, dPhi
 			integer :: iPhi1, iPhi2, nPhi
-			integer :: ix, iy, nx, ny
-			real*8 :: x, y, dx, dy, x_max, y_max
+			integer :: nx, ny
+			real*8 :: dx, dy, x_max, y_max
 			real*8 :: radius1, radius2
 			real*8 :: arg1, arg2, arg3
 				
-			radius1 = cnt1.radius
-			radius2	= cnt2.radius
-			dk = cnt1.dk
+			radius1 = cnt1%radius
+			radius2	= cnt2%radius
+			dk = cnt1%dk
 			K1 = dble(iKcm1)*dk
 			K2 = dble(iKcm2)*dk
         
@@ -101,17 +100,15 @@ module arbitraryAngleForster_module
 					
 				if ((iKcm1 .ne. 0) .and. (iKcm2 .ne. 0)) then
 
-					call calculateMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2, iC, matrixElement)
+					call calculateMatrixElement(cnt1,cnt2, iKcm1, iKcm2, iC, matrixElement)
 					call calculateDOS(cnt1,iKcm1,ix1,dos1)
 					call calculateDOS(cnt2,iKcm2,ix2,dos2)
 
-					totalTransitionRate12 = totalTransitionRate12 + exp(-(cnt1.Ex0_A2(ix1,iKcm1))/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos2 * (sin(theta))**2 / hb / ppLen/ (partitionFunction1 / cnt1.dk) !the multiplication of cnt.dk is because the way partitionFunction is calculated it has units of 1/L while it should be unitless. * (1.d0-exp(-15.d0*theta))
-					totalTransitionRate21 = totalTransitionRate21 + exp(-(cnt2.Ex0_A2(ix2,iKcm2))/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos1 * (sin(theta))**2 / hb / ppLen/ (partitionFunction2 / cnt2.dk) !the multiplication of cnt.dk is because the way partitionFunction is calculated it has units of 1/L while it should be unitless. * (1.d0-exp(-15.d0*theta))
+					totalTransitionRate12 = totalTransitionRate12 + exp(-(cnt1%Ex0_A2(ix1,iKcm1))/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos2 * (sin(theta))**2 / hb / ppLen/ (partitionFunction1 / cnt1%dk) !the multiplication of cnt.dk is because the way partitionFunction is calculated it has units of 1/L while it should be unitless. * (1.d0-exp(-15.d0*theta))
+					totalTransitionRate21 = totalTransitionRate21 + exp(-(cnt2%Ex0_A2(ix2,iKcm2))/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos1 * (sin(theta))**2 / hb / ppLen/ (partitionFunction2 / cnt2%dk) !the multiplication of cnt.dk is because the way partitionFunction is calculated it has units of 1/L while it should be unitless. * (1.d0-exp(-15.d0*theta))
 				end if
 
 			end do
-				
-10		FORMAT (A,E16.8)
 				
 		end subroutine calculateArbitraryForsterRate
 
