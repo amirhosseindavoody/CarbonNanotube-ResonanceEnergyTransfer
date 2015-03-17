@@ -198,7 +198,7 @@ module forsterClass
 				totalTransitionRate21 = 0.d0
 				nCrossing = size(finalCrossingPoints,1)
 				
-				do iC = 1,4
+				do iC = 1,nCrossing
 					
 					!print *, "iC = ", iC
 					
@@ -207,8 +207,8 @@ module forsterClass
 					iKcm = finalCrossingPoints(iC,3)
 					
 					call calculateMatrixElement(cnt1,cnt2,iC,matrixElement)
-					call calculateDOS(cnt1,iKcm,ix1,dos1)
-					call calculateDOS(cnt2,iKcm,ix2,dos2)
+					call calculateDOS(cnt1,ix1,iKcm,dos1)
+					call calculateDOS(cnt2,ix2,iKcm,dos2)
 
 					totalTransitionRate12 = totalTransitionRate12 + exp(-cnt1.Ex0_A2(ix1,iKcm)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos1 * 2.d0 * pi / hb / partitionFunction1
 					totalTransitionRate21 = totalTransitionRate21 + exp(-cnt2.Ex0_A2(ix2,iKcm)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos2 * 2.d0 * pi / hb / partitionFunction2
