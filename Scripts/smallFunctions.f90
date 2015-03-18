@@ -80,7 +80,6 @@ module smallFunctions
 				open(logFile, file="log.dat", status="new", action="write")
 			end if
 			write(logFile, *) logInput
-			print *, logInput
 			close(logFile)
 
 			return

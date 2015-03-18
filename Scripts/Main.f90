@@ -25,16 +25,15 @@ program cnt_resonance_energy_transfer
 	call CPU_time(starttime)
 
 	! read the information of CNTs stored the the following folders
-	write(dirname,'(A)') "CNT(07,05)-nkg(1001)-nr(0200)-E_th(1.5)-Kcm_max(1.5)-i_sub(1)-Ckappa(0.5)"
+	write(dirname,'(A)') "CNT(07,05)-nkg(1001)-nr(0200)-E_th(1.5)-Kcm_max(1.5)-i_sub(1)-Ckappa(5.5)"
 	call inputCNT(cnt1,dirname)
-	write(dirname,'(A)') "CNT(07,05)-nkg(1001)-nr(0200)-E_th(1.5)-Kcm_max(1.5)-i_sub(1)-Ckappa(0.5)"
+	write(dirname,'(A)') "CNT(07,05)-nkg(1001)-nr(0200)-E_th(1.5)-Kcm_max(1.5)-i_sub(1)-Ckappa(5.5)"
 	call inputCNT(cnt2,dirname)
 
 
 	! specify output directory
-	write(outdir,"('Transfer-(',I2.2,',',I2.2,')to(',I2.2,',',I2.2,')-Ckappa(0.5)')") cnt1%n_ch, cnt1%m_ch, cnt2%n_ch, cnt2%m_ch
+	write(outdir,"('Transfer-(',I2.2,',',I2.2,')to(',I2.2,',',I2.2,')-Ckappa(5.5)')") cnt1%n_ch, cnt1%m_ch, cnt2%n_ch, cnt2%m_ch
 	call open_output_directory()
-	print *, "I am here 3"
 
 ! 	call exit()
 	

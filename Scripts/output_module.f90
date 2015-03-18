@@ -13,16 +13,13 @@ contains
 		integer :: i
 		character(len=200) :: command
 		integer, dimension(3) :: date, time
-		character(len=100) :: directory
 
 		! specifiy the output directory
-		write(command,'("rm -rf ''",A100,"''")') outdir !remove the directory if it already exists
+		write(command,'("rm -rf ''",A,"''")') trim(outdir) !remove the directory if it already exists
 		call execute_command_line(command,wait=.true.,exitstat=i)
-    	write(command,'("mkdir ''",A100,"''")') outdir !create the directory again
+    	write(command,'("mkdir ''",A,"''")') trim(outdir) !create the directory again
     	call execute_command_line(command,wait=.true.,exitstat=i)
-    	print *, outdir
-    	write(directory,'(A)') outdir
-    	istat=chdir(directory)
+    	istat=chdir(trim(outdir))
 		if (istat .ne. 0) then
 			write(logInput,*) "Directory did not changed!!!"
 			call writeLog()
