@@ -84,20 +84,6 @@ contains
 		use comparams
 		use input_class
 		use smallFunctions
-		character(len=200) :: command
-		integer(4) :: istat
-		integer :: i
-        
-		!create and change the directory to that of the CNT
-		write(command,'("mkdir ",A100)') outdir
-		call execute_command_line(command,wait=.true.,exitstat=i)
-
-		istat=chdir(outdir)
-		if (istat .ne. 0) then
-			write(logInput,*) "Directory did not changed!!!"
-			call writeLog()
-			call exit()
-		end if
         
 		!write transition rates to the file
 		open(unit=100,file='transitionRates12.dat',status="unknown")
@@ -132,13 +118,6 @@ contains
 				
 		10 FORMAT (E16.8)
        
-		!change the directory back
-		istat=chdir('..')
-		if (istat .ne. 0) then
-			write(logInput,*)"Directory did not changed!!!"
-			call writeLog()
-			call exit()
-		end if
     	return    
 	end subroutine saveTransitionRates
 end module transitionTable_module

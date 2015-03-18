@@ -16,20 +16,7 @@ contains
 		use comparams
         use smallFunctions
         type(cnt), intent(in) :: cnt1,cnt2
-        character(len=200) :: command
-        integer(4) :: istat
         integer :: iKcm, iX, i
-        
-        !create and change the directory to that of the CNT
-        write(command,'("mkdir ",A100)') outdir
-        call execute_command_line(command,wait=.true.,exitstat=i)
-
-        istat=chdir(outdir)
-        if (istat .ne. 0) then
-            write(logInput,*) "Directory did not changed!!!"
-            call writeLog()
-            call exit()
-        end if
         
         !write carbon nanotube 1 k_vector
         open(unit=100,file='cnt1_kvec.dat',status="unknown")
@@ -83,16 +70,6 @@ contains
 11		FORMAT (4I8, 4I8, 4I8)
 12		FORMAT (4I8, 4I8, 4I8, 4I8)
 					 
-  
-       
-        
-        !change the directory back
-        istat=chdir('..')
-        if (istat .ne. 0) then
-            write(logInput,*) "Directory did not changed!!!"
-            call writeLog()
-            call exit()
-        end if
         return    
 	end subroutine saveTransitionPoints
 			
@@ -104,22 +81,8 @@ contains
 		use comparams
         use smallFunctions
         type(cnt), intent(in) :: cnt1, cnt2
-        character(len=200) :: command
-        integer(4) :: istat
-				real*8 :: dos
-        
-        integer :: iKcm, iX, i
-        
-        !create and change the directory to that of the CNT
-        write(command,'("mkdir ",A100)') outdir
-        call execute_command_line(command,wait=.true.,exitstat=i)
-
-        istat=chdir(outdir)
-        if (istat .ne. 0) then
-            write(logInput,*) "Directory did not changed!!!"
-            call writeLog()
-            call exit()
-        end if
+        real*8 :: dos
+        integer :: iKcm, iX
         
         !write cnt1 Ex0_A2 dispersion
         open(unit=100,file='cnt1_DOS.dat',status="unknown")
@@ -145,13 +108,6 @@ contains
 				
         10 FORMAT (E16.8)
         
-        !change the directory back
-        istat=chdir('..')
-        if (istat .ne. 0) then
-            write(logInput,*) "Directory did not changed!!!"
-            call writeLog()
-            call exit()
-        end if
         return    
 	end subroutine saveDOS
 end module data_class

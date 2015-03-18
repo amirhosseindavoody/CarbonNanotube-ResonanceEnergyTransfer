@@ -206,7 +206,7 @@ module cnt_class
         currcnt%ikc_max=floor(pi/norm2(currcnt%t_vec)/currcnt%dk)
         currcnt%ikc_min=-currcnt%ikc_max
         nkc=2*currcnt%ikc_max+1
-  
+        
         allocate(k_vec(currcnt%ikc_min:currcnt%ikc_max))
         allocate(E_k(1-currcnt%Nu/2:currcnt%Nu/2,currcnt%ikc_min:currcnt%ikc_max,2))
         allocate(Cc_k(1-currcnt%Nu/2:currcnt%Nu/2,currcnt%ikc_min:currcnt%ikc_max,2))
@@ -216,15 +216,14 @@ module cnt_class
         do ik=currcnt%ikc_min,currcnt%ikc_max
           k_vec(ik)=dble(ik)*currcnt%dk
         end do
-  
+        
         do mu=1-currcnt%Nu/2,currcnt%Nu/2
           do ik=currcnt%ikc_min,currcnt%ikc_max
             k = dble(mu) * currcnt%K1 + dble(ik) * currcnt%dk * currcnt%K2
             call grapheneEnergy(currcnt, E_k(mu,ik,:), Cc_k(mu,ik,:), Cv_k(mu,ik,:), k)
           enddo
         enddo
-  
-  
+        
         ! find the subbands with a minimum energy.
         min_loc=minloc(E_k(0:currcnt%Nu/2,:,1),2)
         imin_sub=count((min_loc .lt. nkc) .and. (min_loc .gt. 1))
@@ -254,7 +253,6 @@ module cnt_class
             end if    
           end do
         end do
-  
         ! find the max k-index that energy is below threshold energy (E_th).
         ik=0
         E1_tmp=(/ min_energy(currcnt%i_sub),0.d0 /)
@@ -284,7 +282,6 @@ module cnt_class
         allocate(currcnt%Cc(2,currcnt%ik_low:currcnt%ik_high,2))
         allocate(currcnt%Cv(2,currcnt%ik_low:currcnt%ik_high,2))
   
-        
         do ik=currcnt%ik_low,currcnt%ik_high
           mu=currcnt%min_sub(i_sub) !first band
           k=dble(mu)*currcnt%K1+dble(ik)*currcnt%dk*currcnt%K2

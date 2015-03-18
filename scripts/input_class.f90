@@ -35,7 +35,7 @@ contains
 		integer :: istat=0
 		integer :: ios=0
 		integer :: pos=0
-		integer :: nparam=9
+		integer, parameter :: nparam=9
 		integer :: iparam=0
 		integer :: n_ch, m_ch, nkg, nr, i_sub, nX
 		real*8 :: E_th, Kcm_max, kappa
@@ -48,6 +48,8 @@ contains
 
 		open(unit=100,file='log.dat',status="old")
 
+		iparam=0
+		ios=0
 		do while ((ios == 0) .and. (iparam .lt. nparam))
 			read (100,'(A)',iostat=ios) buffer
 			if (ios == 0) then
@@ -71,16 +73,18 @@ contains
 					print *, 'Read nkg: ', nkg
 					iparam = iparam+1
 				case ('nr')
-					read(buffer, *, iostat=ios) nkg
+					read(buffer, *, iostat=ios) nr
 					print *, 'Read nr: ', nr
 					iparam = iparam+1
 				case ('E_th')
 					read(buffer, *, iostat=ios) E_th
 					print *, 'Read E_th: ', E_th
 					iparam = iparam+1
+					E_th=E_th*eV
 				case ('Kcm_max')
 					read(buffer, *, iostat=ios) Kcm_max
 					print *, 'Read Kcm_max: ', Kcm_max
+					Kcm_max = Kcm_max*1.d9
 					iparam = iparam+1
 				case ('i_sub')
 					read(buffer, *, iostat=ios) i_sub
@@ -116,8 +120,6 @@ contains
             write(*,*) "Directory not changed to root!"
             call exit()
 		end if
-
-		call exit()
 
 		return
 	end subroutine inputCNT

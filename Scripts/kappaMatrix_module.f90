@@ -128,23 +128,8 @@ module kappaMatrix_module
 		subroutine saveKappaMatrix()
 			use comparams
 			use smallFunctions
-
-			character(len=200) :: command
-			integer(4) :: istat
 			integer :: iTheta1, iTheta2
 			integer :: nKappaMatrix
-			integer :: i
-			
-			!create and change the directory to that of the CNT
-			write(command,'("mkdir ",A100)') outdir
-			call execute_command_line(command,wait=.true.,exitstat=i)
-
-			istat=chdir(outdir)
-			if (istat .ne. 0) then
-				write(logInput,*) "Directory did not changed!!!"
-				call writeLog()
-				call exit()
-			end if
 			
 			nKappaMatrix = size(kappaMatrix,1)
 			
@@ -159,14 +144,6 @@ module kappaMatrix_module
 			close(100)
   
 10			FORMAT (E16.8)
-        
-			!change the directory back
-			istat=chdir('..')
-			if (istat .ne. 0) then
-				write(logInput,* ) "Directory did not changed!!!"
-				call writeLog()
-				call exit()
-			end if
         
 		end subroutine saveKappaMatrix
 	
