@@ -1,10 +1,8 @@
 module cnt_class
-    use physicalConstants
     implicit none
-    
     private
     
-    public  :: cnt, calculateBands
+    public  :: cnt, init_cnt, calculateBands
     
     type cnt
       integer, public :: n_ch,m_ch !chiral vector parameters
@@ -17,6 +15,9 @@ module cnt_class
       real*8, dimension(:,:), allocatable, public :: posA,posB,posAA,posBB,posAB,posBA
       real*8, dimension(:,:), allocatable, public :: posA3, posB3
       real*8, dimension(:,:,:), allocatable, public :: pos2d, pos3d
+
+      !Environment properties
+      real*8, public :: kappa, Ckappa
     
       !Reciprocal lattice properties
       real*8, public :: dk
@@ -37,146 +38,148 @@ module cnt_class
       integer, public :: nX
 			
     end type cnt
-    
-    interface cnt
-      module procedure init_cnt
-    end interface
-      
-    contains
+          
+contains
       
       !**************************************************************************************************************************
       ! initialize CNT by calculating its geometrical properties
       !**************************************************************************************************************************
-      type(cnt) function init_cnt(n_ch, m_ch, nkg, nX)
-        use smallFunctions
+      
+      function init_cnt(n_ch, m_ch, nkg, nX, kappa, Ckappa) result(currcnt)
+        use mathFunctionsMOD, only: gcd
+        use physicalConstants, only: a_l, pi
 
         integer, intent(in) :: n_ch, m_ch
         integer, intent(in) :: nkg
         integer, intent(in) :: nX
+        real*8, intent(in) :: kappa, Ckappa
+        type(cnt) :: currcnt
+
         integer :: dR = 1
         integer :: t1,t2
         real*8 :: cosTh, sinTh
         real*8, dimension(2,2) :: Rot
         integer :: i,j,k
         
-        init_cnt%n_ch = n_ch
-        init_cnt%m_ch = m_ch
-        init_cnt%nX = nX
+        currcnt%n_ch = n_ch
+        currcnt%m_ch = m_ch
+        currcnt%nX = nX
+        currcnt%kappa = kappa
+        currcnt%Ckappa = Ckappa
         
         ! unit vectors and reciprocal lattice vectors.
-        init_cnt%a1=(/dsqrt(3.d0)/2.d0*a_l, 1.d0/2.d0*a_l/)
-        init_cnt%a2=(/dsqrt(3.d0)/2.d0*a_l, -1.d0/2.d0*a_l/)
-        init_cnt%b1=(/1.d0/dsqrt(3.d0)*2.d0*pi/a_l, +1.d0*2.d0*pi/a_l/)
-        init_cnt%b2=(/1.d0/dsqrt(3.d0)*2.d0*pi/a_l, -1.d0*2.d0*pi/a_l/)
-        init_cnt%aCC_vec=1.d0/3.d0*(init_cnt%a1+init_cnt%a2)
+        currcnt%a1=(/dsqrt(3.d0)/2.d0*a_l, 1.d0/2.d0*a_l/)
+        currcnt%a2=(/dsqrt(3.d0)/2.d0*a_l, -1.d0/2.d0*a_l/)
+        currcnt%b1=(/1.d0/dsqrt(3.d0)*2.d0*pi/a_l, +1.d0*2.d0*pi/a_l/)
+        currcnt%b2=(/1.d0/dsqrt(3.d0)*2.d0*pi/a_l, -1.d0*2.d0*pi/a_l/)
+        currcnt%aCC_vec=1.d0/3.d0*(currcnt%a1+currcnt%a2)
         
         ! calculate chirality and translational vectors of CNT unit cell.
-        init_cnt%ch_vec=dble(n_ch)*init_cnt%a1+dble(m_ch)*init_cnt%a2
-        init_cnt%len_ch=a_l*dsqrt(dble(n_ch)**2+dble(m_ch)**2+dble(n_ch)*dble(m_ch))
-        init_cnt%radius=init_cnt%len_ch/2.d0/pi
+        currcnt%ch_vec=dble(n_ch)*currcnt%a1+dble(m_ch)*currcnt%a2
+        currcnt%len_ch=a_l*dsqrt(dble(n_ch)**2+dble(m_ch)**2+dble(n_ch)*dble(m_ch))
+        currcnt%radius=currcnt%len_ch/2.d0/pi
   
         call gcd(dR,2*n_ch+m_ch,2*m_ch+n_ch)
   
         t1=(2*m_ch+n_ch)/dR
         t2=-(2*n_ch+m_ch)/dR
   
-        init_cnt%t_vec=dble(t1)*init_cnt%a1+dble(t2)*init_cnt%a2
+        currcnt%t_vec=dble(t1)*currcnt%a1+dble(t2)*currcnt%a2
   
-        init_cnt%Nu=2*(n_ch**2+m_ch**2+n_ch*m_ch)/dR
+        currcnt%Nu=2*(n_ch**2+m_ch**2+n_ch*m_ch)/dR
  
  
         ! rotate basis vectors so that ch_vec is along x-axis.
-        cosTh=init_cnt%ch_vec(1)/norm2(init_cnt%ch_vec)
-        sinTh=init_cnt%ch_vec(2)/norm2(init_cnt%ch_vec)
+        cosTh=currcnt%ch_vec(1)/norm2(currcnt%ch_vec)
+        sinTh=currcnt%ch_vec(2)/norm2(currcnt%ch_vec)
         Rot=reshape((/ cosTh, -sinTh , sinTh, cosTh /), (/2,2/))
-        init_cnt%ch_vec=matmul(Rot,init_cnt%ch_vec)
-        init_cnt%t_vec=matmul(Rot,init_cnt%t_vec)
-        init_cnt%a1=matmul(Rot,init_cnt%a1)
-        init_cnt%a2=matmul(Rot,init_cnt%a2)
-        init_cnt%b1=matmul(Rot,init_cnt%b1)
-        init_cnt%b2=matmul(Rot,init_cnt%b2)
-        init_cnt%aCC_vec=matmul(Rot,init_cnt%aCC_vec)
+        currcnt%ch_vec=matmul(Rot,currcnt%ch_vec)
+        currcnt%t_vec=matmul(Rot,currcnt%t_vec)
+        currcnt%a1=matmul(Rot,currcnt%a1)
+        currcnt%a2=matmul(Rot,currcnt%a2)
+        currcnt%b1=matmul(Rot,currcnt%b1)
+        currcnt%b2=matmul(Rot,currcnt%b2)
+        currcnt%aCC_vec=matmul(Rot,currcnt%aCC_vec)
   
         ! calculate reciprocal lattice of CNT.
-        init_cnt%dk=norm2(init_cnt%b1)/(dble(nkg)-1.d0)
-        init_cnt%K1=(-t2*init_cnt%b1+t1*init_cnt%b2)/(dble(init_cnt%Nu))
-        init_cnt%K2=(dble(m_ch)*init_cnt%b1-dble(n_ch)*init_cnt%b2)/dble(init_cnt%Nu)
-        init_cnt%K2=init_cnt%K2/norm2(init_cnt%K2)
+        currcnt%dk=norm2(currcnt%b1)/(dble(nkg)-1.d0)
+        currcnt%K1=(-t2*currcnt%b1+t1*currcnt%b2)/(dble(currcnt%Nu))
+        currcnt%K2=(dble(m_ch)*currcnt%b1-dble(n_ch)*currcnt%b2)/dble(currcnt%Nu)
+        currcnt%K2=currcnt%K2/norm2(currcnt%K2)
   
         ! calculate coordinates of atoms in the unwarped CNT unit cell.
-        allocate(init_cnt%posA(init_cnt%Nu,2))
-        allocate(init_cnt%posB(init_cnt%Nu,2))
+        allocate(currcnt%posA(currcnt%Nu,2))
+        allocate(currcnt%posB(currcnt%Nu,2))
     
         k=0
         do i=0,t1+n_ch
           do j=t2,m_ch
-            if ((dble(t2)/dble(t1)*i .le. j) .and. (dble(m_ch)/dble(n_ch)*i .ge. j) .and. (dble(t2)/dble(t1)*(i-n_ch) .gt. (j-m_ch)) .and. (dble(m_ch)/dble(n_ch)*(i-t1) .lt. (j-t2))) then
+            if ((dble(t2)/dble(t1)*dble(i) .le. dble(j)) .and. (dble(m_ch)/dble(n_ch)*dble(i) .ge. dble(j)) .and. (dble(t2)/dble(t1)*dble(i-n_ch) .gt. dble(j-m_ch)) .and. (dble(m_ch)/dble(n_ch)*dble(i-t1) .lt. dble(j-t2))) then
               k=k+1
-              init_cnt%posA(k,1)=dble(i)*init_cnt%a1(1)+dble(j)*init_cnt%a2(1)
-              init_cnt%posA(k,2)=dble(i)*init_cnt%a1(2)+dble(j)*init_cnt%a2(2)
-              init_cnt%posB(k,1)=init_cnt%posA(k,1)+init_cnt%aCC_vec(1)
-              init_cnt%posB(k,2)=init_cnt%posA(k,2)+init_cnt%aCC_vec(2)
+              currcnt%posA(k,1)=dble(i)*currcnt%a1(1)+dble(j)*currcnt%a2(1)
+              currcnt%posA(k,2)=dble(i)*currcnt%a1(2)+dble(j)*currcnt%a2(2)
+              currcnt%posB(k,1)=currcnt%posA(k,1)+currcnt%aCC_vec(1)
+              currcnt%posB(k,2)=currcnt%posA(k,2)+currcnt%aCC_vec(2)
         
-              if (init_cnt%posA(k,1) .gt. init_cnt%ch_vec(1)) init_cnt%posA(k,1)=init_cnt%posA(k,1)-init_cnt%ch_vec(1)
-              if (init_cnt%posA(k,1) .lt. 0) init_cnt%posA(k,1)=init_cnt%posA(k,1)+init_cnt%ch_vec(1)
-              if (init_cnt%posA(k,2) .gt. init_cnt%t_vec(2)) init_cnt%posA(k,2)=init_cnt%posA(k,2)-init_cnt%t_vec(2)
-              if (init_cnt%posA(k,2) .lt. 0) init_cnt%posA(k,2)=init_cnt%posA(k,2)+init_cnt%t_vec(2)
+              if (currcnt%posA(k,1) .gt. currcnt%ch_vec(1)) currcnt%posA(k,1)=currcnt%posA(k,1)-currcnt%ch_vec(1)
+              if (currcnt%posA(k,1) .lt. 0) currcnt%posA(k,1)=currcnt%posA(k,1)+currcnt%ch_vec(1)
+              if (currcnt%posA(k,2) .gt. currcnt%t_vec(2)) currcnt%posA(k,2)=currcnt%posA(k,2)-currcnt%t_vec(2)
+              if (currcnt%posA(k,2) .lt. 0) currcnt%posA(k,2)=currcnt%posA(k,2)+currcnt%t_vec(2)
           
-              if (init_cnt%posB(k,1) .gt. init_cnt%ch_vec(1)) init_cnt%posB(k,1)=init_cnt%posB(k,1)-init_cnt%ch_vec(1)
-              if (init_cnt%posB(k,1) .lt. 0) init_cnt%posB(k,1)=init_cnt%posB(k,1)+init_cnt%ch_vec(1)
-              if (init_cnt%posB(k,2) .gt. init_cnt%t_vec(2)) init_cnt%posB(k,2)=init_cnt%posB(k,2)-init_cnt%t_vec(2)
-              if (init_cnt%posB(k,2) .lt. 0) init_cnt%posB(k,2)=init_cnt%posB(k,2)+init_cnt%t_vec(2)
+              if (currcnt%posB(k,1) .gt. currcnt%ch_vec(1)) currcnt%posB(k,1)=currcnt%posB(k,1)-currcnt%ch_vec(1)
+              if (currcnt%posB(k,1) .lt. 0) currcnt%posB(k,1)=currcnt%posB(k,1)+currcnt%ch_vec(1)
+              if (currcnt%posB(k,2) .gt. currcnt%t_vec(2)) currcnt%posB(k,2)=currcnt%posB(k,2)-currcnt%t_vec(2)
+              if (currcnt%posB(k,2) .lt. 0) currcnt%posB(k,2)=currcnt%posB(k,2)+currcnt%t_vec(2)
               
             endif
           enddo
         enddo
 
-        allocate(init_cnt%pos2d(2,init_cnt%Nu,2))
-        init_cnt%pos2d(1,:,:) = init_cnt%posA(:,:)
-        init_cnt%pos2d(2,:,:) = init_cnt%posB(:,:)
+        allocate(currcnt%pos2d(2,currcnt%Nu,2))
+        currcnt%pos2d(1,:,:) = currcnt%posA(:,:)
+        currcnt%pos2d(2,:,:) = currcnt%posB(:,:)
     
-        if (k .ne. init_cnt%Nu) then
-          write(logInput,*) "*** Error in calculating atom positions ***"
-          call writeLog()
+        if (k .ne. currcnt%Nu) then
+          write(*,*) "*** Error in calculating atom positions ***"
           call exit()
         endif
   
         ! calculate distances between atoms in a warped CNT unit cell.
-        allocate(init_cnt%posAA(init_cnt%Nu,2))
-        allocate(init_cnt%posAB(init_cnt%Nu,2))
-        allocate(init_cnt%posBA(init_cnt%Nu,2))
-        allocate(init_cnt%posBB(init_cnt%Nu,2))
+        allocate(currcnt%posAA(currcnt%Nu,2))
+        allocate(currcnt%posAB(currcnt%Nu,2))
+        allocate(currcnt%posBA(currcnt%Nu,2))
+        allocate(currcnt%posBB(currcnt%Nu,2))
   
-        do i=1,init_cnt%Nu
-          init_cnt%posAA(i,:)=init_cnt%posA(i,:)-init_cnt%posA(1,:)
-          init_cnt%posAB(i,:)=init_cnt%posA(i,:)-init_cnt%posB(1,:)
-          init_cnt%posBA(i,:)=init_cnt%posB(i,:)-init_cnt%posA(1,:)
-          init_cnt%posBB(i,:)=init_cnt%posB(i,:)-init_cnt%posB(1,:)
-          if (init_cnt%posAA(i,1) .gt. init_cnt%ch_vec(1)/2.d0) init_cnt%posAA(i,1)=init_cnt%posAA(i,1)-init_cnt%ch_vec(1)
-          if (init_cnt%posAB(i,1) .gt. init_cnt%ch_vec(1)/2.d0) init_cnt%posAB(i,1)=init_cnt%posAB(i,1)-init_cnt%ch_vec(1)
-          if (init_cnt%posBA(i,1) .gt. init_cnt%ch_vec(1)/2.d0) init_cnt%posBA(i,1)=init_cnt%posBA(i,1)-init_cnt%ch_vec(1)
-          if (init_cnt%posBB(i,1) .gt. init_cnt%ch_vec(1)/2.d0) init_cnt%posBB(i,1)=init_cnt%posBB(i,1)-init_cnt%ch_vec(1)
+        do i=1,currcnt%Nu
+          currcnt%posAA(i,:)=currcnt%posA(i,:)-currcnt%posA(1,:)
+          currcnt%posAB(i,:)=currcnt%posA(i,:)-currcnt%posB(1,:)
+          currcnt%posBA(i,:)=currcnt%posB(i,:)-currcnt%posA(1,:)
+          currcnt%posBB(i,:)=currcnt%posB(i,:)-currcnt%posB(1,:)
+          if (currcnt%posAA(i,1) .gt. currcnt%ch_vec(1)/2.d0) currcnt%posAA(i,1)=currcnt%posAA(i,1)-currcnt%ch_vec(1)
+          if (currcnt%posAB(i,1) .gt. currcnt%ch_vec(1)/2.d0) currcnt%posAB(i,1)=currcnt%posAB(i,1)-currcnt%ch_vec(1)
+          if (currcnt%posBA(i,1) .gt. currcnt%ch_vec(1)/2.d0) currcnt%posBA(i,1)=currcnt%posBA(i,1)-currcnt%ch_vec(1)
+          if (currcnt%posBB(i,1) .gt. currcnt%ch_vec(1)/2.d0) currcnt%posBB(i,1)=currcnt%posBB(i,1)-currcnt%ch_vec(1)
         end do
         
         ! calculate coordinates of atoms in 3D unit cell
-        allocate(init_cnt%posA3(init_cnt%Nu,3))
-        allocate(init_cnt%posB3(init_cnt%Nu,3))
+        allocate(currcnt%posA3(currcnt%Nu,3))
+        allocate(currcnt%posB3(currcnt%Nu,3))
         
-        do i=1,init_cnt%Nu
-          init_cnt%posA3(i,1) = init_cnt%radius*sin(2*pi*init_cnt%posA(i,1)/init_cnt%len_ch)
-          init_cnt%posA3(i,2) = init_cnt%posA(i,2)
-          init_cnt%posA3(i,3) = -init_cnt%radius*cos(2*pi*init_cnt%posA(i,1)/init_cnt%len_ch)
+        do i=1,currcnt%Nu
+          currcnt%posA3(i,1) = currcnt%radius*sin(2*pi*currcnt%posA(i,1)/currcnt%len_ch)
+          currcnt%posA3(i,2) = currcnt%posA(i,2)
+          currcnt%posA3(i,3) = -currcnt%radius*cos(2*pi*currcnt%posA(i,1)/currcnt%len_ch)
         end do
         
-        do i=1,init_cnt%Nu
-          init_cnt%posB3(i,1) = init_cnt%radius*sin(2*pi*init_cnt%posB(i,1)/init_cnt%len_ch)
-          init_cnt%posB3(i,2) = init_cnt%posB(i,2)
-          init_cnt%posB3(i,3) = -init_cnt%radius*cos(2*pi*init_cnt%posB(i,1)/init_cnt%len_ch)
+        do i=1,currcnt%Nu
+          currcnt%posB3(i,1) = currcnt%radius*sin(2*pi*currcnt%posB(i,1)/currcnt%len_ch)
+          currcnt%posB3(i,2) = currcnt%posB(i,2)
+          currcnt%posB3(i,3) = -currcnt%radius*cos(2*pi*currcnt%posB(i,1)/currcnt%len_ch)
         end do
 
-        allocate(init_cnt%pos3d(2,init_cnt%Nu,3))
-        init_cnt%pos3d(1,:,:) = init_cnt%posA3(:,:)
-        init_cnt%pos3d(2,:,:) = init_cnt%posB3(:,:)
+        allocate(currcnt%pos3d(2,currcnt%Nu,3))
+        currcnt%pos3d(1,:,:) = currcnt%posA3(:,:)
+        currcnt%pos3d(2,:,:) = currcnt%posB3(:,:)
         
       end function init_cnt
     
@@ -184,7 +187,9 @@ module cnt_class
       !**************************************************************************************************************************
       ! calculate band structure of the CNT
       !**************************************************************************************************************************
+      
       subroutine calculateBands(currcnt, i_sub, E_th, Kcm_max)
+        use physicalConstants
         type(cnt), intent(inout) :: currcnt
         integer, intent(in) :: i_sub
         real*8, intent(in) :: E_th, Kcm_max
@@ -297,7 +302,9 @@ module cnt_class
       !**************************************************************************************************************************
       ! private subroutine to calculate Bloch functions and energy in graphene
       !**************************************************************************************************************************
+      
       subroutine grapheneEnergy(currCNT,E,Cc,Cv,k)
+        use physicalConstants, only: i1, t0
         type(cnt), intent(in) :: currCNT
         complex*16 :: f_k
         real*8, dimension(2), intent(in) :: k
@@ -305,14 +312,14 @@ module cnt_class
         complex*16, dimension(2), intent(out) :: Cv
         complex*16, dimension(2), intent(out) :: Cc
   
-        f_k=exp(i1*dot_product(k,(currCNT%a1+currCNT%a2)/3.d0))+exp(i1*dot_product(k,(currCNT%a1-2.d0*currCNT%a2)/3.d0))+exp(i1*dot_product(k,(currCNT%a2-2.d0*currCNT%a1)/3.d0))
+        f_k=exp(i1*dcmplx(dot_product(k,(currCNT%a1+currCNT%a2)/3.d0)))+exp(i1*dcmplx(dot_product(k,(currCNT%a1-2.d0*currCNT%a2)/3.d0)))+exp(i1*dcmplx(dot_product(k,(currCNT%a2-2.d0*currCNT%a1)/3.d0)))
   
         E(1)=+t0*abs(f_k)
         E(2)=-t0*abs(f_k)
   
-        Cc(1)=+1.d0/sqrt(2.d0)
-        Cc(2)=+1.d0/sqrt(2.d0)*conjg(f_k)/abs(f_k)
-        Cv(1)=+1.d0/sqrt(2.d0)
-        Cv(2)=-1.d0/sqrt(2.d0)*conjg(f_k)/abs(f_k)
+        Cc(1)=dcmplx(+1.d0/sqrt(2.d0))
+        Cc(2)=dcmplx(+1.d0/sqrt(2.d0)/abs(f_k))*conjg(f_k)
+        Cv(1)=dcmplx(+1.d0/sqrt(2.d0))
+        Cv(2)=dcmplx(-1.d0/sqrt(2.d0)/abs(f_k))*conjg(f_k)
       end subroutine grapheneEnergy
 end module cnt_class

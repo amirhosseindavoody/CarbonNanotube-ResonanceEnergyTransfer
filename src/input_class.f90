@@ -1,33 +1,20 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Declaration of input parameters
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    
+	
 module input_class
-	use physicalConstants, only: eV, pi
 	implicit none
-  
-	real*8 :: Temperature = 300 !Temperature of the system in Kelvin units
-  
-	real*8 :: ppLen = 40.d-9 !length per perpendicular tubes
-	
-	real*8 :: c2cDistance !center to center distance between parallel carbon nanotubes
-	real*8 :: c2cMin
-	real*8 :: c2cMax
-	integer :: nc2c
-	integer :: ic2c
-	real*8 :: dc2c
-	
-	real*8 :: theta
-	real*8 :: thetaMax
-	real*8 :: thetaMin
-	integer :: nTheta
-	integer :: iTheta
-	real*8 :: dTheta
+	private
+	public :: inputCNT
 
-contains
+contains	
+	!**************************************************************************************************************************
+	! read the CNT information from the log file of exciton calculation which is done previously
+	!**************************************************************************************************************************
+
 	subroutine inputCNT(currcnt,dirname)
-		use smallFunctions
-		use cnt_class
+		use physicalConstants, only: eV
+		use cnt_class, only: cnt, init_cnt, calculateBands
 
 		type(cnt) :: currcnt
 		character(len=100) :: dirname
@@ -35,12 +22,12 @@ contains
 		integer :: istat=0
 		integer :: ios=0
 		integer :: pos=0
-		integer, parameter :: nparam=9
+		integer, parameter :: nparam=10
 		integer :: iparam=0
 		integer :: n_ch, m_ch, nkg, nr, i_sub, nX
-		real*8 :: E_th, Kcm_max, kappa
+		real*8 :: E_th, Kcm_max, kappa, Ckappa
 
-        istat=chdir(dirname)
+		istat=chdir(dirname)
 		if (istat .ne. 0) then
 			write(*,*) "Directory does not exist:", dirname
 			call exit()
@@ -90,6 +77,10 @@ contains
 					read(buffer, *, iostat=ios) i_sub
 					print *, 'Read i_sub: ', i_sub
 					iparam = iparam+1
+				case ('Ckappa')
+					read(buffer, *, iostat=ios) Ckappa
+					print *, 'Read Ckappa: ', Ckappa
+					iparam = iparam+1
 				case ('kappa')
 					read(buffer, *, iostat=ios) kappa
 					print *, 'Read kappa: ', kappa
@@ -110,15 +101,15 @@ contains
 		end if
 
 		! create the cnt object and calculate bands and load exciton wavefunction
-		currcnt = cnt( n_ch, m_ch, nkg, nX)
+		currcnt = init_cnt( n_ch, m_ch, nkg, nX, kappa, Ckappa)
 		call calculateBands(currcnt,i_sub, E_th, Kcm_max)
 		call inputExciton(currcnt)
-        
-        !change the directory back
-        istat=chdir('..')
-        if (istat .ne. 0) then
-            write(*,*) "Directory not changed to root!"
-            call exit()
+		
+		!change the directory back
+		istat=chdir('..')
+		if (istat .ne. 0) then
+			write(*,*) "Directory not changed to root!"
+			call exit()
 		end if
 
 		return
@@ -127,8 +118,9 @@ contains
 	!**************************************************************************************************************************
 	! load the exciton wavefunction and energies from the ExcitonEnergy calculation
 	!**************************************************************************************************************************
+	
 	subroutine inputExciton(currcnt)
-		use cnt_class
+		use cnt_class, only: cnt
 		type(cnt), intent(inout) :: currcnt
 		integer :: iX, iKcm, ikr
 		real*8 :: tmpr1, tmpr2, tmpr3

@@ -2,21 +2,19 @@
 ! Calculate transition table
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-module energyShift_module
-	use cnt_class
-	implicit none
-	
+module energyShiftMOD
+	implicit none	
 	private
-	
 	public :: shiftEnergy
 	
 contains
 	!**************************************************************************************************************************
 	! calculate transition table
-    !**************************************************************************************************************************
+	!**************************************************************************************************************************
 	subroutine shiftEnergy (currcnt)
-		use smallFunctions
-		use physicalConstants	
+		use output_module, only: writeLog, logInput
+		use physicalConstants, only: eV
+		use cnt_class, only: cnt
 		
 		type(cnt), intent(inout) :: currcnt
 		real*8 :: tmpr
@@ -48,7 +46,7 @@ contains
 			call writeLog()
 			currcnt%Ex0_A2 = currcnt%Ex0_A2 - tmpr + 1.702 * eV
 		end if
-        return
+		return
 	end subroutine shiftEnergy
 	
-end module energyShift_module
+end module energyShiftMOD

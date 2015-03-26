@@ -1,5 +1,4 @@
 module parallelForster_module
-    use cnt_class
     implicit none
     private
     
@@ -7,17 +6,66 @@ module parallelForster_module
     
 contains
 	!**************************************************************************************************************************
+    ! calculate scattering rate from cnt1 to cnt2 when they are parallel
+    !**************************************************************************************************************************
+
+    subroutine calculateParallelForsterRate(cnt1, cnt2, totalTransitionRate12, totalTransitionRate21, c2cDistance)
+		use physicalConstants, only : kb, pi, hb
+		use comparams, only: Temperature
+		use prepareForster_module, only: calculatePartitionFunction, crossingPoints, calculateDOS
+		use cnt_class, only: cnt
+
+        type(cnt), intent(in) :: cnt1, cnt2
+        real*8, intent(in) :: c2cDistance
+		real*8, intent(out) :: totalTransitionRate12, totalTransitionRate21
+		integer :: iC
+		integer :: ix1, ix2, iKcm1, iKcm2
+		integer :: nCrossing
+		real*8 :: partitionFunction1, partitionFunction2
+		real*8 :: dos1, dos2
+		complex*16 :: matrixElement
+				
+				
+        call calculatePartitionFunction(cnt1, partitionFunction1)
+		call calculatePartitionFunction(cnt2, partitionFunction2)
+				
+		totalTransitionRate12 = 0.d0
+		totalTransitionRate21 = 0.d0
+		nCrossing = size(crossingPoints,1)
+				
+		do iC = 1,nCrossing		
+			ix1 = crossingPoints(iC,1)
+			ix2 = crossingPoints(iC,2)
+			iKcm1 = crossingPoints(iC,3)
+			iKcm2 = crossingPoints(iC,3)
+				
+			if ((iKcm1 .ne. 0) .and. (iKcm2 .ne. 0)) then
+				call calculateMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2 ,matrixElement, c2cDistance)
+				call calculateDOS(cnt1,iKcm1,ix1,dos1)
+				call calculateDOS(cnt2,iKcm2,ix2,dos2)
+				totalTransitionRate12 = totalTransitionRate12 + exp(-cnt1%Ex0_A2(ix1,iKcm1)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos1 * 2.d0 * pi / hb / partitionFunction1
+				totalTransitionRate21 = totalTransitionRate21 + exp(-cnt2%Ex0_A2(ix2,iKcm2)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos2 * 2.d0 * pi / hb / partitionFunction2
+			end if
+		end do
+		return
+	end subroutine calculateParallelForsterRate
+	
+	!**************************************************************************************************************************
 	! calculate the matrix element for the crossing point number iC in two parallel tube
 	!**************************************************************************************************************************
-	subroutine calculateMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2 ,matrixElementFinal)
-        use input_class
+	
+	subroutine calculateMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2 ,matrixElementFinal, c2cDistance)
         use physicalConstants, only : i1, pi, eps0, q0
-		use smallFunctions
+		use mathFunctionsMOD, only : bessk0
+		use output_module, only: logInput, writeLog
+		use cnt_class, only: cnt
 
         type(cnt), intent(in) :: cnt1,cnt2
 		complex*16, intent(out) :: matrixElementFinal
         integer, intent(in) :: ix1,ix2
         integer, intent(in) :: iKcm1, iKcm2
+        real*8, intent(in) :: c2cDistance
+
 		integer :: iKcm
         integer :: ikr1, ikr2
         integer :: is,isp
@@ -81,46 +129,5 @@ contains
         matrixElementFinal = matrixElementFinal * dcmplx(q0*q0 * Ck / (4.d0*pi*eps0*(4.d0*pi**2)*2.d0*pi/dk))
         return
     end subroutine calculateMatrixElement
-			
-	!**************************************************************************************************************************
-    ! calculate scattering rate from cnt1 to cnt2 when they are parallel
-    !**************************************************************************************************************************
-    subroutine calculateParallelForsterRate(cnt1, cnt2, totalTransitionRate12, totalTransitionRate21)
-		use physicalConstants, only : kb, pi, hb
-		use input_class, only : Temperature
-		use prepareForster_module
-        type(cnt), intent(in) :: cnt1, cnt2
-		real*8, intent(out) :: totalTransitionRate12, totalTransitionRate21
-		integer :: iC
-		integer :: ix1, ix2, iKcm1, iKcm2
-		integer :: nCrossing
-		real*8 :: partitionFunction1, partitionFunction2
-		real*8 :: dos1, dos2
-		complex*16 :: matrixElement
-				
-				
-        call calculatePartitionFunction(cnt1, partitionFunction1)
-		call calculatePartitionFunction(cnt2, partitionFunction2)
-				
-		totalTransitionRate12 = 0.d0
-		totalTransitionRate21 = 0.d0
-		nCrossing = size(crossingPoints,1)
-				
-		do iC = 1,nCrossing		
-			ix1 = crossingPoints(iC,1)
-			ix2 = crossingPoints(iC,2)
-			iKcm1 = crossingPoints(iC,3)
-			iKcm2 = crossingPoints(iC,3)
-				
-			if ((iKcm1 .ne. 0) .and. (iKcm2 .ne. 0)) then
-				call calculateMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2 ,matrixElement)
-				call calculateDOS(cnt1,iKcm1,ix1,dos1)
-				call calculateDOS(cnt2,iKcm2,ix2,dos2)
-				totalTransitionRate12 = totalTransitionRate12 + exp(-cnt1%Ex0_A2(ix1,iKcm1)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos1 * 2.d0 * pi / hb / partitionFunction1
-				totalTransitionRate21 = totalTransitionRate21 + exp(-cnt2%Ex0_A2(ix2,iKcm2)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos2 * 2.d0 * pi / hb / partitionFunction2
-			end if
-		end do
-		return
-	end subroutine calculateParallelForsterRate
 			
 end module parallelForster_module
