@@ -192,21 +192,22 @@ contains
 	!**************************************************************************************************************************
 	! calculate the density of states at a given point
 	!**************************************************************************************************************************
-	subroutine calculateDOS(currcnt,iKcm,iX,DOS)
+	
+	subroutine calculateDOS(currcnt,iKcm,iX,dos)
 		use cnt_class, only: cnt
 
-        type(cnt), intent(in) :: currcnt
-        integer, intent(in) :: iKcm,iX
-        real*8, intent(out) :: DOS
-        
+		type(cnt), intent(in) :: currcnt
+		integer, intent(in) :: iKcm,iX
+		real*8, intent(out) :: dos
+		
 		if (iKcm == currcnt%iKcm_min) then
-			DOS = currcnt%dk/abs(currcnt%Ex0_A2(iX,iKcm)-currcnt%Ex0_A2(iX,iKcm+1))
+			dos = 2.d0*currcnt%dk/abs(-3.d0*currcnt%Ex0_A2(iX,iKcm)+4.d0*currcnt%Ex0_A2(iX,iKcm+1)-currcnt%Ex0_A2(iX,iKcm+2))
 		else if(iKcm == currcnt%iKcm_max) then
-			DOS = currcnt%dk/abs(currcnt%Ex0_A2(iX,iKcm-1)-currcnt%Ex0_A2(iX,iKcm))
+			dos = 2.d0*currcnt%dk/abs(3.d0*currcnt%Ex0_A2(iX,iKcm)-4.d0*currcnt%Ex0_A2(iX,iKcm-1)+currcnt%Ex0_A2(iX,iKcm-2))
 		else if(iKcm == 0) then
-			DOS = currcnt%dk/abs(currcnt%Ex0_A2(iX,iKcm-1)-currcnt%Ex0_A2(iX,iKcm))
+			dos = 2.d0*currcnt%dk/abs(3.d0*currcnt%Ex0_A2(iX,iKcm)-4.d0*currcnt%Ex0_A2(iX,iKcm-1)+currcnt%Ex0_A2(iX,iKcm-2))
 		else
-			DOS = 2.d0*currcnt%dk/abs(currcnt%Ex0_A2(iX,iKcm-1)-currcnt%Ex0_A2(iX,iKcm+1))
+			dos = 12.d0*currcnt%dk / abs(currcnt%Ex0_A2(iX,iKcm-2)-8.d0*currcnt%Ex0_A2(iX,iKcm-1)+8.d0*currcnt%Ex0_A2(iX,iKcm+1)-currcnt%Ex0_A2(iX,iKcm+2))
 		end if
 		return
 	end subroutine calculateDOS
