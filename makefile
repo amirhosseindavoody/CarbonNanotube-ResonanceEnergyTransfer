@@ -20,10 +20,10 @@ energyShiftMOD.o: mathFunctionsMOD.o physicalConstants.o cnt_class.o
 output_module.o: mathFunctionsMOD.o
 
 main: main.o
-	$(FC) -o $@.exe $(wildcard $(OBJDIR)/*.o) $(FCFLAGS) 
+	$(FC) $(FCFLAGS) -o $@.exe $(wildcard $(OBJDIR)/*.o) 
 
 %.o: $(SRCDIR)/%.f90 | $(OBJDIR)
-	$(FC) -c $< $(FCFLAGS) -J$(OBJDIR)
+	$(FC) -c $(FCFLAGS) $< -J$(OBJDIR)
 	@mv -f $@ $(OBJDIR)
 
 $(OBJDIR):

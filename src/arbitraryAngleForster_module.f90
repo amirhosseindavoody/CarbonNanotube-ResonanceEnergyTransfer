@@ -112,7 +112,7 @@ contains
 				
 		Jk = Jk * dPhi * dPhi * pi / arg1
 				
-		matrixElementFinal = kSpaceMatrixElement(iC) * dcmplx(q0*q0*abs(Jk) / (4.d0*pi*eps0*4.d0*(pi*pi)*2.d0*pi/dk))
+		matrixElementFinal = kSpaceMatrixElement(iC) * Jk * dcmplx(q0*q0 / (4.d0*pi*eps0*4.d0*(pi*pi)*2.d0*pi/dk))
         return
 	end subroutine calculateMatrixElement
 

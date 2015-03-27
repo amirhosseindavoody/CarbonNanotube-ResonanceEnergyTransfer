@@ -10,6 +10,7 @@ contains
 	!**************************************************************************************************************************
 	! find the points that the bands cross each other
 	!**************************************************************************************************************************
+	
 	subroutine findCrossings(cnt1,cnt2)
 		use cnt_class, only: cnt
 
@@ -60,6 +61,7 @@ contains
 	!**************************************************************************************************************************
 	! find the points that the bands cross each other
 	!**************************************************************************************************************************
+	
 	subroutine findSameEnergy(cnt1,cnt2)
 		use cnt_class, only: cnt
 
@@ -84,68 +86,42 @@ contains
 		do ix1 = 1,cnt1%nX
 			do iKcm1 = cnt1%iKcm_min , cnt1%iKcm_max
 				do ix2 = 1,cnt2%nX
+					
+					if (cnt1%Ex0_A2(ix1,iKcm1) .eq. cnt2%Ex0_A2(ix2,cnt2%iKcm_min)) then
+							nSameEnergy = nSameEnergy+1
+							tempSameEnergy(nSameEnergy,1) = ix1
+							tempSameEnergy(nSameEnergy,2) = ix2
+							tempSameEnergy(nSameEnergy,3) = iKcm1
+							tempSameEnergy(nSameEnergy,4) = cnt2%iKcm_min
+					endif
+
 					do iKcm2 = cnt2%iKcm_min+1 , cnt2%iKcm_max
 						rtmp1 = (cnt1%Ex0_A2(ix1,iKcm1)-cnt2%Ex0_A2(ix2,iKcm2))
 						rtmp2 = (cnt1%Ex0_A2(ix1,iKcm1)-cnt2%Ex0_A2(ix2,iKcm2-1))
-						if ((rtmp1 * rtmp2) .le. 0.d0) then
-							if ((iKcm2 .eq. iKcm1) .and. (rtmp2 .ne. 0.d0)) then
-								nSameEnergy = nSameEnergy+1
-								tempSameEnergy(nSameEnergy,1) = ix1
-								tempSameEnergy(nSameEnergy,2) = ix2
-								tempSameEnergy(nSameEnergy,3) = iKcm1
-								tempSameEnergy(nSameEnergy,4) = iKcm2
-							else if (((iKcm2-1) .eq. iKcm1) .and. (rtmp1 .ne. 0.d0)) then
-								nSameEnergy = nSameEnergy+1
-								tempSameEnergy(nSameEnergy,1) = ix1
-								tempSameEnergy(nSameEnergy,2) = ix2
-								tempSameEnergy(nSameEnergy,3) = iKcm1
-								tempSameEnergy(nSameEnergy,4) = iKcm2-1
-							else if ((abs(rtmp1) .le. abs(rtmp2)) .or. (abs(rtmp1) .eq. 0.d0)) then
-								nSameEnergy = nSameEnergy+1
+						if (rtmp1 .eq. 0.d0) then
+							nSameEnergy = nSameEnergy+1
+							tempSameEnergy(nSameEnergy,1) = ix1
+							tempSameEnergy(nSameEnergy,2) = ix2
+							tempSameEnergy(nSameEnergy,3) = iKcm1
+							tempSameEnergy(nSameEnergy,4) = iKcm2
+						elseif ((rtmp1 * rtmp2) .lt. 0.d0) then
+							nSameEnergy = nSameEnergy+1
+							if (abs(rtmp1) .lt. abs(rtmp2)) then
 								tempSameEnergy(nSameEnergy,1) = ix1
 								tempSameEnergy(nSameEnergy,2) = ix2
 								tempSameEnergy(nSameEnergy,3) = iKcm1
 								tempSameEnergy(nSameEnergy,4) = iKcm2
 							else
-								nSameEnergy = nSameEnergy+1
 								tempSameEnergy(nSameEnergy,1) = ix1
 								tempSameEnergy(nSameEnergy,2) = ix2
 								tempSameEnergy(nSameEnergy,3) = iKcm1
 								tempSameEnergy(nSameEnergy,4) = iKcm2-1
 							endif
-						end if
+						endif
 					end do
 				end do
 			end do
-		end do
-				
-		!nSameEnergy = 0
-		!do ix1 = 1,cnt1%nX
-		!	do iKcm1 = cnt1%iKcm_min , cnt1%iKcm_max
-		!		do ix2 = 1,cnt2%nX
-		!			do iKcm2 = cnt2%iKcm_min+1 , cnt2%iKcm_max
-		!				rtmp1 = (cnt1%Ex0_A2(ix1,iKcm1)-cnt2%Ex0_A2(ix2,iKcm2))
-		!				rtmp2 = (cnt1%Ex0_A2(ix1,iKcm1)-cnt2%Ex0_A2(ix2,iKcm2-1))
-		!				if ((rtmp1 * rtmp2) .le. 0.d0) then
-		!					if ((abs(iKcm2-iKcm1) .le. abs(iKcm2-1-iKcm1)) .or. (abs(iKcm2-iKcm1) .eq. 0)) then
-		!						nSameEnergy = nSameEnergy+1
-		!						tempSameEnergy(nSameEnergy,1) = ix1
-		!						tempSameEnergy(nSameEnergy,2) = ix2
-		!						tempSameEnergy(nSameEnergy,3) = iKcm1
-		!						tempSameEnergy(nSameEnergy,4) = iKcm2
-		!					else
-		!						nSameEnergy = nSameEnergy+1
-		!						tempSameEnergy(nSameEnergy,1) = ix1
-		!						tempSameEnergy(nSameEnergy,2) = ix2
-		!						tempSameEnergy(nSameEnergy,3) = iKcm1
-		!						tempSameEnergy(nSameEnergy,4) = iKcm2-1
-		!					endif
-		!				end if
-		!			end do
-		!	  end do
-		!	end do
-		!end do
-				
+		end do	
         
 		if(allocated(sameEnergy))	deallocate(sameEnergy)
         allocate(sameEnergy(nSameEnergy ,4))
@@ -164,12 +140,16 @@ contains
 				call calculateKSpaceMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2, kSpaceMatrixElement(iC))
 			end if
 		end do
+
+		call saveTransitionPoints(cnt1,cnt2)
+
         return
 	end subroutine findSameEnergy
 
 	!**************************************************************************************************************************
 	! calculate the partition function for a given carbon nanotube
 	!**************************************************************************************************************************
+	
 	subroutine calculatePartitionFunction(currcnt, partitionFunction)
 		use physicalConstants, only : kb
 		use comparams, only : Temperature
@@ -200,9 +180,9 @@ contains
 		integer, intent(in) :: iKcm,iX
 		real*8, intent(out) :: dos
 		
-		if (iKcm == currcnt%iKcm_min) then
+		if (iKcm .le. (currcnt%iKcm_min+1)) then
 			dos = 2.d0*currcnt%dk/abs(-3.d0*currcnt%Ex0_A2(iX,iKcm)+4.d0*currcnt%Ex0_A2(iX,iKcm+1)-currcnt%Ex0_A2(iX,iKcm+2))
-		else if(iKcm == currcnt%iKcm_max) then
+		else if(iKcm .ge. (currcnt%iKcm_max-1)) then
 			dos = 2.d0*currcnt%dk/abs(3.d0*currcnt%Ex0_A2(iX,iKcm)-4.d0*currcnt%Ex0_A2(iX,iKcm-1)+currcnt%Ex0_A2(iX,iKcm-2))
 		else if(iKcm == 0) then
 			dos = 2.d0*currcnt%dk/abs(3.d0*currcnt%Ex0_A2(iX,iKcm)-4.d0*currcnt%Ex0_A2(iX,iKcm-1)+currcnt%Ex0_A2(iX,iKcm-2))
@@ -215,6 +195,7 @@ contains
 	!**************************************************************************************************************************
 	! calculate the matrix element for the crossing point number iC in two unparallel tube
 	!**************************************************************************************************************************
+	
 	subroutine calculateKSpaceMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2 ,kSpaceMatrixElementTemp)
 		use physicalConstants, only: i1, pi, eps0, q0
 		use cnt_class, only: cnt
@@ -250,6 +231,7 @@ contains
 	!**************************************************************************************************************************
 	! save CNT dispersions and the crossing points and the same energy points
 	!**************************************************************************************************************************
+	
 	subroutine saveTransitionPoints(cnt1,cnt2)
 		use cnt_class, only: cnt
 

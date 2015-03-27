@@ -49,45 +49,45 @@ contains
 				select case (trim(label))
 				case ('n_ch')
 					read(buffer, *, iostat=ios) n_ch
-					print *, 'Read n_ch: ', n_ch
+! 					print *, 'Read n_ch: ', n_ch
 					iparam = iparam+1
 				case ('m_ch')
 					read(buffer, *, iostat=ios) m_ch
-					print *, 'Read m_ch: ', m_ch
+! 					print *, 'Read m_ch: ', m_ch
 					iparam = iparam+1
 				case ('nkg')
 					read(buffer, *, iostat=ios) nkg
-					print *, 'Read nkg: ', nkg
+! 					print *, 'Read nkg: ', nkg
 					iparam = iparam+1
 				case ('nr')
 					read(buffer, *, iostat=ios) nr
-					print *, 'Read nr: ', nr
+! 					print *, 'Read nr: ', nr
 					iparam = iparam+1
 				case ('E_th')
 					read(buffer, *, iostat=ios) E_th
-					print *, 'Read E_th: ', E_th
+! 					print *, 'Read E_th: ', E_th
 					iparam = iparam+1
 					E_th=E_th*eV
 				case ('Kcm_max')
 					read(buffer, *, iostat=ios) Kcm_max
-					print *, 'Read Kcm_max: ', Kcm_max
+! 					print *, 'Read Kcm_max: ', Kcm_max
 					Kcm_max = Kcm_max*1.d9
 					iparam = iparam+1
 				case ('i_sub')
 					read(buffer, *, iostat=ios) i_sub
-					print *, 'Read i_sub: ', i_sub
+! 					print *, 'Read i_sub: ', i_sub
 					iparam = iparam+1
 				case ('Ckappa')
 					read(buffer, *, iostat=ios) Ckappa
-					print *, 'Read Ckappa: ', Ckappa
+! 					print *, 'Read Ckappa: ', Ckappa
 					iparam = iparam+1
 				case ('kappa')
 					read(buffer, *, iostat=ios) kappa
-					print *, 'Read kappa: ', kappa
+! 					print *, 'Read kappa: ', kappa
 					iparam = iparam+1
 				case ('nX')
 					read(buffer, *, iostat=ios) nX
-					print *, 'Read nX: ', nX
+! 					print *, 'Read nX: ', nX
 					iparam = iparam+1
 				end select
 			end if
@@ -174,15 +174,16 @@ contains
 				tmpr2 = 0.d0
 				tmpr3 = 0.d0
 				do ikr=currcnt%ikr_low,currcnt%ikr_high
-					tmpr1 = tmpr1 + dble(conjg(currcnt%Psi_A1(ikr,iX,iKcm)*currcnt%Psi_A1(ikr,iX,iKcm)))
-					tmpr2 = tmpr2 + dble(conjg(currcnt%Psi0_A2(ikr,iX,iKcm)*currcnt%Psi0_A2(ikr,iX,iKcm)))
-					tmpr3 = tmpr3 + dble(conjg(currcnt%Psi1_A2(ikr,iX,iKcm)*currcnt%Psi1_A2(ikr,iX,iKcm)))
+					tmpr1 = tmpr1 + dble(conjg(currcnt%Psi_A1(ikr,iX,iKcm))*currcnt%Psi_A1(ikr,iX,iKcm))
+					tmpr2 = tmpr2 + dble(conjg(currcnt%Psi0_A2(ikr,iX,iKcm))*currcnt%Psi0_A2(ikr,iX,iKcm))
+					tmpr3 = tmpr3 + dble(conjg(currcnt%Psi1_A2(ikr,iX,iKcm))*currcnt%Psi1_A2(ikr,iX,iKcm))
 				enddo
-				currcnt%Psi_A1(:,iX,iKcm) = currcnt%Psi_A1(:,iX,iKcm) / dcmplx(tmpr1)
-				currcnt%Psi0_A2(:,iX,iKcm) = currcnt%Psi0_A2(:,iX,iKcm) / dcmplx(tmpr2)
-				currcnt%Psi1_A2(:,iX,iKcm) = currcnt%Psi1_A2(:,iX,iKcm) / dcmplx(tmpr3)
+				currcnt%Psi_A1(:,iX,iKcm) = currcnt%Psi_A1(:,iX,iKcm) / dcmplx(sqrt(tmpr1))
+				currcnt%Psi0_A2(:,iX,iKcm) = currcnt%Psi0_A2(:,iX,iKcm) / dcmplx(sqrt(tmpr2))
+				currcnt%Psi1_A2(:,iX,iKcm) = currcnt%Psi1_A2(:,iX,iKcm) / dcmplx(sqrt(tmpr3))
 			enddo
 		enddo
+
 		return
 	end subroutine inputExciton
 

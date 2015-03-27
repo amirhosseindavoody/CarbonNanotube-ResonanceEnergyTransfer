@@ -27,6 +27,7 @@ contains
 	!**************************************************************************************************************************
 	! calculate transition table
 	!**************************************************************************************************************************
+	
 	subroutine calculateTransitionTable (cnt1,cnt2)
 		use parallelForster_module, only: calculateParallelForsterRate
 		use arbitraryAngleForster_module, only: calculateArbitraryForsterRate
@@ -61,7 +62,7 @@ contains
 		end if
 		
 		!calculate the crossing points and points with the same energy between cnt1 and cnt2
-		call findCrossings(cnt1,cnt2)
+		!call findCrossings(cnt1,cnt2)
 		call findSameEnergy(cnt1,cnt2)
 			
 		!allocate the transition rate table
