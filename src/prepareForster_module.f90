@@ -33,8 +33,8 @@ contains
 		do ix1 = 1,cnt1%nX
 			do ix2 = 1,cnt2%nX
 				do iKcm = cnt1%iKcm_min+1 , cnt1%iKcm_max
-					rtmp1 = (cnt1%Ex0_A2(ix1,iKcm)-cnt2%Ex0_A2(ix2,iKcm))
-					rtmp2 = (cnt1%Ex0_A2(ix1,iKcm-1)-cnt2%Ex0_A2(ix2,iKcm-1))
+					rtmp1 = (cnt1%Ex_t(ix1,iKcm)-cnt2%Ex_t(ix2,iKcm))
+					rtmp2 = (cnt1%Ex_t(ix1,iKcm-1)-cnt2%Ex_t(ix2,iKcm-1))
 					if ((rtmp1 * rtmp2) .le. 0.d0) then
 						if ((abs(rtmp1) .le. abs(rtmp2)) .or. (abs(rtmp1) .eq. 0.d0)) then
 							nCrossing = nCrossing+1
@@ -87,7 +87,7 @@ contains
 			do iKcm1 = cnt1%iKcm_min , cnt1%iKcm_max
 				do ix2 = 1,cnt2%nX
 					
-					if (cnt1%Ex0_A2(ix1,iKcm1) .eq. cnt2%Ex0_A2(ix2,cnt2%iKcm_min)) then
+					if (cnt1%Ex_t(ix1,iKcm1) .eq. cnt2%Ex_t(ix2,cnt2%iKcm_min)) then
 							nSameEnergy = nSameEnergy+1
 							tempSameEnergy(nSameEnergy,1) = ix1
 							tempSameEnergy(nSameEnergy,2) = ix2
@@ -96,8 +96,8 @@ contains
 					endif
 
 					do iKcm2 = cnt2%iKcm_min+1 , cnt2%iKcm_max
-						rtmp1 = (cnt1%Ex0_A2(ix1,iKcm1)-cnt2%Ex0_A2(ix2,iKcm2))
-						rtmp2 = (cnt1%Ex0_A2(ix1,iKcm1)-cnt2%Ex0_A2(ix2,iKcm2-1))
+						rtmp1 = (cnt1%Ex_t(ix1,iKcm1)-cnt2%Ex_t(ix2,iKcm2))
+						rtmp2 = (cnt1%Ex_t(ix1,iKcm1)-cnt2%Ex_t(ix2,iKcm2-1))
 						if (rtmp1 .eq. 0.d0) then
 							nSameEnergy = nSameEnergy+1
 							tempSameEnergy(nSameEnergy,1) = ix1
@@ -163,7 +163,7 @@ contains
         
 		do ix = 1,currcnt%nX
 			do iKcm = currcnt%iKcm_min,currcnt%iKcm_max
-				partitionFunction = partitionFunction + currcnt%dk * exp(-currcnt%Ex0_A2(ix,iKcm)/kb/Temperature)    
+				partitionFunction = partitionFunction + currcnt%dk * exp(-currcnt%Ex_t(ix,iKcm)/kb/Temperature)    
 			end do
 		end do
         
@@ -181,13 +181,13 @@ contains
 		real*8, intent(out) :: dos
 		
 		if (iKcm .le. (currcnt%iKcm_min+1)) then
-			dos = 2.d0*currcnt%dk/abs(-3.d0*currcnt%Ex0_A2(iX,iKcm)+4.d0*currcnt%Ex0_A2(iX,iKcm+1)-currcnt%Ex0_A2(iX,iKcm+2))
+			dos = 2.d0*currcnt%dk/abs(-3.d0*currcnt%Ex_t(iX,iKcm)+4.d0*currcnt%Ex_t(iX,iKcm+1)-currcnt%Ex_t(iX,iKcm+2))
 		else if(iKcm .ge. (currcnt%iKcm_max-1)) then
-			dos = 2.d0*currcnt%dk/abs(3.d0*currcnt%Ex0_A2(iX,iKcm)-4.d0*currcnt%Ex0_A2(iX,iKcm-1)+currcnt%Ex0_A2(iX,iKcm-2))
+			dos = 2.d0*currcnt%dk/abs(3.d0*currcnt%Ex_t(iX,iKcm)-4.d0*currcnt%Ex_t(iX,iKcm-1)+currcnt%Ex_t(iX,iKcm-2))
 		else if(iKcm == 0) then
-			dos = 2.d0*currcnt%dk/abs(3.d0*currcnt%Ex0_A2(iX,iKcm)-4.d0*currcnt%Ex0_A2(iX,iKcm-1)+currcnt%Ex0_A2(iX,iKcm-2))
+			dos = 2.d0*currcnt%dk/abs(3.d0*currcnt%Ex_t(iX,iKcm)-4.d0*currcnt%Ex_t(iX,iKcm-1)+currcnt%Ex_t(iX,iKcm-2))
 		else
-			dos = 12.d0*currcnt%dk / abs(currcnt%Ex0_A2(iX,iKcm-2)-8.d0*currcnt%Ex0_A2(iX,iKcm-1)+8.d0*currcnt%Ex0_A2(iX,iKcm+1)-currcnt%Ex0_A2(iX,iKcm+2))
+			dos = 12.d0*currcnt%dk / abs(currcnt%Ex_t(iX,iKcm-2)-8.d0*currcnt%Ex_t(iX,iKcm-1)+8.d0*currcnt%Ex_t(iX,iKcm+1)-currcnt%Ex_t(iX,iKcm+2))
 		end if
 		return
 	end subroutine calculateDOS
@@ -221,7 +221,7 @@ contains
 						tmpc = tmpc + conjg(cnt1%Cc(2,-ikr1+iKcm1,is))*cnt1%Cv(2,-ikr1-iKcm1,is)*cnt2%Cc(2,-ikr2+iKcm2,isp)*conjg(cnt2%Cv(2,-ikr2-iKcm2,isp))
 					end do  
 				end do
-				kSpaceMatrixElementTemp = kSpaceMatrixElementTemp + tmpc*conjg(cnt1%Psi0_A2(ikr1,ix1,iKcm1))*cnt2%Psi0_A2(ikr2,ix2,iKcm2)/(2.d0,0.d0)
+				kSpaceMatrixElementTemp = kSpaceMatrixElementTemp + tmpc*conjg(cnt1%Psi_t(ikr1,ix1,iKcm1))*cnt2%Psi_t(ikr2,ix2,iKcm2)/(2.d0,0.d0)
 				tmpc = (0.d0,0.d0)
 			end do
 		end do		
@@ -252,21 +252,21 @@ contains
 		enddo
 		close(100)
 
-		!write carbon nanotube 1 Ex0_A2 dispersion
-		open(unit=100,file='cnt1_Ex0_A2.dat',status="unknown")
+		!write carbon nanotube 1 Ex_t dispersion
+		open(unit=100,file='cnt1_Ex_t.dat',status="unknown")
 		do iKcm=cnt1%iKcm_min,cnt1%iKcm_max
 			do iX=1,cnt1%nX
-				write(100,10, advance='no') cnt1%Ex0_A2(iX,iKcm)
+				write(100,10, advance='no') cnt1%Ex_t(iX,iKcm)
 			enddo
 			write(100,10)
 		enddo
 		close(100)
 
-		!write carbon nanotube 2 Ex0_A2 dispersion
-		open(unit=100,file='cnt2_Ex0_A2.dat',status="unknown")
+		!write carbon nanotube 2 Ex_t dispersion
+		open(unit=100,file='cnt2_Ex_t.dat',status="unknown")
 		do iKcm=cnt2%iKcm_min,cnt2%iKcm_max
 			do iX=1,cnt2%nX
-				write(100,10, advance='no') cnt2%Ex0_A2(iX,iKcm)
+				write(100,10, advance='no') cnt2%Ex_t(iX,iKcm)
 			enddo
 			write(100,10)
 		enddo
@@ -296,6 +296,7 @@ contains
 	!**************************************************************************************************************************
 	! save total exciton density of states for a given cnt
 	!**************************************************************************************************************************
+	
 	subroutine saveDOS(cnt1, cnt2)
 		use cnt_class, only: cnt
 
@@ -303,7 +304,7 @@ contains
 		real*8 :: dos
 		integer :: iKcm, iX
 
-		!write cnt1 Ex0_A2 dispersion
+		!write cnt1 Ex_t dispersion
 		open(unit=100,file='cnt1_DOS.dat',status="unknown")
 		do iKcm=cnt1%iKcm_min,cnt1%iKcm_max
 			do iX=1,cnt1%nX
@@ -314,7 +315,7 @@ contains
 		enddo
 		close(100)
 
-		!write cnt2 Ex0_A2 dispersion
+		!write cnt2 Ex_t dispersion
 		open(unit=100,file='cnt2_DOS.dat',status="unknown")
 		do iKcm=cnt2%iKcm_min,cnt2%iKcm_max
 			do iX=1,cnt2%nX

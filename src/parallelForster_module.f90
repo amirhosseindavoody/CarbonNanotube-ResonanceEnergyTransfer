@@ -43,8 +43,8 @@ contains
 				call calculateMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2 ,matrixElement, c2cDistance)
 				call calculateDOS(cnt1,iKcm1,ix1,dos1)
 				call calculateDOS(cnt2,iKcm2,ix2,dos2)
-				totalTransitionRate12 = totalTransitionRate12 + exp(-cnt1%Ex0_A2(ix1,iKcm1)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos1 * 2.d0 * pi / hb / partitionFunction1
-				totalTransitionRate21 = totalTransitionRate21 + exp(-cnt2%Ex0_A2(ix2,iKcm2)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos2 * 2.d0 * pi / hb / partitionFunction2
+				totalTransitionRate12 = totalTransitionRate12 + exp(-cnt1%Ex_t(ix1,iKcm1)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos1 * 2.d0 * pi / hb / partitionFunction1
+				totalTransitionRate21 = totalTransitionRate21 + exp(-cnt2%Ex_t(ix2,iKcm2)/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos2 * 2.d0 * pi / hb / partitionFunction2
 			end if
 		end do
 		return
@@ -117,8 +117,7 @@ contains
 						matrixElementTemp(2,2) = matrixElementTemp(2,2) + conjg(cnt1%Cc(2,-ikr1+iKcm,is))*cnt1%Cv(2,-ikr1-iKcm,is)*cnt2%Cc(2,-ikr2+iKcm,isp)*conjg(cnt2%Cv(2,-ikr2-iKcm,isp))
 					end do  
 				end do
-				matrixElementFinal = matrixElementFinal + (matrixElementTemp(1,1) + matrixElementTemp(1,2) + matrixElementTemp(2,1) + matrixElementTemp(2,2)) &
-																											* conjg(cnt1%Psi0_A2(ikr1,ix1,iKcm))*cnt2%Psi0_A2(ikr2,ix2,iKcm) / (2.d0,0.d0)
+				matrixElementFinal = matrixElementFinal + (matrixElementTemp(1,1) + matrixElementTemp(1,2) + matrixElementTemp(2,1) + matrixElementTemp(2,2)) * conjg(cnt1%Psi_t(ikr1,ix1,iKcm))*cnt2%Psi_t(ikr2,ix2,iKcm) / (2.d0,0.d0)
 				matrixElementTemp(1,1) = (0.d0,0.d0)
 				matrixElementTemp(1,2) = (0.d0,0.d0)
 				matrixElementTemp(2,1) = (0.d0,0.d0)

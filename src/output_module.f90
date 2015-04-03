@@ -13,12 +13,13 @@ contains
 	!*******************************************************************************
 	! This subroutines opens the log file add new log and closes the file
 	!*******************************************************************************
+	
 	subroutine writeLog()
-		logical :: exist
+		logical :: flgexist
 		integer :: logFile = 10
 
-		inquire(file="log.dat",exist=exist)
-		if (exist) then
+		inquire(file="log.dat",exist=flgexist)
+		if (flgexist) then
 			open(logFile, file="log.dat", status="old", position="append", action="write")
 		else
 			open(logFile, file="log.dat", status="new", action="write")
@@ -49,6 +50,8 @@ contains
 		write(command,'("rm -rf ''",A,"''")') trim(outdir) !remove the directory if it already exists
 		call execute_command_line(command,wait=.true.,exitstat=i)
     	write(command,'("mkdir ''",A,"''")') trim(outdir) !create the directory again
+    	call execute_command_line(command,wait=.true.,exitstat=i)
+    	write(command,'("mv log.dat ''",A,"''")') trim(outdir) !move the log file to the new output directory
     	call execute_command_line(command,wait=.true.,exitstat=i)
     	
     	istat=chdir(trim(outdir))

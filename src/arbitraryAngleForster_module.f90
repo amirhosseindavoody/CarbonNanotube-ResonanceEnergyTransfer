@@ -45,8 +45,8 @@ contains
 				call calculateDOS(cnt1,iKcm1,ix1,dos1)
 				call calculateDOS(cnt2,iKcm2,ix2,dos2)
 
-				totalTransitionRate12 = totalTransitionRate12 + exp(-(cnt1%Ex0_A2(ix1,iKcm1))/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos2 * (sin(theta))**2 / hb / ppLen/ (partitionFunction1 / cnt1%dk) !the multiplication of cnt.dk is because the way partitionFunction is calculated it has units of 1/L while it should be unitless. * (1.d0-exp(-15.d0*theta))
-				totalTransitionRate21 = totalTransitionRate21 + exp(-(cnt2%Ex0_A2(ix2,iKcm2))/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos1 * (sin(theta))**2 / hb / ppLen/ (partitionFunction2 / cnt2%dk) !the multiplication of cnt.dk is because the way partitionFunction is calculated it has units of 1/L while it should be unitless. * (1.d0-exp(-15.d0*theta))
+				totalTransitionRate12 = totalTransitionRate12 + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos2 * (sin(theta))**2 / hb / ppLen/ (partitionFunction1 / cnt1%dk) !the multiplication of cnt.dk is because the way partitionFunction is calculated it has units of 1/L while it should be unitless. * (1.d0-exp(-15.d0*theta))
+				totalTransitionRate21 = totalTransitionRate21 + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/Temperature) * dble(conjg(matrixElement) * matrixElement) * dos1 * (sin(theta))**2 / hb / ppLen/ (partitionFunction2 / cnt2%dk) !the multiplication of cnt.dk is because the way partitionFunction is calculated it has units of 1/L while it should be unitless. * (1.d0-exp(-15.d0*theta))
 			end if
 
 		end do

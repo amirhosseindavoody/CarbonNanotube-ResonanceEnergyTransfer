@@ -15,6 +15,7 @@ contains
 	subroutine inputCNT(currcnt,dirname)
 		use physicalConstants, only: eV
 		use cnt_class, only: cnt, init_cnt, calculateBands
+		use output_module, only: writeLog, logInput
 
 		type(cnt) :: currcnt
 		character(len=100) :: dirname
@@ -49,45 +50,55 @@ contains
 				select case (trim(label))
 				case ('n_ch')
 					read(buffer, *, iostat=ios) n_ch
-! 					print *, 'Read n_ch: ', n_ch
+! 					write(logInput,*) 'Read n_ch: ', n_ch
+! 					call writeLog()
 					iparam = iparam+1
 				case ('m_ch')
 					read(buffer, *, iostat=ios) m_ch
-! 					print *, 'Read m_ch: ', m_ch
+! 					write(logInput,*) 'Read m_ch: ', m_ch
+! 					call writeLog()
 					iparam = iparam+1
 				case ('nkg')
 					read(buffer, *, iostat=ios) nkg
-! 					print *, 'Read nkg: ', nkg
+! 					write(logInput,*) 'Read nkg: ', nkg
+! 					call writeLog()
 					iparam = iparam+1
 				case ('nr')
 					read(buffer, *, iostat=ios) nr
-! 					print *, 'Read nr: ', nr
+! 					write(logInput,*) 'Read nr: ', nr
+! 					call writeLog()
 					iparam = iparam+1
 				case ('E_th')
 					read(buffer, *, iostat=ios) E_th
-! 					print *, 'Read E_th: ', E_th
+! 					write(logInput,*) 'Read E_th: ', E_th
+! 					call writeLog()
 					iparam = iparam+1
 					E_th=E_th*eV
 				case ('Kcm_max')
 					read(buffer, *, iostat=ios) Kcm_max
-! 					print *, 'Read Kcm_max: ', Kcm_max
+! 					write(logInput,*) 'Read Kcm_max: ', Kcm_max
+! 					call writeLog()
 					Kcm_max = Kcm_max*1.d9
 					iparam = iparam+1
 				case ('i_sub')
 					read(buffer, *, iostat=ios) i_sub
-! 					print *, 'Read i_sub: ', i_sub
+! 					write(logInput,*) 'Read i_sub: ', i_sub
+! 					call writeLog()
 					iparam = iparam+1
 				case ('Ckappa')
 					read(buffer, *, iostat=ios) Ckappa
-! 					print *, 'Read Ckappa: ', Ckappa
+! 					write(logInput,*) 'Read Ckappa: ', Ckappa
+! 					call writeLog()
 					iparam = iparam+1
 				case ('kappa')
 					read(buffer, *, iostat=ios) kappa
-! 					print *, 'Read kappa: ', kappa
+! 					write(logInput,*) 'Read kappa: ', kappa
+! 					call writeLog()
 					iparam = iparam+1
 				case ('nX')
 					read(buffer, *, iostat=ios) nX
-! 					print *, 'Read nX: ', nX
+! 					write(logInput,*) 'Read nX: ', nX
+! 					call writeLog()
 					iparam = iparam+1
 				end select
 			end if
@@ -138,6 +149,9 @@ contains
 		allocate(currcnt%Psi_A1(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX,currcnt%iKcm_min:currcnt%iKcm_max))
 		allocate(currcnt%Psi0_A2(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX,currcnt%iKcm_min:currcnt%iKcm_max))
 		allocate(currcnt%Psi1_A2(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX,currcnt%iKcm_min:currcnt%iKcm_max))
+
+		allocate(currcnt%Ex_t(1:currcnt%nX,currcnt%iKcm_min:currcnt%iKcm_max))
+		allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX,currcnt%iKcm_min:currcnt%iKcm_max))
 		
 		do iKcm=currcnt%iKcm_min,currcnt%iKcm_max
 			do iX=1,currcnt%nX

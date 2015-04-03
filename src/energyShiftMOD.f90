@@ -20,31 +20,31 @@ contains
 		real*8 :: tmpr
 		
 		if ((currcnt%n_ch .eq. 7) .and. (currcnt%m_ch .eq. 5) .and. (currcnt%i_sub .eq. 2)) then
-			tmpr = minval(currcnt%Ex0_A2)
-			write(logInput,*) "min Ex0_A2 = ", tmpr/eV
+			tmpr = minval(currcnt%Ex_t)
+			write(logInput,*) "min Ex_t = ", tmpr/eV
 			call writeLog()
-			currcnt%Ex0_A2 = currcnt%Ex0_A2 - tmpr + 1.921 * eV
+			currcnt%Ex_t = currcnt%Ex_t - tmpr + 1.921 * eV
 		end if
 		
 		if ((currcnt%n_ch .eq. 7) .and. (currcnt%m_ch .eq. 6) .and. (currcnt%i_sub .eq. 2)) then
-			tmpr = minval(currcnt%Ex0_A2)
-			write (logInput,*)"min Ex0_A2 = ", tmpr/eV
+			tmpr = minval(currcnt%Ex_t)
+			write (logInput,*)"min Ex_t = ", tmpr/eV
 			call writeLog()
-			currcnt%Ex0_A2 = currcnt%Ex0_A2 - tmpr + 1.914 * eV
+			currcnt%Ex_t = currcnt%Ex_t - tmpr + 1.914 * eV
 		end if
 		
 		if ((currcnt%n_ch .eq. 8) .and. (currcnt%m_ch .eq. 6) .and. (currcnt%i_sub .eq. 2)) then
-			tmpr = minval(currcnt%Ex0_A2)
-			write(logInput,*) "min Ex0_A2 = ", tmpr/eV
+			tmpr = minval(currcnt%Ex_t)
+			write(logInput,*) "min Ex_t = ", tmpr/eV
 			call writeLog()
-			currcnt%Ex0_A2 = currcnt%Ex0_A2 - tmpr + 1.727 * eV
+			currcnt%Ex_t = currcnt%Ex_t - tmpr + 1.727 * eV
 		end if
 		
 		if ((currcnt%n_ch .eq. 8) .and. (currcnt%m_ch .eq. 7) .and. (currcnt%i_sub .eq. 2)) then
-			tmpr = minval(currcnt%Ex0_A2)
-			write(logInput,*) "min Ex0_A2 = ", tmpr/eV
+			tmpr = minval(currcnt%Ex_t)
+			write(logInput,*) "min Ex_t = ", tmpr/eV
 			call writeLog()
-			currcnt%Ex0_A2 = currcnt%Ex0_A2 - tmpr + 1.702 * eV
+			currcnt%Ex_t = currcnt%Ex_t - tmpr + 1.702 * eV
 		end if
 		return
 	end subroutine shiftEnergy

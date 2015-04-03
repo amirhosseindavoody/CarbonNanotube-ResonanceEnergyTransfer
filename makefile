@@ -7,17 +7,18 @@ FCFLAGS += -fbounds-check -ffree-line-length-none -fall-intrinsics
 SRCDIR = ./src
 OBJDIR = ./obj
 
-main.o: comparams.o cnt_class.o input_class.o kappaMatrix_module.o transitionTable_module.o output_module.o
+main.o: cnt_class.o kappaMatrix_module.o transitionTable_module.o initial_final_mod.o
 cnt_class.o: physicalConstants.o mathFunctionsMOD.o
 kappaMatrix_module.o: physicalConstants.o parallelForster_module.o arbitraryAngleForster_module.o output_module.o cnt_class.o input_class.o prepareForster_module.o
 parallelForster_module.o: comparams.o physicalConstants.o mathFunctionsMOD.o output_module.o cnt_class.o prepareForster_module.o 
 prepareForster_module.o: cnt_class.o physicalConstants.o comparams.o
 transitionTable_module.o: input_class.o parallelForster_module.o arbitraryAngleForster_module.o prepareForster_module.o physicalConstants.o cnt_class.o
 output_module.o: mathFunctionsMOD.o comparams.o cnt_class.o
-input_class.o: cnt_class.o physicalConstants.o
+input_class.o: cnt_class.o physicalConstants.o output_module.o
 arbitraryAngleForster_module.o: input_class.o physicalConstants.o prepareForster_module.o cnt_class.o
 energyShiftMOD.o: mathFunctionsMOD.o physicalConstants.o cnt_class.o
 output_module.o: mathFunctionsMOD.o
+initial_final_mod.o: input_class.o output_module.o comparams.o
 
 main: main.o
 	$(FC) $(FCFLAGS) -o $@.exe $(wildcard $(OBJDIR)/*.o) 
