@@ -1,5 +1,5 @@
 %% This file visulaized the calculated transfer rates
-clear all; clc; fig=10;
+clear all; clc; fig=0;
 % close all;
 
 %%

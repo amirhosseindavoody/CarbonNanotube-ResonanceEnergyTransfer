@@ -16,7 +16,7 @@ contains
 		use comparams, only: starttime
 		use cnt_class, only: cnt
 		use input_class, only: inputCNT
-		use output_module, only: open_output_directory, writeLog, logInput
+		use output_module, only: open_output_directory
 
 		type (cnt), intent(inout) :: cnt1, cnt2
 		character(len=100) :: buffer
@@ -38,18 +38,21 @@ contains
 		case ('Ex_A1')
 			cnt1%Ex_t = cnt1%Ex_A1
 			cnt1%Psi_t = cnt1%Psi_A1
-			write(logInput,*) 'cnt1 target exciton = Ex_A1'
-			call writeLog()
+			cnt1%targetExcitonType = 'Ex_A1'
+! 			write(logInput,*) 'cnt1 target exciton = Ex_A1'
+! 			call writeLog()
 		case ('Ex0_A2')
 			cnt1%Ex_t = cnt1%Ex0_A2
 			cnt1%Psi_t = cnt1%Psi0_A2
-			write(logInput,*) 'cnt1 target exciton = Ex0_A2'
-			call writeLog()
+			cnt1%targetExcitonType = 'Ex0_A2'
+! 			write(logInput,*) 'cnt1 target exciton = Ex0_A2'
+! 			call writeLog()
 		case ('Ex1_A2')
 			cnt1%Ex_t = cnt1%Ex1_A2
 			cnt1%Psi_t = cnt1%Psi1_A2
-			write(logInput,*) 'cnt1 target exciton = Ex1_A2'
-			call writeLog()
+			cnt1%targetExcitonType = 'Ex1_A2'
+! 			write(logInput,*) 'cnt1 target exciton = Ex1_A2'
+! 			call writeLog()
 		case default
 			write(*,*) "Could not recognize target exciton type!!!!"
 			call exit()
@@ -65,18 +68,21 @@ contains
 		case ('Ex_A1')
 			cnt2%Ex_t = cnt2%Ex_A1
 			cnt2%Psi_t = cnt2%Psi_A1
-			write(logInput,*) 'cnt2 target exciton = Ex_A1'
-			call writeLog()
+			cnt2%targetExcitonType = 'Ex_A1'
+! 			write(logInput,*) 'cnt2 target exciton = Ex_A1'
+! 			call writeLog()
 		case ('Ex0_A2')
 			cnt2%Ex_t = cnt2%Ex0_A2
 			cnt2%Psi_t = cnt2%Psi0_A2
-			write(logInput,*) 'cnt2 target exciton = Ex0_A2'
-			call writeLog()
+			cnt2%targetExcitonType = 'Ex0_A2'
+! 			write(logInput,*) 'cnt2 target exciton = Ex0_A2'
+! 			call writeLog()
 		case ('Ex1_A2')
 			cnt2%Ex_t = cnt2%Ex1_A2
 			cnt2%Psi_t = cnt2%Psi1_A2
-			write(logInput,*) 'cnt2 target exciton = Ex1_A2'
-			call writeLog()
+			cnt2%targetExcitonType = 'Ex1_A2'
+! 			write(logInput,*) 'cnt2 target exciton = Ex1_A2'
+! 			call writeLog()
 		case default
 			write(*,*) "Could not recognize target exciton type!!!!"
 			call exit()

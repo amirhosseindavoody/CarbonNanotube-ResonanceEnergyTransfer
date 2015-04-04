@@ -44,15 +44,15 @@ contains
 		integer, dimension(3) :: date, time
 		character(len=100) :: outdir !this is the output directory for storing output results
 
-		write(outdir,"('Transfer-(',I2.2,',',I2.2,')to(',I2.2,',',I2.2,')-Ckappa(',F3.1,')')") cnt1%n_ch, cnt1%m_ch, cnt2%n_ch, cnt2%m_ch, cnt1%Ckappa
+		write(outdir,"('Transfer-',A,'(',I2.2,',',I2.2,')-to-',A,'(',I2.2,',',I2.2,')-Ckappa(',F3.1,')')") trim(cnt1%targetExcitonType), cnt1%n_ch, cnt1%m_ch, trim(cnt2%targetExcitonType), cnt2%n_ch, cnt2%m_ch, cnt1%Ckappa
 
 		! specifiy the output directory
 		write(command,'("rm -rf ''",A,"''")') trim(outdir) !remove the directory if it already exists
 		call execute_command_line(command,wait=.true.,exitstat=i)
     	write(command,'("mkdir ''",A,"''")') trim(outdir) !create the directory again
     	call execute_command_line(command,wait=.true.,exitstat=i)
-    	write(command,'("mv log.dat ''",A,"''")') trim(outdir) !move the log file to the new output directory
-    	call execute_command_line(command,wait=.true.,exitstat=i)
+!     	write(command,'("mv log.dat ''",A,"''")') trim(outdir) !move the log file to the new output directory
+!     	call execute_command_line(command,wait=.true.,exitstat=i)
     	
     	istat=chdir(trim(outdir))
 		if (istat .ne. 0) then

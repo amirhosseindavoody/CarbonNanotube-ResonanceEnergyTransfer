@@ -15,7 +15,6 @@ contains
 	subroutine inputCNT(currcnt,dirname)
 		use physicalConstants, only: eV
 		use cnt_class, only: cnt, init_cnt, calculateBands
-		use output_module, only: writeLog, logInput
 
 		type(cnt) :: currcnt
 		character(len=100) :: dirname
@@ -50,55 +49,35 @@ contains
 				select case (trim(label))
 				case ('n_ch')
 					read(buffer, *, iostat=ios) n_ch
-! 					write(logInput,*) 'Read n_ch: ', n_ch
-! 					call writeLog()
 					iparam = iparam+1
 				case ('m_ch')
 					read(buffer, *, iostat=ios) m_ch
-! 					write(logInput,*) 'Read m_ch: ', m_ch
-! 					call writeLog()
 					iparam = iparam+1
 				case ('nkg')
 					read(buffer, *, iostat=ios) nkg
-! 					write(logInput,*) 'Read nkg: ', nkg
-! 					call writeLog()
 					iparam = iparam+1
 				case ('nr')
 					read(buffer, *, iostat=ios) nr
-! 					write(logInput,*) 'Read nr: ', nr
-! 					call writeLog()
 					iparam = iparam+1
 				case ('E_th')
 					read(buffer, *, iostat=ios) E_th
-! 					write(logInput,*) 'Read E_th: ', E_th
-! 					call writeLog()
 					iparam = iparam+1
 					E_th=E_th*eV
 				case ('Kcm_max')
 					read(buffer, *, iostat=ios) Kcm_max
-! 					write(logInput,*) 'Read Kcm_max: ', Kcm_max
-! 					call writeLog()
 					Kcm_max = Kcm_max*1.d9
 					iparam = iparam+1
 				case ('i_sub')
 					read(buffer, *, iostat=ios) i_sub
-! 					write(logInput,*) 'Read i_sub: ', i_sub
-! 					call writeLog()
 					iparam = iparam+1
 				case ('Ckappa')
 					read(buffer, *, iostat=ios) Ckappa
-! 					write(logInput,*) 'Read Ckappa: ', Ckappa
-! 					call writeLog()
 					iparam = iparam+1
 				case ('kappa')
 					read(buffer, *, iostat=ios) kappa
-! 					write(logInput,*) 'Read kappa: ', kappa
-! 					call writeLog()
 					iparam = iparam+1
 				case ('nX')
 					read(buffer, *, iostat=ios) nX
-! 					write(logInput,*) 'Read nX: ', nX
-! 					call writeLog()
 					iparam = iparam+1
 				end select
 			end if

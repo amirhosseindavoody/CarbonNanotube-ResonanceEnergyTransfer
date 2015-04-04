@@ -11,10 +11,10 @@ main.o: cnt_class.o kappaMatrix_module.o transitionTable_module.o initial_final_
 cnt_class.o: physicalConstants.o mathFunctionsMOD.o
 kappaMatrix_module.o: physicalConstants.o parallelForster_module.o arbitraryAngleForster_module.o output_module.o cnt_class.o input_class.o prepareForster_module.o
 parallelForster_module.o: comparams.o physicalConstants.o mathFunctionsMOD.o output_module.o cnt_class.o prepareForster_module.o 
-prepareForster_module.o: cnt_class.o physicalConstants.o comparams.o
+prepareForster_module.o: cnt_class.o physicalConstants.o comparams.o output_module.o
 transitionTable_module.o: input_class.o parallelForster_module.o arbitraryAngleForster_module.o prepareForster_module.o physicalConstants.o cnt_class.o
 output_module.o: mathFunctionsMOD.o comparams.o cnt_class.o
-input_class.o: cnt_class.o physicalConstants.o output_module.o
+input_class.o: cnt_class.o physicalConstants.o
 arbitraryAngleForster_module.o: input_class.o physicalConstants.o prepareForster_module.o cnt_class.o
 energyShiftMOD.o: mathFunctionsMOD.o physicalConstants.o cnt_class.o
 output_module.o: mathFunctionsMOD.o
