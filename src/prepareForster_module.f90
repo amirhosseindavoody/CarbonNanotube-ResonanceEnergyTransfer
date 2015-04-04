@@ -136,7 +136,7 @@ contains
 		call writeLog()
 				
 		do iC = 1,nSameEnergy
-			if (mod(iC,10) .eq. 0) then
+			if (mod(iC,100) .eq. 0) then
 				write(logInput, '("Calculating k-space matrix element: iC = ", I5.5, "  nSameEnergy = ", I5.5)') iC, nSameEnergy
 				call writeLog()
 			end if
