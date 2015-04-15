@@ -64,7 +64,7 @@ contains
 	
 	subroutine findSameEnergy(cnt1,cnt2)
 		use cnt_class, only: cnt
-		use output_module, only: writeLog, logInput
+		use output_module, only: writeLog
 
 		type(cnt), intent(in) :: cnt1,cnt2
 		integer :: ix1,ix2
@@ -73,7 +73,8 @@ contains
 		integer, dimension(:,:), allocatable :: tempSameEnergy
 		integer :: iC
 		real*8 :: rtmp1, rtmp2
-        
+        character(len=100) :: logInput
+
 		tmp = cnt1%nX * cnt2%nX * (2*cnt1%iKcm_max+1) * (2*cnt2%iKcm_max+1)
 		allocate(tempSameEnergy(tmp,4))
 		do i = 1,tmp
@@ -132,13 +133,12 @@ contains
 		allocate(kSpaceMatrixElement(nSameEnergy))
 		kSpaceMatrixElement = kSpaceMatrixElement * 0.d0
 
-		write(logInput, *) "Same energy table calculated!!!"
-		call writeLog()
+		call writeLog("Same energy table calculated!!!")
 				
 		do iC = 1,nSameEnergy
 			if (mod(iC,100) .eq. 0) then
 				write(logInput, '("Calculating k-space matrix element: iC = ", I5.5, "  nSameEnergy = ", I5.5)') iC, nSameEnergy
-				call writeLog()
+				call writeLog(logInput)
 			end if
 
 			ix1 = sameEnergy(iC,1)

@@ -27,14 +27,14 @@ contains
 		use parallelForster_module, only: calculateParallelForsterRate
 		use arbitraryAngleForster_module, only: calculateArbitraryForsterRate
 		use prepareForster_module, only: findCrossings, findSameEnergy
-		use output_module, only: logInput, writeLog
+		use output_module, only: writeLog
 		use cnt_class, only: cnt
 		
 		type(cnt), intent(in) :: cnt1,cnt2
 		integer :: iTheta1, iTheta2
+		character(len=100) :: logInput
 		
-		write(logInput,*) "Calculating kappa matrix ..."
-		call writeLog()
+		call writeLog("Calculating kappa matrix ...")
 		
 		! set seperation properties
 		c2cDistance = 5.0d-9
@@ -88,7 +88,7 @@ contains
 					call calculateArbitraryForsterRate(cnt1,cnt1, kappaMatrix(iTheta1,iTheta2), kappaMatrix(iTheta2,iTheta1), c2cDistance, theta)
 				end if
 				write(logInput,*) 'iTheta1=', iTheta1, ', iTheta2=', iTheta2
-				call writeLog()
+				call writeLog(logInput)
 			end do
 		end do
 		
@@ -104,7 +104,7 @@ contains
 					call calculateArbitraryForsterRate(cnt2,cnt2, kappaMatrix(nTheta+iTheta1,nTheta+iTheta2), kappaMatrix(nTheta+iTheta2,nTheta+iTheta1), c2cDistance, theta)
 				end if
 				write(logInput,*) 'iTheta1=', iTheta1, ', iTheta2=', iTheta2
-				call writeLog()
+				call writeLog(logInput)
 			end do
 		end do
 		
@@ -122,7 +122,7 @@ contains
 					call calculateArbitraryForsterRate(cnt1,cnt2, kappaMatrix(iTheta1,nTheta+iTheta2), kappaMatrix(nTheta+iTheta2,iTheta1), c2cDistance, theta)
 				end if
 				write(logInput,*) 'iTheta1=', iTheta1, ', iTheta2=', iTheta2
-				call writeLog()
+				call writeLog(logInput)
 			end do
 		end do
 		

@@ -57,7 +57,7 @@ contains
 	subroutine calculateMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2 ,matrixElementFinal, c2cDistance)
         use physicalConstants, only : i1, pi, eps0, q0
 		use mathFunctionsMOD, only : bessk0
-		use output_module, only: logInput, writeLog
+		use output_module, only: writeLog
 		use cnt_class, only: cnt
 
         type(cnt), intent(in) :: cnt1,cnt2
@@ -65,7 +65,7 @@ contains
         integer, intent(in) :: ix1,ix2
         integer, intent(in) :: iKcm1, iKcm2
         real*8, intent(in) :: c2cDistance
-
+        
 		integer :: iKcm
         integer :: ikr1, ikr2
         integer :: is,isp
@@ -78,8 +78,7 @@ contains
 		real*8 :: tmpr
 				
 		if (iKcm1 .ne. iKcm2) then
-			write(logInput,*) "Momentum not conserved in parallel geometry rate calculation!"
-			call writeLog()
+			call writeLog("Momentum not conserved in parallel geometry rate calculation!")
 			call exit()
 		end if
 				

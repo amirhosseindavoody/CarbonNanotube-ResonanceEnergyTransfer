@@ -58,7 +58,6 @@ contains
 	!**************************************************************************************************************************
 	
 	subroutine calculateMatrixElement(cnt1,cnt2, iKcm1, iKcm2, iC ,matrixElementFinal, c2cDistance, theta)
-		use input_class
 		use physicalConstants, only : i1, pi, eps0, q0
 		use prepareForster_module, only : kSpaceMatrixElement
 		use cnt_class, only: cnt

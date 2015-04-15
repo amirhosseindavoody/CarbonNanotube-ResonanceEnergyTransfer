@@ -2,7 +2,7 @@ module cnt_class
     implicit none
     private
     
-    public  :: cnt, init_cnt, calculateBands
+    public  :: cnt, cnt_geometry, cnt_band
     
     type cnt
       integer, public :: n_ch,m_ch !chiral vector parameters
@@ -12,14 +12,20 @@ module cnt_class
       real*8, dimension(2) :: a1,a2,b1,b2,ch_vec,t_vec,aCC_vec
       real*8 :: len_ch,radius
       integer :: Nu
+      integer, public :: nr
       real*8, dimension(:,:), allocatable, public :: posA,posB,posAA,posBB,posAB,posBA
       real*8, dimension(:,:), allocatable, public :: posA3, posB3
       real*8, dimension(:,:,:), allocatable, public :: pos2d, pos3d
+
+      !Length and location of cnt for calculating the resonance energy transfer rate
+      real*8, public :: Length
+      real*8, public :: center_position
 
       !Environment properties
       real*8, public :: kappa, Ckappa
     
       !Reciprocal lattice properties
+      integer, public :: nkg
       real*8, public :: dk
       real*8, dimension(2) :: K1, K2
       
@@ -43,6 +49,11 @@ module cnt_class
 
       !number of exciton bands below free-electron free-hole energy level
       integer, public :: nX
+      real*8, public :: E_th
+      real*8, public :: Kcm_max
+
+      !directory that the CNT information is stored
+      character(len=200), public :: directory
 			
     end type cnt
           
@@ -52,7 +63,7 @@ contains
       ! initialize CNT by calculating its geometrical properties
       !**************************************************************************************************************************
       
-      function init_cnt(n_ch, m_ch, nkg, nX, kappa, Ckappa) result(currcnt)
+      subroutine cnt_geometry(currcnt, n_ch, m_ch, nkg, nX, kappa, Ckappa)
         use mathFunctionsMOD, only: gcd
         use physicalConstants, only: a_l, pi
 
@@ -188,14 +199,14 @@ contains
         currcnt%pos3d(1,:,:) = currcnt%posA3(:,:)
         currcnt%pos3d(2,:,:) = currcnt%posB3(:,:)
         
-      end function init_cnt
+      end subroutine cnt_geometry
     
     
       !**************************************************************************************************************************
       ! calculate band structure of the CNT
       !**************************************************************************************************************************
       
-      subroutine calculateBands(currcnt, i_sub, E_th, Kcm_max)
+      subroutine cnt_band(currcnt, i_sub, E_th, Kcm_max)
         use physicalConstants
         type(cnt), intent(inout) :: currcnt
         integer, intent(in) :: i_sub
@@ -304,7 +315,7 @@ contains
           call grapheneEnergy(currcnt,currcnt%Ek(2,ik,:),currcnt%Cc(2,ik,:),currcnt%Cv(2,ik,:),k)
         enddo
       
-      end subroutine calculateBands
+      end subroutine cnt_band
     
       !**************************************************************************************************************************
       ! private subroutine to calculate Bloch functions and energy in graphene

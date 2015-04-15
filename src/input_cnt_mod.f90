@@ -2,24 +2,22 @@
 ! Declaration of input parameters
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	
-module input_class
+module input_cnt_mod
 	implicit none
 	private
-	public :: inputCNT
+	public :: input_cnt
 
 contains	
 	!**************************************************************************************************************************
 	! read the CNT information from the log file of exciton calculation which is done previously
 	!**************************************************************************************************************************
 
-	subroutine inputCNT(currcnt,dirname)
+	subroutine input_cnt(currcnt)
 		use physicalConstants, only: eV
-		use cnt_class, only: cnt, init_cnt, calculateBands
+		use cnt_class, only: cnt, cnt_geometry, cnt_band
 
 		type(cnt) :: currcnt
-		character(len=100) :: dirname
 		character(len=200) :: buffer, label
-		integer :: istat=0
 		integer :: ios=0
 		integer :: pos=0
 		integer, parameter :: nparam=10
@@ -27,13 +25,7 @@ contains
 		integer :: n_ch, m_ch, nkg, nr, i_sub, nX
 		real*8 :: E_th, Kcm_max, kappa, Ckappa
 
-		istat=chdir(dirname)
-		if (istat .ne. 0) then
-			write(*,*) "Directory does not exist:", dirname
-			call exit()
-		end if
-
-		open(unit=100,file='log.dat',status="old")
+		open(unit=100, file= trim(currcnt%directory)//'log.dat', status="old")
 
 		iparam=0
 		ios=0
@@ -49,6 +41,7 @@ contains
 				select case (trim(label))
 				case ('n_ch')
 					read(buffer, *, iostat=ios) n_ch
+					write(*,*) "read n_ch = ", n_ch
 					iparam = iparam+1
 				case ('m_ch')
 					read(buffer, *, iostat=ios) m_ch
@@ -91,36 +84,29 @@ contains
 		end if
 
 		! create the cnt object and calculate bands and load exciton wavefunction
-		currcnt = init_cnt( n_ch, m_ch, nkg, nX, kappa, Ckappa)
-		call calculateBands(currcnt,i_sub, E_th, Kcm_max)
-		call inputExciton(currcnt)
-		
-		!change the directory back
-		istat=chdir('..')
-		if (istat .ne. 0) then
-			write(*,*) "Directory not changed to root!"
-			call exit()
-		end if
+		call cnt_geometry(currcnt, n_ch, m_ch, nkg, nX, kappa, Ckappa)
+		call cnt_band(currcnt,i_sub, E_th, Kcm_max)
+		call input_exciton(currcnt)
 
 		return
-	end subroutine inputCNT
+	end subroutine input_cnt
 
 	!**************************************************************************************************************************
 	! load the exciton wavefunction and energies from the ExcitonEnergy calculation
 	!**************************************************************************************************************************
 	
-	subroutine inputExciton(currcnt)
+	subroutine input_exciton(currcnt)
 		use cnt_class, only: cnt
 		type(cnt), intent(inout) :: currcnt
 		integer :: iX, iKcm, ikr
 		real*8 :: tmpr1, tmpr2, tmpr3
 		
-		open(unit=100,file='Ex_A1.dat',status="old")
-		open(unit=101,file='Ex0_A2.dat',status="old")
-		open(unit=102,file='Ex1_A2.dat',status="old")
-		open(unit=103,file='Psi_A1.dat',status="old")
-		open(unit=104,file='Psi0_A2.dat',status="old")
-		open(unit=105,file='Psi1_A2.dat',status="old")
+		open(unit=100,file=trim(currcnt%directory)//'Ex_A1.dat',status="old")
+		open(unit=101,file=trim(currcnt%directory)//'Ex0_A2.dat',status="old")
+		open(unit=102,file=trim(currcnt%directory)//'Ex1_A2.dat',status="old")
+		open(unit=103,file=trim(currcnt%directory)//'Psi_A1.dat',status="old")
+		open(unit=104,file=trim(currcnt%directory)//'Psi0_A2.dat',status="old")
+		open(unit=105,file=trim(currcnt%directory)//'Psi1_A2.dat',status="old")
 		
 		allocate(currcnt%Ex_A1(1:currcnt%nX,currcnt%iKcm_min:currcnt%iKcm_max))
 		allocate(currcnt%Ex0_A2(1:currcnt%nX,currcnt%iKcm_min:currcnt%iKcm_max))
@@ -178,7 +164,7 @@ contains
 		enddo
 
 		return
-	end subroutine inputExciton
+	end subroutine input_exciton
 
 	
-end module input_class
+end module input_cnt_mod

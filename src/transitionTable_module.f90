@@ -32,14 +32,14 @@ contains
 		use parallelForster_module, only: calculateParallelForsterRate
 		use arbitraryAngleForster_module, only: calculateArbitraryForsterRate
 		use prepareForster_module, only: findCrossings, findSameEnergy
-		use output_module, only: writeLog, logInput
+		use output_module, only: writeLog
 		use physicalConstants, only: pi
 		use cnt_class, only: cnt
 
 		type(cnt), intent(in) :: cnt1,cnt2
+		character(len=100) :: logInput
 		
-		write(logInput,*) "Start calculating transitionTable"
-		call writeLog()
+		call writeLog("Start calculating transitionTable")
 		
 		! set seperation properties
 		c2cMin = 01.2d-9
@@ -83,7 +83,7 @@ contains
 				end if
 				
 				write(logInput,*) 'iTheta=', iTheta, ', nTheta=', nTheta, 'iC2C=', ic2c, ', nC2C=', nc2c
-				call writeLog()		
+				call writeLog(logInput)		
 			end do
 		end do
 		

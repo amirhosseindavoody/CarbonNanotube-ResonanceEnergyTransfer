@@ -5,7 +5,7 @@
 module initial_final_mod
 	implicit none
 	private
-	public :: initialize, finalize
+	public :: initialize
 
 contains	
 	!**************************************************************************************************************************
@@ -15,8 +15,7 @@ contains
 	subroutine initialize(cnt1,cnt2)
 		use comparams, only: starttime
 		use cnt_class, only: cnt
-		use input_class, only: inputCNT
-		use output_module, only: open_output_directory
+		use input_cnt_mod, only: input_cnt
 
 		type (cnt), intent(inout) :: cnt1, cnt2
 		character(len=100) :: buffer
@@ -31,7 +30,7 @@ contains
 		! read the information of the first CNT
 		call get_command_argument(1,buffer)
 		buffer = trim(buffer)
-		call inputCNT(cnt1,buffer)
+		call input_cnt(cnt1)
 		! set the target exciton type
 		call get_command_argument(2,buffer)
 		select case (trim(buffer))
@@ -61,7 +60,7 @@ contains
 		! read the information of the second CNT
 		call get_command_argument(3,buffer)
 		buffer = trim(buffer)
-		call inputCNT(cnt2,buffer)
+		call input_cnt(cnt2)
 		! set the target exciton type
 		call get_command_argument(4,buffer)
 		select case (trim(buffer))
@@ -94,20 +93,8 @@ contains
 			call exit()
 		end if
 
-		call open_output_directory(cnt1, cnt2)
-
 		return
 	end subroutine initialize
-
-	subroutine finalize()
-		use comparams, only: endtime
-		use output_module, only: close_output_directory
-
-		call CPU_time(endtime)
-		call close_output_directory()
-
-		return
-	end subroutine finalize
 
 	
 end module initial_final_mod

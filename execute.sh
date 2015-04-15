@@ -2,9 +2,9 @@
 clear
 cwd=$(pwd)
 
-cd "/cygdrive/c/Users/Amirhossein/Google Drive/Research/Exciton/Data/Environmental Effect"
+cd "/cygdrive/c/Users/Amirhossein/Google Drive/Research/Exciton/Data/Environmental Effect/test"
 
-$cwd/main.exe "CNT(08,07)-nkg(1001)-nr(0200)-E_th(1.5)-Kcm_max(1.5)-i_sub(1)-Ckappa(1.0)" Ex_A1 "CNT(08,07)-nkg(1001)-nr(0200)-E_th(1.5)-Kcm_max(1.5)-i_sub(1)-Ckappa(1.0)" Ex_A1
+$cwd/main.exe $cwd/sample.in
 # $cwd/main.exe "CNT(07,05)-nkg(1001)-nr(0200)-E_th(1.5)-Kcm_max(1.5)-i_sub(1)-Ckappa(1.0)" "CNT(07,05)-nkg(1001)-nr(0200)-E_th(1.5)-Kcm_max(1.5)-i_sub(1)-Ckappa(1.0)" &
 # $cwd/main.exe "CNT(07,05)-nkg(1001)-nr(0200)-E_th(1.5)-Kcm_max(1.5)-i_sub(1)-Ckappa(1.5)" "CNT(07,05)-nkg(1001)-nr(0200)-E_th(1.5)-Kcm_max(1.5)-i_sub(1)-Ckappa(1.5)" &
 # $cwd/main.exe "CNT(07,05)-nkg(1001)-nr(0200)-E_th(1.5)-Kcm_max(1.5)-i_sub(1)-Ckappa(2.0)" "CNT(07,05)-nkg(1001)-nr(0200)-E_th(1.5)-Kcm_max(1.5)-i_sub(1)-Ckappa(2.0)" &
