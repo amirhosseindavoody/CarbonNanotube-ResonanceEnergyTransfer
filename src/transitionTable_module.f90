@@ -29,12 +29,13 @@ contains
 	!**************************************************************************************************************************
 	
 	subroutine calculateTransitionTable (cnt1,cnt2)
-		use parallelForster_module, only: calculateParallelForsterRate
 		use arbitraryAngleForster_module, only: calculateArbitraryForsterRate
-		use prepareForster_module, only: findCrossings, findSameEnergy
-		use output_module, only: writeLog
-		use physicalConstants, only: pi
 		use cnt_class, only: cnt
+		use matrix_element_mod, only: calculate_kSpaceMatrixElement
+		use parallelForster_module, only: calculateParallelForsterRate
+		use physicalConstants, only: pi
+		use transition_points_mod, only: findCrossings, findSameEnergy
+		use write_log_mod, only: writeLog
 
 		type(cnt), intent(in) :: cnt1,cnt2
 		character(len=100) :: logInput
@@ -62,8 +63,8 @@ contains
 		end if
 		
 		!calculate the crossing points and points with the same energy between cnt1 and cnt2
-		!call findCrossings(cnt1,cnt2)
 		call findSameEnergy(cnt1,cnt2)
+		call calculate_kSpaceMatrixElement()
 			
 		!allocate the transition rate table
 		allocate(transitionRate(2,nTheta,nc2c))

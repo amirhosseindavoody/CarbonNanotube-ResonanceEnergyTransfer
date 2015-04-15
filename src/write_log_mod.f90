@@ -2,7 +2,7 @@
 ! Declaration of input parameters
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     
-module output_module
+module write_log_mod
 	implicit none
 	private
 	public :: writeLog
@@ -29,4 +29,4 @@ contains
 		return
 	end subroutine writeLog
 	
-end module output_module
+end module write_log_mod

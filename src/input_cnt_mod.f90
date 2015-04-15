@@ -15,7 +15,7 @@ contains
 	subroutine input_cnt(currcnt)
 		use physicalConstants, only: eV
 		use cnt_class, only: cnt, cnt_geometry, cnt_band
-		use output_module, only: writeLog
+		use write_log_mod, only: writeLog
 
 		type(cnt) :: currcnt
 		character(len=200) :: buffer, label
@@ -116,7 +116,7 @@ contains
 	
 	subroutine input_exciton(currcnt)
 		use cnt_class, only: cnt
-		use output_module, only: writeLog
+		use write_log_mod, only: writeLog
 
 		type(cnt), intent(inout) :: currcnt
 		integer :: iX, iKcm, ikr

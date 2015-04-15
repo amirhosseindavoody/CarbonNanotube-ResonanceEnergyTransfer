@@ -15,7 +15,7 @@ contains
 	subroutine parse_input_file()
 		use comparams, only: cnt1, cnt2
 		use physicalConstants, only: eV
-		use output_module, only: writeLog
+		use write_log_mod, only: writeLog
 
 		character(len=100) :: filename
 		character(len=200) :: buffer, cnt_name, label, value
@@ -147,7 +147,7 @@ contains
 	!*******************************************************************************
 	
 	subroutine create_outdir(outdir)
-		use output_module, only: writeLog
+		use write_log_mod, only: writeLog
 
 		character(len=200), intent(in) :: outdir
 		integer :: istat=0

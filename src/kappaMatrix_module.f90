@@ -22,13 +22,14 @@ contains
 	! calculate kappa matrix
 	!**************************************************************************************************************************
 	subroutine calculateKappaMatrix (cnt1,cnt2)
-		use physicalConstants, only: pi
+		use arbitraryAngleForster_module, only: calculateArbitraryForsterRate
+		use cnt_class, only: cnt
 		use comparams, only: ppLen
 		use parallelForster_module, only: calculateParallelForsterRate
-		use arbitraryAngleForster_module, only: calculateArbitraryForsterRate
-		use prepareForster_module, only: findCrossings, findSameEnergy
-		use output_module, only: writeLog
-		use cnt_class, only: cnt
+		use physicalConstants, only: pi
+		use transition_points_mod, only: findCrossings, findSameEnergy
+		use write_log_mod, only: writeLog
+		
 		
 		type(cnt), intent(in) :: cnt1,cnt2
 		integer :: iTheta1, iTheta2

@@ -10,10 +10,11 @@ contains
     !**************************************************************************************************************************
 
     subroutine calculateParallelForsterRate(cnt1, cnt2, totalTransitionRate12, totalTransitionRate21, c2cDistance)
-		use physicalConstants, only : kb, pi, hb
-		use comparams, only: Temperature
-		use prepareForster_module, only: calculatePartitionFunction, crossingPoints, calculateDOS
 		use cnt_class, only: cnt
+		use comparams, only: Temperature
+		use physicalConstants, only : hb, kb, pi
+		use prepareForster_module, only: calculatePartitionFunction, calculateDOS
+		use transition_points_mod, only: crossingPoints
 
         type(cnt), intent(in) :: cnt1, cnt2
         real*8, intent(in) :: c2cDistance
@@ -55,10 +56,10 @@ contains
 	!**************************************************************************************************************************
 	
 	subroutine calculateMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2 ,matrixElementFinal, c2cDistance)
+        use cnt_class, only: cnt
+        use math_functions_mod, only : bessk0
         use physicalConstants, only : i1, pi, eps0, q0
-		use math_functions_mod, only : bessk0
-		use output_module, only: writeLog
-		use cnt_class, only: cnt
+		use write_log_mod, only: writeLog
 
         type(cnt), intent(in) :: cnt1,cnt2
 		complex*16, intent(out) :: matrixElementFinal

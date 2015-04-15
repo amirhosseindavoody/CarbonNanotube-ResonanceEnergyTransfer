@@ -1,7 +1,7 @@
 %% This file visualizes the results of the fortran program for CNT bethe salpeter equation
 clear all; clc; fig=40;
 % close all;
-dir='C:\Users\amirhossein\Google Drive\Research\Exciton\Data\Environmental Effect\ForsterRate (07,05) to (08,07)\';
+dir='C:\Users\Amirhossein\Google Drive\Research\Exciton\Data\Environmental Effect\Resonance-Energy-Transfer-Rate\Transfer-Ex0_A2(07,05)-to-Ex0_A2(08,07)-Ckappa(1.0)\';
 eV=1.6e-19;
 
 %% plot CNT unit cell
@@ -99,24 +99,16 @@ eV=1.6e-19;
 % return;
 
 %% plot exciton density of states of the first cnt
-% FileName=[dir,'cnt2_kvec.dat'];
-% k_vec2=load(FileName);
-% nKcm2 = numel(k_vec2);
-% FileName=[dir,'cnt2_DOS.dat'];
-% cnt2_DOS=load(FileName);
-% 
-% fig=fig+1; figure(fig); hold on; box on;
-% plot(k_vec2,cnt2_DOS*eV,'-','LineWidth',3);
-% for i = 1:nC
-%     plot(k_vec2(tmp+crossingPoints(i,3)),cnt2_DOS(tmp+crossingPoints(i,3),crossingPoints(i,2))*eV,'*-k','LineWidth',4);
-% end
-% axis tight;
-% for iX = 1:size(cnt2_DOS,2)
-%     plot(k_vec2,cnt2_DOS(:,iX),'-','LineWidth',3);
-%     pause;
-% end;
+FileName=[dir,'dos-cnt(07,05)-i_sub(1)-Ckappa(1.0).dat'];
+cnt_DOS=load(FileName);
+n=size(cnt_DOS,1);
+lbound=-(n-1)/2;
+hbound=(n-1)/2;
+k_vec=linspace(lbound, hbound, n);
 
-% return;
+fig=fig+1; figure(fig); box on;
+semilogy(k_vec,cnt_DOS*eV,'--','LineWidth',3); hold on;
+return;
 
 %% plot exciton energy Ex0_A2
 FileName=[dir,'Ex0_A2.dat'];

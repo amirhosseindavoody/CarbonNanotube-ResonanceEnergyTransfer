@@ -1,8 +1,8 @@
-input_directory= /cygdrive/c/Users/amirhossein/Google Drive/Research/Exciton/Data/Environmental Effect/CNT-Exciton/
-output_directory= /cygdrive/c/Users/amirhossein/Google Drive/Research/Exciton/Data/Environmental Effect/Resonance-Energy-Transfer-Rate/
+input_directory= /cygdrive/c/Users/Amirhossein/Google Drive/Research/Exciton/Data/Environmental Effect/CNT-Exciton/
+output_directory= /cygdrive/c/Users/Amirhossein/Google Drive/Research/Exciton/Data/Environmental Effect/Resonance-Energy-Transfer-Rate/
 
-cnt1, n_ch=	8
-cnt1, m_ch=	7
+cnt1, n_ch=	7
+cnt1, m_ch=	5
 cnt1, nkg=	1001
 cnt1, nr=		200
 cnt1, E_th[eV]=	1.5

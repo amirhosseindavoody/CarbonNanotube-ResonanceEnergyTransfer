@@ -10,10 +10,11 @@ contains
 	!**************************************************************************************************************************
 	
 	subroutine calculateArbitraryForsterRate(cnt1, cnt2, totalTransitionRate12, totalTransitionRate21, c2cDistance, theta)
-		use physicalConstants, only : kb, pi, hb
-		use comparams, only : Temperature, ppLen
-		use prepareForster_module
 		use cnt_class, only: cnt
+		use comparams, only : Temperature, ppLen
+		use physicalConstants, only : kb, pi, hb
+		use prepareForster_module, only: calculatePartitionFunction, calculateDOS
+		use transition_points_mod, only: sameEnergy
 
 		type(cnt), intent(in) :: cnt1, cnt2
 		real*8, intent(in) :: theta, c2cDistance
@@ -59,7 +60,7 @@ contains
 	
 	subroutine calculateMatrixElement(cnt1,cnt2, iKcm1, iKcm2, iC ,matrixElementFinal, c2cDistance, theta)
 		use physicalConstants, only : i1, pi, eps0, q0
-		use prepareForster_module, only : kSpaceMatrixElement
+		use matrix_element_mod, only : kSpaceMatrixElement
 		use cnt_class, only: cnt
 
 		type(cnt), intent(in) :: cnt1,cnt2

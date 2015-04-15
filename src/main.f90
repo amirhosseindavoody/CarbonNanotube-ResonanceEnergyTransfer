@@ -6,12 +6,14 @@
 
 program cnt_resonance_energy_transfer
 	use cnt_class, only: cnt
-	use kappaMatrix_module
-	use transitionTable_module
-	use output_module, only: writeLog
-	use parse_input_file_mod, only: parse_input_file
 	use comparams, only: starttime, endtime, cnt1, cnt2
 	use input_cnt_mod, only: input_cnt
+	use kappaMatrix_module
+	use parse_input_file_mod, only: parse_input_file
+	use prepareForster_module, only: saveDOS
+	use transitionTable_module
+	use write_log_mod, only: writeLog
+	
 	implicit none
 
 	character(len=100) :: logInput
@@ -22,9 +24,13 @@ program cnt_resonance_energy_transfer
 	
 	call writeLog(new_line('A')//"************** Reading cnt1 ****************")
 	call input_cnt(cnt1)
+	call saveDOS(cnt1)
 
 	call writeLog(new_line('A')//"************** Reading cnt2 ****************")
 	call input_cnt(cnt2)
+	call saveDOS(cnt2)
+
+	call exit()
 
  	call calculateTransitionTable(cnt1,cnt2)
 	

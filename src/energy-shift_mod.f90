@@ -2,7 +2,7 @@
 ! Calculate transition table
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-module energyShiftMOD
+module energy_shift_mod
 	implicit none	
 	private
 	public :: shiftEnergy
@@ -49,4 +49,4 @@ contains
 		return
 	end subroutine shiftEnergy
 	
-end module energyShiftMOD
+end module energy_shift_mod
