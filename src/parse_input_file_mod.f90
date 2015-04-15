@@ -40,8 +40,15 @@ contains
 			call exit()
 		end if
 
+		!first line is the directory of exciton data
 		read (100,'(A)',iostat=ios) buffer
-		indir = trim(adjustl(buffer))
+		pos_equal = scan(buffer,'=')
+		indir = trim(adjustl(buffer(pos_equal+1:)))
+
+		!second line is the output base directory for writing transfer rate results
+		read (100,'(A)',iostat=ios) buffer
+		pos_equal = scan(buffer,'=')
+		outdir = trim(adjustl(buffer(pos_equal+1:)))
 
 		do while (ios == 0)
 			read (100,'(A)',iostat=ios) buffer
@@ -124,13 +131,13 @@ contains
 
 		write(cnt1%directory,"( A, 'CNT(', I2.2, ',', I2.2, ')-nkg(', I4.4, ')-nr(', I4.4, ')-E_th(', F3.1, ')-Kcm_max(', F3.1, ')-i_sub(', I1.1, ')-Ckappa(', F3.1, ')/' )") trim(indir), cnt1%n_ch, cnt1%m_ch, cnt1%nkg, cnt1%nr, cnt1%E_th/eV, cnt1%Kcm_max*1.d-9, cnt1%i_sub, cnt1%Ckappa
 		write(cnt2%directory,"( A, 'CNT(', I2.2, ',', I2.2, ')-nkg(', I4.4, ')-nr(', I4.4, ')-E_th(', F3.1, ')-Kcm_max(', F3.1, ')-i_sub(', I1.1, ')-Ckappa(', F3.1, ')/' )") trim(indir), cnt2%n_ch, cnt2%m_ch, cnt2%nkg, cnt2%nr, cnt2%E_th/eV, cnt2%Kcm_max*1.d-9, cnt2%i_sub, cnt2%Ckappa
-		write(outdir,"('Transfer-',A,'(',I2.2,',',I2.2,')-to-',A,'(',I2.2,',',I2.2,')-Ckappa(',F3.1,')')") trim(cnt1%targetExcitonType), cnt1%n_ch, cnt1%m_ch, trim(cnt2%targetExcitonType), cnt2%n_ch, cnt2%m_ch, cnt1%Ckappa
+		write(outdir,"(A, 'Transfer-',A,'(',I2.2,',',I2.2,')-to-',A,'(',I2.2,',',I2.2,')-Ckappa(',F3.1,')')") trim(outdir), trim(cnt1%targetExcitonType), cnt1%n_ch, cnt1%m_ch, trim(cnt2%targetExcitonType), cnt2%n_ch, cnt2%m_ch, cnt1%Ckappa
 
 		call create_outdir(outdir)
 
-		call writeLog(cnt1%directory)
-		call writeLog(cnt2%directory)
-		call writeLog(outdir)
+		call writeLog(new_line('A'))
+		call writeLog("cnt1 directory: "//cnt1%directory)
+		call writeLog("cnt2 directory: "//cnt2%directory)
 
 		return
 	end subroutine parse_input_file

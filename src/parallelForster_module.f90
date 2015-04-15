@@ -56,7 +56,7 @@ contains
 	
 	subroutine calculateMatrixElement(cnt1,cnt2,ix1, ix2, iKcm1, iKcm2 ,matrixElementFinal, c2cDistance)
         use physicalConstants, only : i1, pi, eps0, q0
-		use mathFunctionsMOD, only : bessk0
+		use math_functions_mod, only : bessk0
 		use output_module, only: writeLog
 		use cnt_class, only: cnt
 

@@ -133,7 +133,7 @@ contains
 		allocate(kSpaceMatrixElement(nSameEnergy))
 		kSpaceMatrixElement = kSpaceMatrixElement * 0.d0
 
-		call writeLog("Same energy table calculated!!!")
+		call writeLog(new_line('A')//"Same energy table calculated!!!"//new_line('A'))
 				
 		do iC = 1,nSameEnergy
 			if (mod(iC,100) .eq. 0) then

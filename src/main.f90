@@ -9,7 +9,6 @@ program cnt_resonance_energy_transfer
 	use kappaMatrix_module
 	use transitionTable_module
 	use output_module, only: writeLog
-	use initial_final_mod, only: initialize
 	use parse_input_file_mod, only: parse_input_file
 	use comparams, only: starttime, endtime, cnt1, cnt2
 	use input_cnt_mod, only: input_cnt
@@ -21,14 +20,13 @@ program cnt_resonance_energy_transfer
 
 	call parse_input_file()
 	
+	call writeLog(new_line('A')//"************** Reading cnt1 ****************")
 	call input_cnt(cnt1)
+
+	call writeLog(new_line('A')//"************** Reading cnt2 ****************")
 	call input_cnt(cnt2)
 
-	call exit()
-
-! 	call initialize(cnt1,cnt2)
-	
-! 	call calculateTransitionTable(cnt1,cnt2)
+ 	call calculateTransitionTable(cnt1,cnt2)
 	
 ! 	call calculateKappaMatrix(cnt1,cnt2)
 

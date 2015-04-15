@@ -39,7 +39,7 @@ contains
 		type(cnt), intent(in) :: cnt1,cnt2
 		character(len=100) :: logInput
 		
-		call writeLog("Start calculating transitionTable")
+		call writeLog(new_line('A')//"************** Start calculating transitionTable ****************")
 		
 		! set seperation properties
 		c2cMin = 01.2d-9

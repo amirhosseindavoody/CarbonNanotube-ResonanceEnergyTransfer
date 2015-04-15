@@ -63,27 +63,17 @@ contains
       ! initialize CNT by calculating its geometrical properties
       !**************************************************************************************************************************
       
-      subroutine cnt_geometry(currcnt, n_ch, m_ch, nkg, nX, kappa, Ckappa)
-        use mathFunctionsMOD, only: gcd
+      subroutine cnt_geometry(currcnt)
+        use math_Functions_mod, only: gcd
         use physicalConstants, only: a_l, pi
 
-        integer, intent(in) :: n_ch, m_ch
-        integer, intent(in) :: nkg
-        integer, intent(in) :: nX
-        real*8, intent(in) :: kappa, Ckappa
-        type(cnt) :: currcnt
+        type(cnt), intent(inout) :: currcnt
 
         integer :: dR = 1
         integer :: t1,t2
         real*8 :: cosTh, sinTh
         real*8, dimension(2,2) :: Rot
         integer :: i,j,k
-        
-        currcnt%n_ch = n_ch
-        currcnt%m_ch = m_ch
-        currcnt%nX = nX
-        currcnt%kappa = kappa
-        currcnt%Ckappa = Ckappa
         
         ! unit vectors and reciprocal lattice vectors.
         currcnt%a1=(/dsqrt(3.d0)/2.d0*a_l, 1.d0/2.d0*a_l/)
@@ -93,18 +83,18 @@ contains
         currcnt%aCC_vec=1.d0/3.d0*(currcnt%a1+currcnt%a2)
         
         ! calculate chirality and translational vectors of CNT unit cell.
-        currcnt%ch_vec=dble(n_ch)*currcnt%a1+dble(m_ch)*currcnt%a2
-        currcnt%len_ch=a_l*dsqrt(dble(n_ch)**2+dble(m_ch)**2+dble(n_ch)*dble(m_ch))
+        currcnt%ch_vec=dble(currcnt%n_ch)*currcnt%a1+dble(currcnt%m_ch)*currcnt%a2
+        currcnt%len_ch=a_l*dsqrt(dble(currcnt%n_ch)**2+dble(currcnt%m_ch)**2+dble(currcnt%n_ch)*dble(currcnt%m_ch))
         currcnt%radius=currcnt%len_ch/2.d0/pi
   
-        call gcd(dR,2*n_ch+m_ch,2*m_ch+n_ch)
+        call gcd(dR,2*currcnt%n_ch+currcnt%m_ch,2*currcnt%m_ch+currcnt%n_ch)
   
-        t1=(2*m_ch+n_ch)/dR
-        t2=-(2*n_ch+m_ch)/dR
+        t1=(2*currcnt%m_ch+currcnt%n_ch)/dR
+        t2=-(2*currcnt%n_ch+currcnt%m_ch)/dR
   
         currcnt%t_vec=dble(t1)*currcnt%a1+dble(t2)*currcnt%a2
   
-        currcnt%Nu=2*(n_ch**2+m_ch**2+n_ch*m_ch)/dR
+        currcnt%Nu=2*(currcnt%n_ch**2+currcnt%m_ch**2+currcnt%n_ch*currcnt%m_ch)/dR
  
  
         ! rotate basis vectors so that ch_vec is along x-axis.
@@ -120,9 +110,9 @@ contains
         currcnt%aCC_vec=matmul(Rot,currcnt%aCC_vec)
   
         ! calculate reciprocal lattice of CNT.
-        currcnt%dk=norm2(currcnt%b1)/(dble(nkg)-1.d0)
+        currcnt%dk=norm2(currcnt%b1)/(dble(currcnt%nkg)-1.d0)
         currcnt%K1=(-t2*currcnt%b1+t1*currcnt%b2)/(dble(currcnt%Nu))
-        currcnt%K2=(dble(m_ch)*currcnt%b1-dble(n_ch)*currcnt%b2)/dble(currcnt%Nu)
+        currcnt%K2=(dble(currcnt%m_ch)*currcnt%b1-dble(currcnt%n_ch)*currcnt%b2)/dble(currcnt%Nu)
         currcnt%K2=currcnt%K2/norm2(currcnt%K2)
   
         ! calculate coordinates of atoms in the unwarped CNT unit cell.
@@ -130,9 +120,9 @@ contains
         allocate(currcnt%posB(currcnt%Nu,2))
     
         k=0
-        do i=0,t1+n_ch
-          do j=t2,m_ch
-            if ((dble(t2)/dble(t1)*dble(i) .le. dble(j)) .and. (dble(m_ch)/dble(n_ch)*dble(i) .ge. dble(j)) .and. (dble(t2)/dble(t1)*dble(i-n_ch) .gt. dble(j-m_ch)) .and. (dble(m_ch)/dble(n_ch)*dble(i-t1) .lt. dble(j-t2))) then
+        do i=0,t1+currcnt%n_ch
+          do j=t2,currcnt%m_ch
+            if ((dble(t2)/dble(t1)*dble(i) .le. dble(j)) .and. (dble(currcnt%m_ch)/dble(currcnt%n_ch)*dble(i) .ge. dble(j)) .and. (dble(t2)/dble(t1)*dble(i-currcnt%n_ch) .gt. dble(j-currcnt%m_ch)) .and. (dble(currcnt%m_ch)/dble(currcnt%n_ch)*dble(i-t1) .lt. dble(j-t2))) then
               k=k+1
               currcnt%posA(k,1)=dble(i)*currcnt%a1(1)+dble(j)*currcnt%a2(1)
               currcnt%posA(k,2)=dble(i)*currcnt%a1(2)+dble(j)*currcnt%a2(2)
@@ -206,11 +196,9 @@ contains
       ! calculate band structure of the CNT
       !**************************************************************************************************************************
       
-      subroutine cnt_band(currcnt, i_sub, E_th, Kcm_max)
+      subroutine cnt_band(currcnt)
         use physicalConstants
         type(cnt), intent(inout) :: currcnt
-        integer, intent(in) :: i_sub
-        real*8, intent(in) :: E_th, Kcm_max
         
         integer :: nkc, imin_sub
         integer :: i,j,mu,ik,tmpi
@@ -222,8 +210,6 @@ contains
         complex*16, dimension(:,:,:), allocatable :: Cc_k,Cv_k
         complex*16, dimension(2) :: Cc_tmp,Cv_tmp
   
-        ! set the value of i_sub
-        currcnt%i_sub = i_sub
         
         ! calculate CNT energy dispersion.
         currcnt%ikc_max=floor(pi/norm2(currcnt%t_vec)/currcnt%dk)
@@ -280,7 +266,7 @@ contains
         ik=0
         E1_tmp=(/ min_energy(currcnt%i_sub),0.d0 /)
         E2_tmp=(/ min_energy(currcnt%i_sub),0.d0 /)
-        do while ((min(E1_tmp(1),E2_tmp(1))-min_energy(currcnt%i_sub)) .le. E_th )
+        do while ((min(E1_tmp(1),E2_tmp(1))-min_energy(currcnt%i_sub)) .le. currcnt%E_th )
           k=dble(currcnt%min_sub(currcnt%i_sub))*currcnt%K1+dble(ik)*currcnt%dk*currcnt%K2
           call grapheneEnergy(currcnt,E1_tmp,Cc_tmp,Cv_tmp,k)
           k=dble(currcnt%min_sub(currcnt%i_sub))*currcnt%K1-dble(ik)*currcnt%dk*currcnt%K2
@@ -291,7 +277,7 @@ contains
         ! set the index boundaries for some arrays and kernels.
         currcnt%ik_max=ik                              !the higher limit of k-vector that is below E_th
         currcnt%ik_min=-ik                             !the lower limit of k-vector that is below E_th
-        currcnt%iKcm_max=floor(Kcm_max/currcnt%dk)        !the higher limit of center of mass wave vector that we calculate
+        currcnt%iKcm_max=floor(currcnt%Kcm_max/currcnt%dk)        !the higher limit of center of mass wave vector that we calculate
         currcnt%iKcm_min = - currcnt%iKcm_max             !the lower limit of center of mass wave vector that we calculate
         currcnt%ikr_high=currcnt%iKcm_max-currcnt%ik_min     !the maximum index that the relative wavenumber in the entire simulation.
         currcnt%ikr_low=-currcnt%ikr_high                 !the minimum index that the relative wavenumber in the entire simulation.
@@ -306,11 +292,11 @@ contains
         allocate(currcnt%Cv(2,currcnt%ik_low:currcnt%ik_high,2))
   
         do ik=currcnt%ik_low,currcnt%ik_high
-          mu=currcnt%min_sub(i_sub) !first band
+          mu=currcnt%min_sub(currcnt%i_sub) !first band
           k=dble(mu)*currcnt%K1+dble(ik)*currcnt%dk*currcnt%K2
           call grapheneEnergy(currcnt,currcnt%Ek(1,ik,:),currcnt%Cc(1,ik,:),currcnt%Cv(1,ik,:),k)
 
-          mu=-currcnt%min_sub(i_sub) !second band
+          mu=-currcnt%min_sub(currcnt%i_sub) !second band
           k=dble(mu)*currcnt%K1+dble(ik)*currcnt%dk*currcnt%K2
           call grapheneEnergy(currcnt,currcnt%Ek(2,ik,:),currcnt%Cc(2,ik,:),currcnt%Cv(2,ik,:),k)
         enddo

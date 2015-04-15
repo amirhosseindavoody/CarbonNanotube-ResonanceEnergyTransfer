@@ -1,4 +1,4 @@
-module mathFunctionsMOD
+module math_functions_mod
 	implicit none
 	private
 	public :: gcd, bessk0
@@ -67,4 +67,4 @@ contains
 		return 
 	end function bessk0
 
-end module mathFunctionsMOD
+end module math_Functions_mod
