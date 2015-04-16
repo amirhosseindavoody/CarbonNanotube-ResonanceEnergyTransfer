@@ -30,7 +30,7 @@ program cnt_resonance_energy_transfer
 	call input_cnt(cnt2)
 	call saveDOS(cnt2)
 
-	call exit()
+! 	call exit()
 
  	call calculateTransitionTable(cnt1,cnt2)
 	

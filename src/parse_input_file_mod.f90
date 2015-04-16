@@ -14,11 +14,12 @@ contains
 
 	subroutine parse_input_file()
 		use comparams, only: cnt1, cnt2
-		use physicalConstants, only: eV
+		use physicalConstants, only: eV, pi
+		use transitionTable_module, only: c2cMin, c2cMax, nc2c, thetaMin, thetaMax, nTheta
 		use write_log_mod, only: writeLog
 
 		character(len=100) :: filename
-		character(len=200) :: buffer, cnt_name, label, value
+		character(len=200) :: buffer, command, label, value
 		character(len=200) :: outdir	
 		character(len=200) :: indir
 		integer :: istat=0
@@ -40,28 +41,25 @@ contains
 			call exit()
 		end if
 
-		!first line is the directory of exciton data
-		read (100,'(A)',iostat=ios) buffer
-		pos_equal = scan(buffer,'=')
-		indir = trim(adjustl(buffer(pos_equal+1:)))
-
-		!second line is the output base directory for writing transfer rate results
-		read (100,'(A)',iostat=ios) buffer
-		pos_equal = scan(buffer,'=')
-		outdir = trim(adjustl(buffer(pos_equal+1:)))
-
 		do while (ios == 0)
 			read (100,'(A)',iostat=ios) buffer
 			if (ios == 0) then
 				if (buffer(1:1) .ne. '#') then
 					pos_comma = scan(buffer,',')
 					pos_equal = scan(buffer,'=')
-					cnt_name = adjustl(buffer(1:pos_comma-1))
+					command = adjustl(buffer(1:pos_comma-1))
 					label = adjustl(buffer(pos_comma+1:pos_equal-1))
 					value = adjustl(buffer(pos_equal+1:))
 
 					! set the target cnt
-					select case (trim(cnt_name))
+					select case (trim(command))
+					case('directory')
+						select case (trim(label))
+						case ('input')
+							indir = trim(value)
+						case ('output')
+							outdir = trim(value)
+						end select
 					case ('cnt1')
 						select case (trim(label))
 						case ('n_ch')
@@ -119,6 +117,25 @@ contains
 						case ('center_position[nm]')
 							read(value, *) cnt2%center_position
 							cnt2%center_position = cnt2%center_position * 1.d-9
+						end select
+					case ('geometry')
+						select case (trim(label))
+						case('c2cMin[nm]')
+							read(value, *) c2cMin
+							c2cMin = c2cMin * 1.d-9
+						case('c2cMax[nm]')
+							read(value, *) c2cMax
+							c2cMax = c2cMax * 1.d-9
+						case('nc2c')
+							read(value, *) nc2c
+						case('thetaMin[degree]')
+							read(value, *) thetaMin
+							thetaMin = thetaMin * pi/180
+						case('thetaMax[degree]')
+							read(value, *) thetaMax
+							thetaMax = thetaMax * pi/180
+						case ('nTheta')
+							read(value, *) nTheta
 						end select
 					end select
 				end if

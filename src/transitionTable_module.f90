@@ -9,19 +9,20 @@ module transitionTable_module
 
 	real*8, dimension(:,:,:), allocatable :: transitionRate	
 
-	real*8 :: c2cDistance !center to center distance between parallel carbon nanotubes
-	real*8 :: c2cMin
-	real*8 :: c2cMax
-	integer :: nc2c
+	real*8, public :: c2cMin
+	real*8, public :: c2cMax
+	integer, public :: nc2c
+	real*8 :: c2cDistance
 	integer :: ic2c
 	real*8 :: dc2c
 	
+	real*8, public :: thetaMax
+	real*8, public :: thetaMin
+	integer, public :: nTheta
 	real*8 :: theta
-	real*8 :: thetaMax
-	real*8 :: thetaMin
-	integer :: nTheta
 	integer :: iTheta
 	real*8 :: dTheta
+	
 	
 contains
 	!**************************************************************************************************************************
@@ -29,42 +30,53 @@ contains
 	!**************************************************************************************************************************
 	
 	subroutine calculateTransitionTable (cnt1,cnt2)
-		use arbitraryAngleForster_module, only: calculateArbitraryForsterRate
 		use cnt_class, only: cnt
-		use matrix_element_mod, only: calculate_kSpaceMatrixElement
-		use parallelForster_module, only: calculateParallelForsterRate
+		use matrix_element_mod, only: calculate_kSpaceMatrixElement, calculate_geometricMatrixElement
+		use parallel_geometry_mod, only: calculateParallelGeometryRate
 		use physicalConstants, only: pi
 		use transition_points_mod, only: findCrossings, findSameEnergy
 		use write_log_mod, only: writeLog
+		use unparallel_geometry_mod, only: calculateUnparallelGeometryRate
 
 		type(cnt), intent(in) :: cnt1,cnt2
 		character(len=100) :: logInput
 		
+		
 		call writeLog(new_line('A')//"************** Start calculating transitionTable ****************")
 		
 		! set seperation properties
-		c2cMin = 01.2d-9
-		c2cMax = 01.2d-9
-		nc2c = 1
 		if (nc2c .ne. 1) then
 			dc2c = (c2cMax-c2cMin)/dble(nc2c-1)
 		else
 			dc2c = 0.d0
 		end if
+
+		write(logInput, '("c2cMin[nm] = ", F4.1)') c2cMin*1.d9
+		call writeLog(trim(logInput))
+		write(logInput, '("c2cMax[nm] = ", F4.1)') c2cMax*1.d9
+		call writeLog(trim(logInput))
+		write(logInput, '("nC2C = ", I3.3)') nC2C
 		
 		! set orientation properties
-		thetaMax = pi/2.d0
-		thetaMin = 0.d0
-		nTheta = 100
 		if (nTheta .ne. 1) then
 			dTheta = (thetaMax-thetaMin)/dble(nTheta-1)
 		else
 			dTheta = 0.d0
 		end if
-		
+
+		call writeLog(trim(logInput))
+		write(logInput, '("thetaMin = ", I3.3)') nint(thetaMin*180/pi)
+		call writeLog(trim(logInput))
+		write(logInput, '("thetaMax = ", I3.3)') nint(thetaMax*180/pi)
+		call writeLog(trim(logInput))
+		write(logInput, '("nTheta = ", I3.3)') nTheta
+		call writeLog(trim(logInput))
+	
 		!calculate the crossing points and points with the same energy between cnt1 and cnt2
-		call findSameEnergy(cnt1,cnt2)
-		call calculate_kSpaceMatrixElement()
+! 		call findSameEnergy(cnt1,cnt2)
+! 		call calculate_kSpaceMatrixElement()
+		call calculate_geometricMatrixElement(thetaMin, thetaMax, nTheta, c2cDistance)
+		call exit()
 			
 		!allocate the transition rate table
 		allocate(transitionRate(2,nTheta,nc2c))
@@ -76,11 +88,11 @@ contains
 				theta = thetaMin + dble(iTheta-1)*dTheta
 			
 				if (theta .eq. 0.d0) then
-					!call calculateParallelForsterRate(cnt1,cnt2, transitionRate(1,iTheta,ic2c), transitionRate(2,iTheta,ic2c), c2cDistance)
+					!call calculateParallelGeometryRate(cnt1,cnt2, transitionRate(1,iTheta,ic2c), transitionRate(2,iTheta,ic2c), c2cDistance)
 					transitionRate(1,iTheta,ic2c) = 0.d0
 					transitionRate(2,iTheta,ic2c) = 0.d0
 				else
-					call calculateArbitraryForsterRate(cnt1,cnt2, transitionRate(1,iTheta,ic2c), transitionRate(2,iTheta,ic2c), c2cDistance, theta)
+					call calculateUnparallelGeometryRate(cnt1,cnt2, transitionRate(1,iTheta,ic2c), transitionRate(2,iTheta,ic2c), c2cDistance, theta)
 				end if
 				
 				write(logInput,*) 'iTheta=', iTheta, ', nTheta=', nTheta, 'iC2C=', ic2c, ', nC2C=', nc2c

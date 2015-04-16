@@ -1,15 +1,15 @@
-module parallelForster_module
+module parallel_geometry_mod
     implicit none
     private
     
-    public  :: calculateParallelForsterRate
+    public  :: calculateParallelGeometryRate
     
 contains
 	!**************************************************************************************************************************
     ! calculate scattering rate from cnt1 to cnt2 when they are parallel
     !**************************************************************************************************************************
 
-    subroutine calculateParallelForsterRate(cnt1, cnt2, totalTransitionRate12, totalTransitionRate21, c2cDistance)
+    subroutine calculateParallelGeometryRate(cnt1, cnt2, totalTransitionRate12, totalTransitionRate21, c2cDistance)
 		use cnt_class, only: cnt
 		use comparams, only: Temperature
 		use physicalConstants, only : hb, kb, pi
@@ -49,7 +49,7 @@ contains
 			end if
 		end do
 		return
-	end subroutine calculateParallelForsterRate
+	end subroutine calculateParallelGeometryRate
 	
 	!**************************************************************************************************************************
 	! calculate the matrix element for the crossing point number iC in two parallel tube
@@ -129,4 +129,4 @@ contains
         return
     end subroutine calculateMatrixElement
 			
-end module parallelForster_module
+end module parallel_geometry_mod

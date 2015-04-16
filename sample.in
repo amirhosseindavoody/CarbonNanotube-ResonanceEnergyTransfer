@@ -1,5 +1,5 @@
-input_directory= /cygdrive/c/Users/Amirhossein/Google Drive/Research/Exciton/Data/Environmental Effect/CNT-Exciton/
-output_directory= /cygdrive/c/Users/Amirhossein/Google Drive/Research/Exciton/Data/Environmental Effect/Resonance-Energy-Transfer-Rate/
+directory, input= /cygdrive/c/Users/Amirhossein/Google Drive/Research/Exciton/Data/Environmental Effect/CNT-Exciton/
+directory, output= /cygdrive/c/Users/Amirhossein/Google Drive/Research/Exciton/Data/Environmental Effect/Resonance-Energy-Transfer-Rate/
 
 cnt1, n_ch=	7
 cnt1, m_ch=	5
@@ -24,3 +24,11 @@ cnt2, Ckappa=	1.0
 cnt2, target_exciton_type=	Ex0_A2
 cnt2, length[nm]=	30
 cnt2, center_position[nm]=	0
+
+geometry, c2cMin[nm]= 1.2
+geometry, c2cMax[nm]= 1.2
+geometry, nc2c= 1
+
+geometry, thetaMin[degree]= 0
+geometry, thetaMax[degree]= 90
+geometry, nTheta=100

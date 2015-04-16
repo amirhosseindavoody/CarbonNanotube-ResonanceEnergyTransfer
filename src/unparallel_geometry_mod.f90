@@ -1,15 +1,15 @@
-module arbitraryAngleForster_module
+module unparallel_geometry_mod
 	implicit none
 	private
 	
-	public  :: calculateArbitraryForsterRate
+	public  :: calculateUnparallelGeometryRate
 	
 contains		
 	!**************************************************************************************************************************
 	! calculate scattering rate from cnt1 to cnt2 when they are perpendicular
 	!**************************************************************************************************************************
 	
-	subroutine calculateArbitraryForsterRate(cnt1, cnt2, totalTransitionRate12, totalTransitionRate21, c2cDistance, theta)
+	subroutine calculateUnparallelGeometryRate(cnt1, cnt2, totalTransitionRate12, totalTransitionRate21, c2cDistance, theta)
 		use cnt_class, only: cnt
 		use comparams, only : Temperature, ppLen
 		use physicalConstants, only : kb, pi, hb
@@ -52,7 +52,7 @@ contains
 
 		end do
 		return	
-	end subroutine calculateArbitraryForsterRate
+	end subroutine calculateUnparallelGeometryRate
 
 	!**************************************************************************************************************************
 	! calculate the matrix element for the crossing point number iC in two unparallel tube
@@ -73,8 +73,6 @@ contains
 		complex*16 :: Jk
 		real*8 :: phi1, phi2, dPhi
 		integer :: iPhi1, iPhi2, nPhi
-		integer :: nx, ny
-		real*8 :: dx, dy, x_max, y_max
 		real*8 :: radius1, radius2
 		real*8 :: arg1, arg2, arg3
 				
@@ -86,15 +84,6 @@ contains
         
 		nPhi = 20
 		dPhi = 2.d0*pi/dble(nPhi)
-				
-		x_max = 20.d-9
-		y_max = x_max
-			
-		dx = 1.0d-10
-		dy = dx
-				
-		nx = int(x_max/dx)
-		ny = nx
 				
 		Jk = (0.d0,0.d0)
 			
@@ -116,4 +105,4 @@ contains
         return
 	end subroutine calculateMatrixElement
 
-end module arbitraryAngleForster_module
+end module unparallel_geometry_mod
