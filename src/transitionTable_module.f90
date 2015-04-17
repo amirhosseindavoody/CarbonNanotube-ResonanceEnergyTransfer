@@ -31,7 +31,7 @@ contains
 	
 	subroutine calculateTransitionTable (cnt1,cnt2)
 		use cnt_class, only: cnt
-		use matrix_element_mod, only: calculate_kSpaceMatrixElement, calculate_geometricMatrixElement
+		use matrix_element_mod, only: calculate_kSpaceMatrixElement, calculate_finiteGeometricMatrixElement, calculate_infiniteGeometricMatrixElement
 		use parallel_geometry_mod, only: calculateParallelGeometryRate
 		use physicalConstants, only: pi
 		use transition_points_mod, only: findCrossings, findSameEnergy
@@ -75,18 +75,23 @@ contains
 		!calculate the crossing points and points with the same energy between cnt1 and cnt2
 ! 		call findSameEnergy(cnt1,cnt2)
 ! 		call calculate_kSpaceMatrixElement()
-		call calculate_geometricMatrixElement(thetaMin, thetaMax, nTheta, c2cDistance)
-		call exit()
 			
 		!allocate the transition rate table
 		allocate(transitionRate(2,nTheta,nc2c))
 		
 		do ic2c = 1, nc2c
-			do iTheta = 1, nTheta
-		
-				c2cDistance = c2cMin+dble(ic2c-1)*dc2c
+			c2cDistance = c2cMin+dble(ic2c-1)*dc2c
+
+			do iTheta = 1, nTheta				
 				theta = thetaMin + dble(iTheta-1)*dTheta
-			
+				
+				if ((cnt1%length .lt. huge(1.d0)) .and. (cnt2%length .lt. huge(1.d0))) then
+					call calculate_finiteGeometricMatrixElement(theta, c2cDistance)
+				else
+					call calculate_infiniteGeometricMatrixElement(theta, c2cDistance)
+				end if
+				call exit()
+				
 				if (theta .eq. 0.d0) then
 					!call calculateParallelGeometryRate(cnt1,cnt2, transitionRate(1,iTheta,ic2c), transitionRate(2,iTheta,ic2c), c2cDistance)
 					transitionRate(1,iTheta,ic2c) = 0.d0
@@ -107,6 +112,7 @@ contains
 	!**************************************************************************************************************************
 	! save the calculated transition table
 	!**************************************************************************************************************************
+	
 	subroutine saveTransitionRates()
 
 		!write transition rates to the file

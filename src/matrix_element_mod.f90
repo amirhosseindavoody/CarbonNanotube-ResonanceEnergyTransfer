@@ -1,10 +1,10 @@
 module matrix_element_mod
 	implicit none
 	private
-    public  :: calculate_kSpaceMatrixElement, calculate_geometricMatrixElement
+    public  :: calculate_kSpaceMatrixElement, calculate_finitegeometricMatrixElement, calculate_infinitegeometricMatrixElement
 
 	complex*16, dimension(:), allocatable, public :: kSpaceMatrixElement
-	complex*16, dimension(:,:,:), allocatable, public :: geometricMatrixElement
+	complex*16, dimension(:,:), allocatable, public :: geometricMatrixElement
     
 contains
 	
@@ -66,25 +66,17 @@ contains
 	end subroutine calculate_kSpaceMatrixElement
 
 	!**************************************************************************************************************************
-	! calculate the geometric part of matrix element for two tubes forming angle theta
+	! calculate the geometric part of matrix element for two finite tubes forming angle theta
 	!**************************************************************************************************************************
 	
-	subroutine calculate_geometricMatrixElement(thetaMin, thetaMax, nTheta, c2cDistance)
+	subroutine calculate_finiteGeometricMatrixElement(theta, c2cDistance)
 		use comparams, only: cnt1, cnt2
-		use write_log_mod, only: writeLog
 		use physicalConstants, only: i1, pi
 
-		character(len=100) :: logInput
-
-		real*8, intent(in) :: thetaMin, thetaMax
-		integer, intent(in) :: nTheta
+		real*8, intent(in) :: theta
 		real*8, intent(in) :: c2cDistance
 
-		complex*16 :: tmpc
-
-		integer :: iTheta
 		integer :: iKcm1, iKcm2
-		real*8 :: dTheta, theta
 
 		real*8 :: dx
 		real*8 :: x1, x2, xp1, xp2
@@ -95,29 +87,20 @@ contains
 
 		real*8 :: radius1, radius2
 
-		call writeLog("Calculating geometric part of matrix element")
-
-		allocate(geometricMatrixElement(cnt1%iKcm_min:cnt1%iKcm_max,cnt2%iKcm_min:cnt2%iKcm_max,nTheta))
-
-		! set orientation properties
-		if (nTheta .ne. 1) then
-			dTheta = (thetaMax-thetaMin)/dble(nTheta-1)
-		else
-			dTheta = 0.d0
-		end if
+		if (.not. allocated(geometricMatrixElement)) allocate(geometricMatrixElement(cnt1%iKcm_min:cnt1%iKcm_max,cnt2%iKcm_min:cnt2%iKcm_max))
 
 		radius1 = cnt1%radius
 		radius2	= cnt2%radius
 
-		dx = 1.0d-10
+		dx = 5.0d-10
 
 		x1 = cnt1%center_position - cnt1%length/2.d0
 		x2 = cnt1%center_position + cnt1%length/2.d0
 		xp1 = cnt2%center_position - cnt2%length/2.d0
 		xp2 = cnt2%center_position + cnt2%length/2.d0
 
-		nx1 = nint((x1-x2)/dx)
-		nx2 = nint((xp1-xp2)/dx)
+		nx1 = nint((x2-x1)/dx)
+		nx2 = nint((xp2-xp1)/dx)
 
 		allocate(xvec1(nx1))
 		do ix1 = 1, nx1
@@ -129,27 +112,99 @@ contains
 			xvec2(ix2) = xp1+dble(ix2-1)*dx
 		end do
 
-		do iTheta = 1, nTheta
-			
-			theta = thetaMin + dble(iTheta-1)*dTheta
+! 		if (theta .eq. 0.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_0.dat',status="unknown")
+! 		if (theta .eq. 45.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_45.dat',status="unknown")
+! 		if (theta .eq. 90.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_90.dat',status="unknown")
 
-			do iKcm2 = cnt2%iKcm_min, cnt2%iKcm_max
-				K2 = dble(iKcm2)*cnt2%dk
-				do iKcm1 = cnt1%iKcm_min, cnt1%iKcm_max
-					K1 = dble(iKcm1)*cnt1%dk
-					geometricMatrixElement(iKcm1, iKcm2, iTheta) = (0.d0, 0.d0)
-! 					tmpc = (0.d0, 0.d0)
-					do ix1 = 1, nx1
-						geometricMatrixElement(iKcm1, iKcm2, iTheta) = geometricMatrixElement(iKcm1, iKcm2, iTheta) + sum(exp(-i1*dcmplx(2.d0*K1*xvec1(ix1)))*exp(i1*dcmplx(2.d0*K2*xvec2))/dcmplx(sqrt((xvec2*cos(theta)-xvec1(ix1))**2+(xvec2*sin(theta))**2+c2cDistance**2)))
-					end do
+		do iKcm2 = cnt2%iKcm_min, cnt2%iKcm_max
+			K2 = dble(iKcm2)*cnt2%dk
+			do iKcm1 = cnt1%iKcm_min, cnt1%iKcm_max
+				K1 = dble(iKcm1)*cnt1%dk
+				geometricMatrixElement(iKcm1, iKcm2) = (0.d0, 0.d0)
+				do ix1 = 1, nx1
+					geometricMatrixElement(iKcm1, iKcm2) = geometricMatrixElement(iKcm1, iKcm2) + sum(exp(-i1*dcmplx(2.d0*K1*xvec1(ix1)))*exp(i1*dcmplx(2.d0*K2*xvec2))/dcmplx(sqrt((xvec2*cos(theta)-xvec1(ix1))**2+(xvec2*sin(theta))**2+c2cDistance**2)))
 				end do
+				geometricMatrixElement(iKcm1, iKcm2) = geometricMatrixElement(iKcm1, iKcm2) * dcmplx((2.d0*pi*dx)**2)
+
+! 				write(100,'(SP , E16.3 )', advance='no') abs(geometricMatrixElement(iKcm1, iKcm2))
 			end do
-			write(logInput, '("Calculating geometric matrix elemetn: theta = ", I3.3, ", matrix elemetn = (", E8.3, ",",E8.3,")" )') nint(theta*180/pi), real(geometricMatrixElement(iKcm1, iKcm2, iTheta)), aimag(geometricMatrixElement(iKcm1, iKcm2, iTheta))
-			call writeLog(logInput)
+! 			write(100, *)
 		end do
-			
+! 		close(100)
+						
 		return		
-	end subroutine calculate_geometricMatrixElement
+	end subroutine calculate_finiteGeometricMatrixElement
+
+
+	!**************************************************************************************************************************
+	! calculate the geometric part of matrix element for two infinite tubes forming angle theta
+	!**************************************************************************************************************************
+	
+	subroutine calculate_infiniteGeometricMatrixElement(theta, c2cDistance)
+		use comparams, only: cnt1, cnt2
+		use physicalConstants, only: i1, pi
+
+		real*8, intent(in) :: theta
+		real*8, intent(in) :: c2cDistance
+
+		integer :: iKcm1, iKcm2
+
+		real*8 :: dx
+		real*8 :: x1, x2, xp1, xp2
+		real*8 :: K1, K2
+		integer :: ix1, ix2
+		integer :: nx1, nx2
+		real*8, dimension(:), allocatable :: xvec1, xvec2
+
+		real*8 :: radius1, radius2
+
+		if (.not. allocated(geometricMatrixElement)) allocate(geometricMatrixElement(cnt1%iKcm_min:cnt1%iKcm_max,cnt2%iKcm_min:cnt2%iKcm_max))
+
+		radius1 = cnt1%radius
+		radius2	= cnt2%radius
+
+		dx = 5.0d-10
+
+		x1 = cnt1%center_position - cnt1%length/2.d0
+		x2 = cnt1%center_position + cnt1%length/2.d0
+		xp1 = cnt2%center_position - cnt2%length/2.d0
+		xp2 = cnt2%center_position + cnt2%length/2.d0
+
+		nx1 = nint((x2-x1)/dx)
+		nx2 = nint((xp2-xp1)/dx)
+
+		allocate(xvec1(nx1))
+		do ix1 = 1, nx1
+			xvec1(ix1) = x1+dble(ix1-1)*dx
+		end do
+
+		allocate(xvec2(nx2))
+		do ix2 = 1, nx2
+			xvec2(ix2) = xp1+dble(ix2-1)*dx
+		end do
+
+! 		if (theta .eq. 0.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_0.dat',status="unknown")
+! 		if (theta .eq. 45.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_45.dat',status="unknown")
+! 		if (theta .eq. 90.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_90.dat',status="unknown")
+
+		do iKcm2 = cnt2%iKcm_min, cnt2%iKcm_max
+			K2 = dble(iKcm2)*cnt2%dk
+			do iKcm1 = cnt1%iKcm_min, cnt1%iKcm_max
+				K1 = dble(iKcm1)*cnt1%dk
+				geometricMatrixElement(iKcm1, iKcm2) = (0.d0, 0.d0)
+				do ix1 = 1, nx1
+					geometricMatrixElement(iKcm1, iKcm2) = geometricMatrixElement(iKcm1, iKcm2) + sum(exp(-i1*dcmplx(2.d0*K1*xvec1(ix1)))*exp(i1*dcmplx(2.d0*K2*xvec2))/dcmplx(sqrt((xvec2*cos(theta)-xvec1(ix1))**2+(xvec2*sin(theta))**2+c2cDistance**2)))
+				end do
+				geometricMatrixElement(iKcm1, iKcm2) = geometricMatrixElement(iKcm1, iKcm2) * dcmplx((2.d0*pi*dx)**2)
+
+! 				write(100,'(SP , E16.3 )', advance='no') abs(geometricMatrixElement(iKcm1, iKcm2))
+			end do
+! 			write(100, *)
+		end do
+! 		close(100)
+						
+		return		
+	end subroutine calculate_infiniteGeometricMatrixElement
 
 				
 end module matrix_element_mod

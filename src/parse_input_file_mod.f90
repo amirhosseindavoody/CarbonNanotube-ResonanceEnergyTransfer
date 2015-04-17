@@ -82,7 +82,7 @@ contains
 							read(value, *) cnt1%Ckappa
 						case ('target_exciton_type')
 							read(value, *) cnt1%targetExcitonType
-						case ('length[1/nm]')
+						case ('length[nm]')
 							read(value, *) cnt1%length
 							cnt1%length = cnt1%length * 1.d-9
 						case ('center_position[nm]')
@@ -111,7 +111,7 @@ contains
 							read(value, *) cnt2%Ckappa
 						case ('target_exciton_type')
 							read(value, *) cnt2%targetExcitonType
-						case ('length[1/nm]')
+						case ('length[nm]')
 							read(value, *) cnt2%length
 							cnt2%length = cnt2%length * 1.d-9
 						case ('center_position[nm]')

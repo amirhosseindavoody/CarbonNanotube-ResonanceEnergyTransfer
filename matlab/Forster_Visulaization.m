@@ -1,24 +1,42 @@
 %% This file visualizes the results of the fortran program for CNT bethe salpeter equation
-clear all; clc; fig=40;
+clear all; clc; fig=50;
 % close all;
 dir='C:\Users\Amirhossein\Google Drive\Research\Exciton\Data\Environmental Effect\Resonance-Energy-Transfer-Rate\Transfer-Ex0_A2(07,05)-to-Ex0_A2(08,07)-Ckappa(1.0)\';
 eV=1.6e-19;
 
-%% plot CNT unit cell
-% FileName=[dir,'posA.dat'];
-% posA=load(FileName);
-% FileName=[dir,'posB.dat'];
-% posB=load(FileName);
+%% plot geometrical part of matrix element
+FileName=[dir,'geometricMatrixElement_0.dat'];
+geometricMatrixElement_0=load(FileName);
+FileName=[dir,'geometricMatrixElement_45.dat'];
+geometricMatrixElement_45=load(FileName);
+FileName=[dir,'geometricMatrixElement_90.dat'];
+geometricMatrixElement_90=load(FileName);
+
+
+% fig=fig+1; figure(fig); hold on; box on;
+% contourf(geometricMatrixElement_0,50);
+% axis tight; axis equal;
 % 
 % fig=fig+1; figure(fig); hold on; box on;
-% plot(posA(:,1),posA(:,2),'b.','MarkerSize',20);
-% plot(posB(:,1),posB(:,2),'r.','MarkerSize',20);
+% contourf(geometricMatrixElement_45,50);
+% axis tight; axis equal;
 % 
-% plot(posA(1,1),posA(1,2),'g.','MarkerSize',20);
-% plot(posB(1,1),posB(1,2),'k.','MarkerSize',20);
-% 
-% axis equal; axis tight;
-% return;
+% fig=fig+1; figure(fig); hold on; box on;
+% contourf(geometricMatrixElement_90,50);
+% axis tight; axis equal;
+
+fig=fig+1; figure(fig); hold on; box on;
+surf(geometricMatrixElement_0,'EdgeColor', 'none');
+axis tight;
+
+fig=fig+1; figure(fig); hold on; box on;
+surf(geometricMatrixElement_45,'EdgeColor', 'none');
+axis tight;
+
+fig=fig+1; figure(fig); hold on; box on;
+surf(geometricMatrixElement_90,'EdgeColor', 'none');
+axis tight;
+return
 
 %% plot exciton energy dispersion of the first cnt
 % FileName=[dir,'cnt1_kvec.dat'];
