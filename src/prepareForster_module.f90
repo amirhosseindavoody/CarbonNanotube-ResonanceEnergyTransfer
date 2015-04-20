@@ -21,7 +21,7 @@ contains
         
 		do ix = 1,currcnt%nX
 			do iKcm = currcnt%iKcm_min,currcnt%iKcm_max
-				partitionFunction = partitionFunction + currcnt%dk * exp(-currcnt%Ex_t(ix,iKcm)/kb/Temperature)    
+				partitionFunction = partitionFunction + exp(-currcnt%Ex_t(ix,iKcm)/kb/Temperature)    
 			end do
 		end do
         

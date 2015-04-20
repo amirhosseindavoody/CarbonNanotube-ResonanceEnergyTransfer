@@ -127,14 +127,17 @@ contains
 			call writeLog("Target exciton: Ex_A1")
 			open(unit=100,file=trim(currcnt%directory)//'Ex_A1.dat',status="old")
 			open(unit=101,file=trim(currcnt%directory)//'Psi_A1.dat',status="old")
+			currcnt%ex_symmetry = -1.d0
 		case ('Ex0_A2')
 			call writeLog("Target exciton: Ex0_A2")
 			open(unit=100,file=trim(currcnt%directory)//'Ex0_A2.dat',status="old")
 			open(unit=101,file=trim(currcnt%directory)//'Psi0_A2.dat',status="old")
+			currcnt%ex_symmetry = +1.d0
 		case ('Ex1_A2')
 			call writeLog("Target exciton: Ex1_A2")
 			open(unit=100,file=trim(currcnt%directory)//'Ex1_A2.dat',status="old")
 			open(unit=101,file=trim(currcnt%directory)//'Psi1_A2.dat',status="old")
+			currcnt%ex_symmetry = +1.d0
 		case default
 			call writeLog("Could not recognize target exciton type!!!!")
 			call exit()

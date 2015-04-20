@@ -31,7 +31,7 @@ contains
 	
 	subroutine calculateTransitionTable (cnt1,cnt2)
 		use cnt_class, only: cnt
-		use matrix_element_mod, only: calculate_kSpaceMatrixElement, calculate_finiteGeometricMatrixElement, calculate_infiniteGeometricMatrixElement
+		use matrix_element_mod, only: calculate_kSpaceMatrixElement, calculate_finiteGeometricMatrixElement, calculate_infiniteGeometricMatrixElement_unparallel
 		use parallel_geometry_mod, only: calculateParallelGeometryRate
 		use physicalConstants, only: pi
 		use transition_points_mod, only: findCrossings, findSameEnergy
@@ -39,7 +39,7 @@ contains
 		use unparallel_geometry_mod, only: calculateUnparallelGeometryRate
 
 		type(cnt), intent(in) :: cnt1,cnt2
-		character(len=100) :: logInput
+		character(len=200) :: logInput
 		
 		
 		call writeLog(new_line('A')//"************** Start calculating transitionTable ****************")
@@ -73,8 +73,8 @@ contains
 		call writeLog(trim(logInput))
 	
 		!calculate the crossing points and points with the same energy between cnt1 and cnt2
-! 		call findSameEnergy(cnt1,cnt2)
-! 		call calculate_kSpaceMatrixElement()
+		call findSameEnergy(cnt1,cnt2)
+		call calculate_kSpaceMatrixElement()
 			
 		!allocate the transition rate table
 		allocate(transitionRate(2,nTheta,nc2c))
@@ -86,22 +86,23 @@ contains
 				theta = thetaMin + dble(iTheta-1)*dTheta
 				
 				if ((cnt1%length .lt. huge(1.d0)) .and. (cnt2%length .lt. huge(1.d0))) then
+					write(logInput,*) 'Calculating finite transition rate: iTheta=', iTheta, ', nTheta=', nTheta, 'iC2C=', ic2c, ', nC2C=', nc2c
+					call writeLog(logInput)	
 					call calculate_finiteGeometricMatrixElement(theta, c2cDistance)
 				else
-					call calculate_infiniteGeometricMatrixElement(theta, c2cDistance)
+					write(logInput,*) 'Calculating infinite transition rate: iTheta=', iTheta, ', nTheta=', nTheta, 'iC2C=', ic2c, ', nC2C=', nc2c
+					call writeLog(logInput)	
+					call calculate_infiniteGeometricMatrixElement_unparallel(theta, c2cDistance)
 				end if
-				call exit()
+! 				call exit()
 				
 				if (theta .eq. 0.d0) then
 					!call calculateParallelGeometryRate(cnt1,cnt2, transitionRate(1,iTheta,ic2c), transitionRate(2,iTheta,ic2c), c2cDistance)
 					transitionRate(1,iTheta,ic2c) = 0.d0
 					transitionRate(2,iTheta,ic2c) = 0.d0
 				else
-					call calculateUnparallelGeometryRate(cnt1,cnt2, transitionRate(1,iTheta,ic2c), transitionRate(2,iTheta,ic2c), c2cDistance, theta)
+					call calculateUnparallelGeometryRate(cnt1,cnt2, transitionRate(1,iTheta,ic2c), transitionRate(2,iTheta,ic2c), theta)
 				end if
-				
-				write(logInput,*) 'iTheta=', iTheta, ', nTheta=', nTheta, 'iC2C=', ic2c, ', nC2C=', nc2c
-				call writeLog(logInput)		
 			end do
 		end do
 		

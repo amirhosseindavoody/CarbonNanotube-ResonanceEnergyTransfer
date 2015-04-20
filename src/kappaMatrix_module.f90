@@ -86,7 +86,7 @@ contains
 			do iTheta2 = 1, nTheta
 				theta = abs(dble(iTheta1-iTheta2))*dTheta
 				if ((iTheta1-iTheta2) .ne. 0) then
-					call calculateUnparallelGeometryRate(cnt1,cnt1, kappaMatrix(iTheta1,iTheta2), kappaMatrix(iTheta2,iTheta1), c2cDistance, theta)
+					call calculateUnparallelGeometryRate(cnt1,cnt1, kappaMatrix(iTheta1,iTheta2), kappaMatrix(iTheta2,iTheta1), theta)
 				end if
 				write(logInput,*) 'iTheta1=', iTheta1, ', iTheta2=', iTheta2
 				call writeLog(logInput)
@@ -102,7 +102,7 @@ contains
 			do iTheta2 = 1, nTheta
 				theta = abs(dble(iTheta1-iTheta2))*dTheta
 				if ((iTheta1-iTheta2) .ne. 0) then
-					call calculateUnparallelGeometryRate(cnt2,cnt2, kappaMatrix(nTheta+iTheta1,nTheta+iTheta2), kappaMatrix(nTheta+iTheta2,nTheta+iTheta1), c2cDistance, theta)
+					call calculateUnparallelGeometryRate(cnt2,cnt2, kappaMatrix(nTheta+iTheta1,nTheta+iTheta2), kappaMatrix(nTheta+iTheta2,nTheta+iTheta1), theta)
 				end if
 				write(logInput,*) 'iTheta1=', iTheta1, ', iTheta2=', iTheta2
 				call writeLog(logInput)
@@ -120,7 +120,7 @@ contains
 				if ((iTheta1-iTheta2) .eq. 0) then
 					call calculateParallelGeometryRate(cnt1,cnt2, kappaMatrix(iTheta1,nTheta+iTheta2), kappaMatrix(nTheta+iTheta2,iTheta1), c2cDistance)
 				else
-					call calculateUnparallelGeometryRate(cnt1,cnt2, kappaMatrix(iTheta1,nTheta+iTheta2), kappaMatrix(nTheta+iTheta2,iTheta1), c2cDistance, theta)
+					call calculateUnparallelGeometryRate(cnt1,cnt2, kappaMatrix(iTheta1,nTheta+iTheta2), kappaMatrix(nTheta+iTheta2,iTheta1), theta)
 				end if
 				write(logInput,*) 'iTheta1=', iTheta1, ', iTheta2=', iTheta2
 				call writeLog(logInput)
