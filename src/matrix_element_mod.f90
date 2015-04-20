@@ -18,7 +18,7 @@ contains
 		use write_log_mod, only: writeLog
 		use physicalConstants, only: pi, eps0, q0
 
-		complex*16 :: tmpc
+		complex*16 :: tmpc, tmpc1, tmpc2, tmpc3, tmpc4
 		integer :: ix1,ix2
 		integer :: iKcm1, iKcm2
 		integer :: ikr1, ikr2
@@ -50,10 +50,11 @@ contains
 					do ikr2 = cnt2%ikr_low, cnt2%ikr_high					
 						do is = 1,2
 							do isp = 1,2
-								tmpc = tmpc + conjg(cnt1%Cc(1,+ikr1+iKcm1,is))*cnt1%Cv(1,+ikr1-iKcm1,is)*cnt2%Cc(1,+ikr2+iKcm2,isp)*conjg(cnt2%Cv(1,+ikr2-iKcm2,isp))
-								tmpc = tmpc + conjg(cnt1%Cc(1,+ikr1+iKcm1,is))*cnt1%Cv(1,+ikr1-iKcm1,is)*cnt2%Cc(2,-ikr2+iKcm2,isp)*conjg(cnt2%Cv(2,-ikr2-iKcm2,isp))*dcmplx(cnt2%ex_symmetry)
-								tmpc = tmpc + conjg(cnt1%Cc(2,-ikr1+iKcm1,is))*cnt1%Cv(2,-ikr1-iKcm1,is)*cnt2%Cc(1,+ikr2+iKcm2,isp)*conjg(cnt2%Cv(1,+ikr2-iKcm2,isp))*dcmplx(cnt1%ex_symmetry)
-								tmpc = tmpc + conjg(cnt1%Cc(2,-ikr1+iKcm1,is))*cnt1%Cv(2,-ikr1-iKcm1,is)*cnt2%Cc(2,-ikr2+iKcm2,isp)*conjg(cnt2%Cv(2,-ikr2-iKcm2,isp))*dcmplx(cnt1%ex_symmetry*cnt2%ex_symmetry)
+								tmpc1 = conjg(cnt1%Cc(1,+ikr1+iKcm1,is))*cnt1%Cv(1,+ikr1-iKcm1,is)*cnt2%Cc(1,+ikr2+iKcm2,isp)*conjg(cnt2%Cv(1,+ikr2-iKcm2,isp))
+								tmpc2 = conjg(cnt1%Cc(1,+ikr1+iKcm1,is))*cnt1%Cv(1,+ikr1-iKcm1,is)*cnt2%Cc(2,-ikr2+iKcm2,isp)*conjg(cnt2%Cv(2,-ikr2-iKcm2,isp))*dcmplx(cnt2%ex_symmetry)
+								tmpc3 = conjg(cnt1%Cc(2,-ikr1+iKcm1,is))*cnt1%Cv(2,-ikr1-iKcm1,is)*cnt2%Cc(1,+ikr2+iKcm2,isp)*conjg(cnt2%Cv(1,+ikr2-iKcm2,isp))*dcmplx(cnt1%ex_symmetry)
+								tmpc4 = conjg(cnt1%Cc(2,-ikr1+iKcm1,is))*cnt1%Cv(2,-ikr1-iKcm1,is)*cnt2%Cc(2,-ikr2+iKcm2,isp)*conjg(cnt2%Cv(2,-ikr2-iKcm2,isp))*dcmplx(cnt1%ex_symmetry*cnt2%ex_symmetry)
+								tmpc = tmpc + tmpc1 + tmpc2 + tmpc3 + tmpc4
 							end do  
 						end do
 						kSpaceMatrixElement(iC) = kSpaceMatrixElement(iC) + tmpc*conjg(cnt1%Psi_t(ikr1,ix1,iKcm1))*cnt2%Psi_t(ikr2,ix2,iKcm2)/dcmplx(2.d0,0.d0)
@@ -63,7 +64,7 @@ contains
 			end if
 		end do
 
-		kSpaceMatrixElement = kSpaceMatrixElement * dcmplx(q0**2/(4.d0*pi*eps0*4.d0*(pi*pi)*sqrt(2.d0*pi/cnt1%dk)*sqrt(2.d0*pi/cnt2%dk)))
+		kSpaceMatrixElement = kSpaceMatrixElement * dcmplx(q0**2/(4.d0*pi*eps0*4.d0*(pi*pi)*sqrt(2.d0*pi/cnt1%dk * 2.d0*pi/cnt2%dk)))
 			
 		return		
 	end subroutine calculate_kSpaceMatrixElement
