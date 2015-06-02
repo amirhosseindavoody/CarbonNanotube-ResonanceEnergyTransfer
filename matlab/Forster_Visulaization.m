@@ -1,8 +1,56 @@
 %% This file visualizes the results of the fortran program for CNT bethe salpeter equation
-clear all; clc; fig=50;
-% close all;
-dir='C:\Users\Amirhossein\Google Drive\Research\Exciton\Data\Environmental Effect\Resonance-Energy-Transfer-Rate\Transfer-Ex0_A2(07,05)-to-Ex0_A2(08,07)-Ckappa(1.0)\';
+clear all; clc; fig=0;
+close all;
+dir='C:\Users\amirhossein\Google Drive\Research\Exciton\Data\Environmental Effect\Geometrical-Matrix-Element\Transfer-Ex0_A2(07,05)-to-Ex0_A2(08,07)-Ckappa(1.0)\';
 eV=1.6e-19;
+
+%% plot occupation number histogram
+%first cnt
+FileName=[dir,'occupation-cnt(07,05)-i_sub(1)-Ckappa(1.0).dat'];
+occupation=load(FileName);
+
+nX = size(occupation,1);
+Emin = min(occupation(:,1));
+Emax = max(occupation(:,1));
+nInterval = 50;
+Espace = linspace(Emin,Emax,nInterval+1);
+deltaE=Espace(2)-Espace(1);
+histogram = zeros(nInterval+1,1);
+
+for iX = 1:nX
+   itmp = floor((occupation(iX,1)-Emin)/deltaE)+1;
+   histogram(itmp) = histogram(itmp) + occupation(iX,2);
+end
+
+
+
+fig=fig+1; figure(fig); box on;
+plot(Espace,histogram,'-*','LineWidth',3); hold on;
+axis tight;
+
+% second cnt
+FileName=[dir,'occupation-cnt(08,07)-i_sub(1)-Ckappa(1.0).dat'];
+occupation=load(FileName);
+
+nX = size(occupation,1);
+Emin = min(occupation(:,1));
+Emax = max(occupation(:,1));
+Espace = linspace(Emin,Emax,nInterval+1);
+deltaE=Espace(2)-Espace(1);
+histogram = zeros(nInterval+1,1);
+
+for iX = 1:nX
+   itmp = floor((occupation(iX,1)-Emin)/deltaE)+1;
+   histogram(itmp) = histogram(itmp) + occupation(iX,2);
+end
+
+
+
+% fig=fig+1; figure(fig); hold on; box on;
+semilogy(Espace,histogram,'-*','LineWidth',3);
+axis tight;
+
+return
 
 %% plot geometrical part of matrix element
 FileName=[dir,'geometricMatrixElement_0.dat'];
@@ -25,15 +73,17 @@ geometricMatrixElement_90=load(FileName);
 % contourf(geometricMatrixElement_90,50);
 % axis tight; axis equal;
 
-fig=fig+1; figure(fig); hold on; box on;
+% fig=fig+1; 
+figure(fig); hold on; box on;
+subplot(2,3,4);
 surf(geometricMatrixElement_0,'EdgeColor', 'none');
 axis tight;
 
-fig=fig+1; figure(fig); hold on; box on;
+subplot(2,3,5);
 surf(geometricMatrixElement_45,'EdgeColor', 'none');
 axis tight;
 
-fig=fig+1; figure(fig); hold on; box on;
+subplot(2,3,6);
 surf(geometricMatrixElement_90,'EdgeColor', 'none');
 axis tight;
 return

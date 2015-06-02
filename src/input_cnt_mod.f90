@@ -143,6 +143,8 @@ contains
 			call exit()
 		end select
 
+
+		! read the information of the target exciton type
 		allocate(currcnt%Ex_t(1:currcnt%nX,currcnt%iKcm_min:currcnt%iKcm_max))
 		allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX,currcnt%iKcm_min:currcnt%iKcm_max))
 		

@@ -73,8 +73,8 @@ contains
 		call writeLog(trim(logInput))
 	
 		!calculate the crossing points and points with the same energy between cnt1 and cnt2
-		call findSameEnergy(cnt1,cnt2)
-		call calculate_kSpaceMatrixElement()
+! 		call findSameEnergy(cnt1,cnt2)
+! 		call calculate_kSpaceMatrixElement()
 			
 		!allocate the transition rate table
 		allocate(transitionRate(2,nTheta,nc2c))
@@ -96,13 +96,13 @@ contains
 				end if
 ! 				call exit()
 				
-				if (theta .eq. 0.d0) then
-					!call calculateParallelGeometryRate(cnt1,cnt2, transitionRate(1,iTheta,ic2c), transitionRate(2,iTheta,ic2c), c2cDistance)
-					transitionRate(1,iTheta,ic2c) = 0.d0
-					transitionRate(2,iTheta,ic2c) = 0.d0
-				else
-					call calculateUnparallelGeometryRate(cnt1,cnt2, transitionRate(1,iTheta,ic2c), transitionRate(2,iTheta,ic2c), theta)
-				end if
+! 				if (theta .eq. 0.d0) then
+! 					!call calculateParallelGeometryRate(cnt1,cnt2, transitionRate(1,iTheta,ic2c), transitionRate(2,iTheta,ic2c), c2cDistance)
+! 					transitionRate(1,iTheta,ic2c) = 0.d0
+! 					transitionRate(2,iTheta,ic2c) = 0.d0
+! 				else
+! 					call calculateUnparallelGeometryRate(cnt1,cnt2, transitionRate(1,iTheta,ic2c), transitionRate(2,iTheta,ic2c), theta)
+! 				end if
 			end do
 		end do
 		

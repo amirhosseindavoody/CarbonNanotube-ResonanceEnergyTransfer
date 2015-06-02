@@ -116,9 +116,9 @@ contains
 			xvec2(ix2) = xp1+dble(ix2-1)*dx
 		end do
 
-! 		if (theta .eq. 0.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_0.dat',status="unknown")
-! 		if (theta .eq. 45.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_45.dat',status="unknown")
-! 		if (theta .eq. 90.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_90.dat',status="unknown")
+		if (theta .eq. 0.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_0.dat',status="unknown")
+		if (theta .eq. 45.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_45.dat',status="unknown")
+		if (theta .eq. 90.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_90.dat',status="unknown")
 
 		do iKcm2 = cnt2%iKcm_min, cnt2%iKcm_max
 			K2 = dble(iKcm2)*cnt2%dk
@@ -130,11 +130,11 @@ contains
 				end do
 				geometricMatrixElement(iKcm1, iKcm2) = geometricMatrixElement(iKcm1, iKcm2) * dcmplx((2.d0*pi*dx)**2)
 
-! 				write(100,'(SP , E16.3 )', advance='no') abs(geometricMatrixElement(iKcm1, iKcm2))
+				write(100,'(SP , E16.3 )', advance='no') abs(geometricMatrixElement(iKcm1, iKcm2))
 			end do
-! 			write(100, *)
+			write(100, *)
 		end do
-! 		close(100)
+		close(100)
 						
 		return		
 	end subroutine calculate_finiteGeometricMatrixElement
@@ -144,11 +144,11 @@ contains
 	! calculate the geometric part of matrix element for two infinite tubes forming angle theta
 	!**************************************************************************************************************************
 	
-	subroutine calculate_infiniteGeometricMatrixElement_unparallel(theta, c2cDistance)
+	subroutine calculate_infiniteGeometricMatrixElement_unparallel(realTheta, c2cDistance)
 		use comparams, only: cnt1, cnt2
 		use physicalConstants, only: i1, pi
 
-		real*8, intent(in) :: theta
+		real*8, intent(in) :: realTheta
 		real*8, intent(in) :: c2cDistance
 
 		integer :: iKcm1, iKcm2
@@ -162,6 +162,8 @@ contains
 		real*8 :: arg1, arg2, arg3
 
 		real*8 :: radius1, radius2
+
+		real*8 :: theta
 
 		if (.not. allocated(geometricMatrixElement)) allocate(geometricMatrixElement(cnt1%iKcm_min:cnt1%iKcm_max,cnt2%iKcm_min:cnt2%iKcm_max))
 
@@ -184,9 +186,14 @@ contains
 			phi2(iPhi2) = dble(iPhi2)*dPhi2
 		end do
 
-! 		if (theta .eq. 0.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_0.dat',status="unknown")
-! 		if (theta .eq. 45.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_45.dat',status="unknown")
-! 		if (theta .eq. 90.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_90.dat',status="unknown")
+		theta = realTheta
+
+		if (theta .eq. 0.d0*pi/180.d0) then
+			open(unit=100,file='geometricMatrixElement_0.dat',status="unknown")
+			theta = 5.d0*pi/180.d0
+		end if
+		if (theta .eq. 45.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_45.dat',status="unknown")
+		if (theta .eq. 90.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_90.dat',status="unknown")
 
 		do iKcm2 = cnt2%iKcm_min, cnt2%iKcm_max
 			K2 = dble(iKcm2)*cnt2%dk
@@ -206,11 +213,11 @@ contains
 					geometricMatrixElement(iKcm1, iKcm2) = geometricMatrixElement(iKcm1, iKcm2) * dcmplx(dPhi1*dPhi2*pi/arg1)
 				end if
 
-! 				write(100,'(SP , E16.3 )', advance='no') abs(geometricMatrixElement(iKcm1, iKcm2))
+				write(100,'(SP , E16.3 )', advance='no') abs(geometricMatrixElement(iKcm1, iKcm2))
 			end do
-! 			write(100, *)
+			write(100, *)
 		end do
-! 		close(100)
+		close(100)
 						
 		return		
 	end subroutine calculate_infiniteGeometricMatrixElement_unparallel
