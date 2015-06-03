@@ -68,6 +68,8 @@ contains
 							read(value, *) cnt1%m_ch
 						case ('nkg')
 							read(value, *) cnt1%nkg
+						case ('dk/dkx')
+							read(value, *) cnt1%dk_dkx_ratio
 						case ('nr')
 							read(value, *) cnt1%nr
 						case ('E_th[eV]')
@@ -97,6 +99,8 @@ contains
 							read(value, *) cnt2%m_ch
 						case ('nkg')
 							read(value, *) cnt2%nkg
+						case ('dk/dkx')
+							read(value, *) cnt2%dk_dkx_ratio
 						case ('nr')
 							read(value, *) cnt2%nr
 						case ('E_th[eV]')

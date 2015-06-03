@@ -19,10 +19,14 @@ contains
 
 		type(cnt), intent(in) :: currcnt
 		integer :: table_size, iX, iKcm, counter
+		integer :: iKcm_max_fine, iKcm_min_fine
 		real*8 :: partitionFunction
 		real*8 , dimension(:,:), allocatable :: occupation_table
 		character(len=100) :: filename
 		
+		iKcm_min_fine = currcnt%dk_dkx_ratio * currcnt%iKcm_min
+		iKcm_max_fine = currcnt%dk_dkx_ratio * currcnt%iKcm_max
+
 		table_size = size(currcnt%Ex_t)
 		allocate(occupation_table(table_size,3))
 
@@ -32,7 +36,7 @@ contains
 
 		counter = 0
 		do ix = 1,currcnt%nX
-			do iKcm = currcnt%iKcm_min,currcnt%iKcm_max
+			do iKcm = iKcm_min_fine,iKcm_max_fine
 				counter = counter + 1
 				occupation_table(counter,1) = currcnt%Ex_t(ix,iKcm)
 				occupation_table(counter,2) = exp(-currcnt%Ex_t(ix,iKcm)/kb/Temperature)

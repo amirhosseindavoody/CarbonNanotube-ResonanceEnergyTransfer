@@ -1,18 +1,18 @@
 %% This file visualizes the results of the fortran program for CNT bethe salpeter equation
 clear all; clc; fig=0;
 close all;
-dir='C:\Users\amirhossein\Google Drive\Research\Exciton\Data\Environmental Effect\Geometrical-Matrix-Element\Transfer-Ex0_A2(07,05)-to-Ex0_A2(08,07)-Ckappa(1.0)\';
+dir='C:\Users\Amirhossein\Google Drive\Research\Exciton\Data\Environmental Effect\Mesh-Size-Test\Transfer-Ex_A1(08,00)-to-Ex0_A2(08,00)-Ckappa(2.0)\';
 eV=1.6e-19;
 
 %% plot occupation number histogram
 %first cnt
-FileName=[dir,'occupation-cnt(07,05)-i_sub(1)-Ckappa(1.0).dat'];
+FileName=[dir,'occupation-cnt(08,00)-i_sub(1)-Ckappa(2.0).dat'];
 occupation=load(FileName);
 
 nX = size(occupation,1);
 Emin = min(occupation(:,1));
 Emax = max(occupation(:,1));
-nInterval = 50;
+nInterval = 500000;
 Espace = linspace(Emin,Emax,nInterval+1);
 deltaE=Espace(2)-Espace(1);
 histogram = zeros(nInterval+1,1);
@@ -27,7 +27,7 @@ end
 fig=fig+1; figure(fig); box on;
 plot(Espace,histogram,'-*','LineWidth',3); hold on;
 axis tight;
-
+return;
 % second cnt
 FileName=[dir,'occupation-cnt(08,07)-i_sub(1)-Ckappa(1.0).dat'];
 occupation=load(FileName);

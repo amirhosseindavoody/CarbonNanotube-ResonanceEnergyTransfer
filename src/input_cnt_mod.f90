@@ -21,7 +21,7 @@ contains
 		character(len=200) :: buffer, label
 		integer :: ios=0
 		integer :: pos=0
-		integer, parameter :: nparam=10
+		integer, parameter :: nparam=11
 		integer :: iparam=0
 		character(len=100) :: logInput
 
@@ -54,18 +54,23 @@ contains
 					write(logInput,"('nkg = ', I4.4)") currcnt%nkg
 					call writeLog(logInput)
 					iparam = iparam+1
+				case ('dk/dkx')
+					read(buffer, *, iostat=ios) currcnt%dk_dkx_ratio
+					write(logInput,"('dk/dkx = ', I4.4)") currcnt%dk_dkx_ratio
+					call writeLog(logInput)
+					iparam = iparam+1
 				case ('nr')
 					read(buffer, *, iostat=ios) currcnt%nr
 					write(logInput,"('nr = ', I4.4)") currcnt%nr
 					call writeLog(logInput)
 					iparam = iparam+1
-				case ('E_th')
+				case ('E_th[eV]')
 					read(buffer, *, iostat=ios) currcnt%E_th
 					write(logInput,"('E_th[eV] = ', f3.1)") currcnt%E_th
 					call writeLog(logInput)
 					iparam = iparam+1
 					currcnt%E_th=currcnt%E_th*eV
-				case ('Kcm_max')
+				case ('Kcm_max[1/nm]')
 					read(buffer, *, iostat=ios) currcnt%Kcm_max
 					write(logInput,"('Kcm_max[1/nm] = ', f3.1)") currcnt%Kcm_max
 					call writeLog(logInput)
@@ -120,6 +125,7 @@ contains
 
 		type(cnt), intent(inout) :: currcnt
 		integer :: iX, iKcm, ikr
+		integer :: iKcm_min_fine, iKcm_max_fine
 		real*8 :: tmpr
 		
 		select case (trim(currcnt%targetExcitonType))
@@ -144,11 +150,14 @@ contains
 		end select
 
 
+		iKcm_max_fine = currcnt%dk_dkx_ratio * currcnt%iKcm_max
+		iKcm_min_fine = currcnt%dk_dkx_ratio * currcnt%iKcm_min
+
 		! read the information of the target exciton type
-		allocate(currcnt%Ex_t(1:currcnt%nX,currcnt%iKcm_min:currcnt%iKcm_max))
-		allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX,currcnt%iKcm_min:currcnt%iKcm_max))
+		allocate(currcnt%Ex_t(1:currcnt%nX,iKcm_min_fine:iKcm_max_fine))
+		allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX,iKcm_min_fine:iKcm_max_fine))
 		
-		do iKcm=currcnt%iKcm_min,currcnt%iKcm_max
+		do iKcm=iKcm_min_fine,iKcm_max_fine
 			do iX=1,currcnt%nX
 				read(100,'(E16.8)', advance='no') currcnt%Ex_t(iX,iKcm)
 				do ikr=currcnt%ikr_low,currcnt%ikr_high
@@ -166,7 +175,7 @@ contains
 				
 		!make sure the exciton wavefunctions are normalized
 		do iX=1,currcnt%nX
-			do iKcm=currcnt%iKcm_min,currcnt%iKcm_max
+			do iKcm=iKcm_min_fine,iKcm_max_fine
 				tmpr = 0.d0
 				do ikr=currcnt%ikr_low,currcnt%ikr_high
 					tmpr = tmpr + abs(currcnt%Psi_t(ikr,iX,iKcm))
