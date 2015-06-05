@@ -14,14 +14,15 @@ contains
 	
 	subroutine calculate_kSpaceMatrixElement()
 		use comparams, only: cnt1, cnt2
+		use physicalConstants, only: pi, eps0, q0
 		use transition_points_mod, only: sameEnergy
 		use write_log_mod, only: writeLog
-		use physicalConstants, only: pi, eps0, q0
 
 		complex*16 :: tmpc, tmpc1, tmpc2, tmpc3, tmpc4
 		integer :: ix1,ix2
 		integer :: iKcm1, iKcm2
 		integer :: ikr1, ikr2
+		integer :: ikc1_p, ikc2_p, ikc1_m, ikc2_m, ikv1_p, ikv2_p, ikv1_m, ikv2_m
 		integer :: is,isp
 		integer :: iC
 		integer :: nSameEnergy
@@ -45,23 +46,29 @@ contains
 			kSpaceMatrixElement(iC) = (0.d0,0.d0)
 
 			tmpc = (0.d0,0.d0)
-			if ((iKcm1 .ne. 0) .and. (iKcm2 .ne. 0)) then
-				do ikr1 = cnt1%ikr_low, cnt1%ikr_high
-					do ikr2 = cnt2%ikr_low, cnt2%ikr_high					
-						do is = 1,2
-							do isp = 1,2
-								tmpc1 = conjg(cnt1%Cc(1,+ikr1+iKcm1,is))*cnt1%Cv(1,+ikr1-iKcm1,is)*cnt2%Cc(1,+ikr2+iKcm2,isp)*conjg(cnt2%Cv(1,+ikr2-iKcm2,isp))
-								tmpc2 = conjg(cnt1%Cc(1,+ikr1+iKcm1,is))*cnt1%Cv(1,+ikr1-iKcm1,is)*cnt2%Cc(2,-ikr2+iKcm2,isp)*conjg(cnt2%Cv(2,-ikr2-iKcm2,isp))*dcmplx(cnt2%ex_symmetry)
-								tmpc3 = conjg(cnt1%Cc(2,-ikr1+iKcm1,is))*cnt1%Cv(2,-ikr1-iKcm1,is)*cnt2%Cc(1,+ikr2+iKcm2,isp)*conjg(cnt2%Cv(1,+ikr2-iKcm2,isp))*dcmplx(cnt1%ex_symmetry)
-								tmpc4 = conjg(cnt1%Cc(2,-ikr1+iKcm1,is))*cnt1%Cv(2,-ikr1-iKcm1,is)*cnt2%Cc(2,-ikr2+iKcm2,isp)*conjg(cnt2%Cv(2,-ikr2-iKcm2,isp))*dcmplx(cnt1%ex_symmetry*cnt2%ex_symmetry)
-								tmpc = tmpc + tmpc1 + tmpc2 + tmpc3 + tmpc4
-							end do  
-						end do
-						kSpaceMatrixElement(iC) = kSpaceMatrixElement(iC) + tmpc*conjg(cnt1%Psi_t(ikr1,ix1,iKcm1))*cnt2%Psi_t(ikr2,ix2,iKcm2)/dcmplx(2.d0,0.d0)
-						tmpc = (0.d0,0.d0)
+			do ikr1 = cnt1%ikr_low, cnt1%ikr_high
+				ikc1_p = +ikr1 * cnt1%dk_dkx_ratio + iKcm1
+				ikv1_p = +ikr1 * cnt1%dk_dkx_ratio - iKcm1
+				ikc1_m = -ikr1 * cnt1%dk_dkx_ratio + iKcm1
+				ikv1_m = -ikr1 * cnt1%dk_dkx_ratio - iKcm1
+				do ikr2 = cnt2%ikr_low, cnt2%ikr_high
+					ikc2_p = +ikr2 * cnt2%dk_dkx_ratio + iKcm2
+					ikv2_p = +ikr2 * cnt2%dk_dkx_ratio - iKcm2
+					ikc2_m = -ikr2 * cnt2%dk_dkx_ratio + iKcm2
+					ikv2_m = -ikr2 * cnt2%dk_dkx_ratio - iKcm2
+					do is = 1,2
+						do isp = 1,2
+							tmpc1 = conjg(cnt1%Cc(1,ikc1_p,is))*cnt1%Cv(1,ikv1_p,is)*cnt2%Cc(1,ikc2_p,isp)*conjg(cnt2%Cv(1,ikv2_p,isp))
+							tmpc2 = conjg(cnt1%Cc(1,ikc1_p,is))*cnt1%Cv(1,ikv1_p,is)*cnt2%Cc(2,ikc2_m,isp)*conjg(cnt2%Cv(2,ikv2_m,isp))*dcmplx(cnt2%ex_symmetry)
+							tmpc3 = conjg(cnt1%Cc(2,ikc1_m,is))*cnt1%Cv(2,ikv1_m,is)*cnt2%Cc(1,ikc2_p,isp)*conjg(cnt2%Cv(1,ikv2_p,isp))*dcmplx(cnt1%ex_symmetry)
+							tmpc4 = conjg(cnt1%Cc(2,ikc1_m,is))*cnt1%Cv(2,ikv1_m,is)*cnt2%Cc(2,ikc2_m,isp)*conjg(cnt2%Cv(2,ikv2_m,isp))*dcmplx(cnt1%ex_symmetry*cnt2%ex_symmetry)
+							tmpc = tmpc + tmpc1 + tmpc2 + tmpc3 + tmpc4
+						end do  
 					end do
+					kSpaceMatrixElement(iC) = kSpaceMatrixElement(iC) + tmpc*conjg(cnt1%Psi_t(ikr1,ix1,iKcm1))*cnt2%Psi_t(ikr2,ix2,iKcm2)/dcmplx(2.d0,0.d0)
+					tmpc = (0.d0,0.d0)
 				end do
-			end if
+			end do
 		end do
 
 		kSpaceMatrixElement = kSpaceMatrixElement * dcmplx(q0**2/(4.d0*pi*eps0*4.d0*(pi*pi)*sqrt(2.d0*pi/cnt1%dk * 2.d0*pi/cnt2%dk)))
@@ -91,7 +98,7 @@ contains
 
 		real*8 :: radius1, radius2
 
-		if (.not. allocated(geometricMatrixElement)) allocate(geometricMatrixElement(cnt1%iKcm_min:cnt1%iKcm_max,cnt2%iKcm_min:cnt2%iKcm_max))
+		if (.not. allocated(geometricMatrixElement)) allocate(geometricMatrixElement(cnt1%iKcm_min_fine:cnt1%iKcm_max_fine,cnt2%iKcm_min_fine:cnt2%iKcm_max_fine))
 
 		radius1 = cnt1%radius
 		radius2	= cnt2%radius
@@ -116,25 +123,25 @@ contains
 			xvec2(ix2) = xp1+dble(ix2-1)*dx
 		end do
 
-		if (theta .eq. 0.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_0.dat',status="unknown")
-		if (theta .eq. 45.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_45.dat',status="unknown")
-		if (theta .eq. 90.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_90.dat',status="unknown")
+! 		if (theta .eq. 0.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_0.dat',status="unknown")
+! 		if (theta .eq. 45.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_45.dat',status="unknown")
+! 		if (theta .eq. 90.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_90.dat',status="unknown")
 
-		do iKcm2 = cnt2%iKcm_min, cnt2%iKcm_max
-			K2 = dble(iKcm2)*cnt2%dk
-			do iKcm1 = cnt1%iKcm_min, cnt1%iKcm_max
-				K1 = dble(iKcm1)*cnt1%dk
+		do iKcm2 = cnt2%iKcm_min_fine, cnt2%iKcm_max_fine
+			K2 = dble(iKcm2)*cnt2%dkx
+			do iKcm1 = cnt1%iKcm_min_fine, cnt1%iKcm_max_fine
+				K1 = dble(iKcm1)*cnt1%dkx
 				geometricMatrixElement(iKcm1, iKcm2) = (0.d0, 0.d0)
 				do ix1 = 1, nx1
 					geometricMatrixElement(iKcm1, iKcm2) = geometricMatrixElement(iKcm1, iKcm2) + sum(exp(-i1*dcmplx(2.d0*K1*xvec1(ix1)))*exp(i1*dcmplx(2.d0*K2*xvec2))/dcmplx(sqrt((xvec2*cos(theta)-xvec1(ix1))**2+(xvec2*sin(theta))**2+c2cDistance**2)))
 				end do
 				geometricMatrixElement(iKcm1, iKcm2) = geometricMatrixElement(iKcm1, iKcm2) * dcmplx((2.d0*pi*dx)**2)
 
-				write(100,'(SP , E16.3 )', advance='no') abs(geometricMatrixElement(iKcm1, iKcm2))
+! 				write(100,'(SP , E16.3 )', advance='no') abs(geometricMatrixElement(iKcm1, iKcm2))
 			end do
-			write(100, *)
+! 			write(100, *)
 		end do
-		close(100)
+! 		close(100)
 						
 		return		
 	end subroutine calculate_finiteGeometricMatrixElement
@@ -165,7 +172,7 @@ contains
 
 		real*8 :: theta
 
-		if (.not. allocated(geometricMatrixElement)) allocate(geometricMatrixElement(cnt1%iKcm_min:cnt1%iKcm_max,cnt2%iKcm_min:cnt2%iKcm_max))
+		if (.not. allocated(geometricMatrixElement)) allocate(geometricMatrixElement(cnt1%iKcm_min_fine:cnt1%iKcm_max_fine,cnt2%iKcm_min_fine:cnt2%iKcm_max_fine))
 
 		radius1 = cnt1%radius
 		radius2	= cnt2%radius
@@ -189,16 +196,16 @@ contains
 		theta = realTheta
 
 		if (theta .eq. 0.d0*pi/180.d0) then
-			open(unit=100,file='geometricMatrixElement_0.dat',status="unknown")
-			theta = 5.d0*pi/180.d0
+! 			open(unit=100,file='geometricMatrixElement_0.dat',status="unknown")
+			theta = 1.d0*pi/180.d0
 		end if
-		if (theta .eq. 45.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_45.dat',status="unknown")
-		if (theta .eq. 90.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_90.dat',status="unknown")
+! 		if (theta .eq. 45.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_45.dat',status="unknown")
+! 		if (theta .eq. 90.d0*pi/180.d0) open(unit=100,file='geometricMatrixElement_90.dat',status="unknown")
 
-		do iKcm2 = cnt2%iKcm_min, cnt2%iKcm_max
-			K2 = dble(iKcm2)*cnt2%dk
-			do iKcm1 = cnt1%iKcm_min, cnt1%iKcm_max
-				K1 = dble(iKcm1)*cnt1%dk
+		do iKcm2 = cnt2%iKcm_min_fine, cnt2%iKcm_max_fine
+			K2 = dble(iKcm2)*cnt2%dkx
+			do iKcm1 = cnt1%iKcm_min_fine, cnt1%iKcm_max_fine
+				K1 = dble(iKcm1)*cnt1%dkx
 				geometricMatrixElement(iKcm1, iKcm2) = (0.d0, 0.d0)
 				if ((iKcm1 .ne. 0) .and. (iKcm2 .ne. 0)) then
 					arg1 = sqrt(K1**2+K2**2-2.d0*K1*K2*cos(theta))
@@ -213,11 +220,11 @@ contains
 					geometricMatrixElement(iKcm1, iKcm2) = geometricMatrixElement(iKcm1, iKcm2) * dcmplx(dPhi1*dPhi2*pi/arg1)
 				end if
 
-				write(100,'(SP , E16.3 )', advance='no') abs(geometricMatrixElement(iKcm1, iKcm2))
+! 				write(100,'(SP , E16.3 )', advance='no') abs(geometricMatrixElement(iKcm1, iKcm2))
 			end do
-			write(100, *)
+! 			write(100, *)
 		end do
-		close(100)
+! 		close(100)
 						
 		return		
 	end subroutine calculate_infiniteGeometricMatrixElement_unparallel

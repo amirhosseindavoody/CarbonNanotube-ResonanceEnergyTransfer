@@ -33,6 +33,7 @@ module cnt_class
 		!CNT band structure properties
 		integer, dimension(:), allocatable :: min_sub
 		integer, public :: ikc_max, ikc_min, ik_max, ik_min, iKcm_max, iKcm_min, ik_high, ik_low, ikr_high, ikr_low, iq_max, iq_min
+		integer, public :: iKcm_min_fine, iKcm_max_fine
 		
 		!CNT self energy and tight binding coefficients
 		real*8, dimension(:,:,:), allocatable, public :: Ek  !Tight-binding energy
@@ -288,19 +289,22 @@ contains
 		currcnt%ik_low=-currcnt%ik_high                   	!the minimum index that the wavenumber in the entire simulation.
 		currcnt%iq_max=2*currcnt%ikr_high                 	!the higher limit of the index in v_FT and esp_q
 		currcnt%iq_min=-currcnt%iq_max                    	!the lower limit of the index in v_FT and esp_q
+
+		currcnt%iKcm_max_fine = currcnt%iKcm_max * currcnt%dk_dkx_ratio
+		currcnt%iKcm_min_fine = currcnt%iKcm_min * currcnt%dk_dkx_ratio
 		
 		! calculate the tight-binding energies and coefficients.
-		allocate(currcnt%Ek(2,currcnt%ik_low:currcnt%ik_high,2))
-		allocate(currcnt%Cc(2,currcnt%ik_low:currcnt%ik_high,2))
-		allocate(currcnt%Cv(2,currcnt%ik_low:currcnt%ik_high,2))
+		allocate(currcnt%Ek(2,currcnt%ik_low*currcnt%dk_dkx_ratio:currcnt%ik_high*currcnt%dk_dkx_ratio,2))
+		allocate(currcnt%Cc(2,currcnt%ik_low*currcnt%dk_dkx_ratio:currcnt%ik_high*currcnt%dk_dkx_ratio,2))
+		allocate(currcnt%Cv(2,currcnt%ik_low*currcnt%dk_dkx_ratio:currcnt%ik_high*currcnt%dk_dkx_ratio,2))
 	
-		do ik=currcnt%ik_low,currcnt%ik_high
+		do ik=currcnt%ik_low*currcnt%dk_dkx_ratio,currcnt%ik_high*currcnt%dk_dkx_ratio
 			mu=currcnt%min_sub(currcnt%i_sub) !first band
-			k=dble(mu)*currcnt%K1+dble(ik)*currcnt%dk*currcnt%K2
+			k=dble(mu)*currcnt%K1+dble(ik)*currcnt%dkx*currcnt%K2
 			call grapheneEnergy(currcnt,currcnt%Ek(1,ik,:),currcnt%Cc(1,ik,:),currcnt%Cv(1,ik,:),k)
 
 			mu=-currcnt%min_sub(currcnt%i_sub) !second band
-			k=dble(mu)*currcnt%K1+dble(ik)*currcnt%dk*currcnt%K2
+			k=dble(mu)*currcnt%K1+dble(ik)*currcnt%dkx*currcnt%K2
 			call grapheneEnergy(currcnt,currcnt%Ek(2,ik,:),currcnt%Cc(2,ik,:),currcnt%Cv(2,ik,:),k)
 		enddo
 		

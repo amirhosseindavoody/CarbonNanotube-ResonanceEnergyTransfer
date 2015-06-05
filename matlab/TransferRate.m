@@ -4,7 +4,7 @@ clear all; clc; fig=0;
 
 %%
 
-dir='C:\Users\amirhossein\Google Drive\Research\Exciton\Data\Environmental Effect\Resonance-Energy-Transfer-Rate\Transfer-Ex_A1(07,05)-to-Ex_A1(08,07)-Ckappa(1.0)\';
+dir='C:\Users\amirhossein\Google Drive\Research\Exciton\Data\Transition-Rate\Transfer-Ex0_A2(07,05)-to-Ex0_A2(08,07)-Ckappa(2.0)\';
 FileName=[dir,'transitionRates12.dat'];
 kappa12=load(FileName);
 

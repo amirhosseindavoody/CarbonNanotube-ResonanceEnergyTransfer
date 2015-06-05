@@ -13,8 +13,8 @@ contains
 	!**************************************************************************************************************************
 
 	subroutine input_cnt(currcnt)
-		use physicalConstants, only: eV
 		use cnt_class, only: cnt, cnt_geometry, cnt_band
+		use physicalConstants, only: eV
 		use write_log_mod, only: writeLog
 
 		type(cnt) :: currcnt
@@ -125,64 +125,110 @@ contains
 
 		type(cnt), intent(inout) :: currcnt
 		integer :: iX, iKcm, ikr
-		integer :: iKcm_min_fine, iKcm_max_fine
-		real*8 :: tmpr
+		real*8 :: tmpr1, tmpr2, tmpr3
+
+		! read the information of A1 exciton
+		allocate(currcnt%Ex_A1(1:currcnt%nX,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+		allocate(currcnt%Psi_A1(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
 		
-		select case (trim(currcnt%targetExcitonType))
-		case ('Ex_A1')
-			call writeLog("Target exciton: Ex_A1")
-			open(unit=100,file=trim(currcnt%directory)//'Ex_A1.dat',status="old")
-			open(unit=101,file=trim(currcnt%directory)//'Psi_A1.dat',status="old")
-			currcnt%ex_symmetry = -1.d0
-		case ('Ex0_A2')
-			call writeLog("Target exciton: Ex0_A2")
-			open(unit=100,file=trim(currcnt%directory)//'Ex0_A2.dat',status="old")
-			open(unit=101,file=trim(currcnt%directory)//'Psi0_A2.dat',status="old")
-			currcnt%ex_symmetry = +1.d0
-		case ('Ex1_A2')
-			call writeLog("Target exciton: Ex1_A2")
-			open(unit=100,file=trim(currcnt%directory)//'Ex1_A2.dat',status="old")
-			open(unit=101,file=trim(currcnt%directory)//'Psi1_A2.dat',status="old")
-			currcnt%ex_symmetry = +1.d0
-		case default
-			call writeLog("Could not recognize target exciton type!!!!")
-			call exit()
-		end select
-
-
-		iKcm_max_fine = currcnt%dk_dkx_ratio * currcnt%iKcm_max
-		iKcm_min_fine = currcnt%dk_dkx_ratio * currcnt%iKcm_min
-
-		! read the information of the target exciton type
-		allocate(currcnt%Ex_t(1:currcnt%nX,iKcm_min_fine:iKcm_max_fine))
-		allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX,iKcm_min_fine:iKcm_max_fine))
-		
-		do iKcm=iKcm_min_fine,iKcm_max_fine
+		open(unit=100,file=trim(currcnt%directory)//'Ex_A1.dat',status="old")
+		open(unit=101,file=trim(currcnt%directory)//'Psi_A1.dat',status="old")
+		do iKcm=currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
 			do iX=1,currcnt%nX
-				read(100,'(E16.8)', advance='no') currcnt%Ex_t(iX,iKcm)
+				read(100,'(E16.8)', advance='no') currcnt%Ex_A1(iX,iKcm)
 				do ikr=currcnt%ikr_low,currcnt%ikr_high
-					read(101,'(E16.8,E16.8)', advance='no') currcnt%Psi_t(ikr,iX,iKcm)
+					read(101,'(E16.8,E16.8)', advance='no') currcnt%Psi_A1(ikr,iX,iKcm)
 				enddo
 			enddo
 			
 			read(100,'(E16.8)')
 			read(101,'(E16.8)')
 		enddo
-		
-		
 		close(100)
 		close(101)
-				
+
+		! read the information of singlet A2 exciton
+		allocate(currcnt%Ex0_A2(1:currcnt%nX,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+		allocate(currcnt%Psi0_A2(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+		
+		open(unit=100,file=trim(currcnt%directory)//'Ex0_A2.dat',status="old")
+		open(unit=101,file=trim(currcnt%directory)//'Psi0_A2.dat',status="old")
+		do iKcm=currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
+			do iX=1,currcnt%nX
+				read(100,'(E16.8)', advance='no') currcnt%Ex0_A2(iX,iKcm)
+				do ikr=currcnt%ikr_low,currcnt%ikr_high
+					read(101,'(E16.8,E16.8)', advance='no') currcnt%Psi0_A2(ikr,iX,iKcm)
+				enddo
+			enddo
+			
+			read(100,'(E16.8)')
+			read(101,'(E16.8)')
+		enddo
+		close(100)
+		close(101)
+
+		! read the information of triplet A2 exciton
+		allocate(currcnt%Ex1_A2(1:currcnt%nX,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+		allocate(currcnt%Psi1_A2(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+		
+		open(unit=100,file=trim(currcnt%directory)//'Ex1_A2.dat',status="old")
+		open(unit=101,file=trim(currcnt%directory)//'Psi1_A2.dat',status="old")
+		do iKcm=currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
+			do iX=1,currcnt%nX
+				read(100,'(E16.8)', advance='no') currcnt%Ex1_A2(iX,iKcm)
+				do ikr=currcnt%ikr_low,currcnt%ikr_high
+					read(101,'(E16.8,E16.8)', advance='no') currcnt%Psi1_A2(ikr,iX,iKcm)
+				enddo
+			enddo
+			
+			read(100,'(E16.8)')
+			read(101,'(E16.8)')
+		enddo
+		close(100)
+		close(101)
+
 		!make sure the exciton wavefunctions are normalized
 		do iX=1,currcnt%nX
-			do iKcm=iKcm_min_fine,iKcm_max_fine
-				tmpr = 0.d0
+			do iKcm=currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
+				tmpr1 = 0.d0
+				tmpr2 = 0.d0
+				tmpr3 = 0.d0
 				do ikr=currcnt%ikr_low,currcnt%ikr_high
-					tmpr = tmpr + abs(currcnt%Psi_t(ikr,iX,iKcm))
+					tmpr1 = tmpr1 + abs(currcnt%Psi_A1(ikr,iX,iKcm))
+					tmpr2 = tmpr2 + abs(currcnt%Psi0_A2(ikr,iX,iKcm))
+					tmpr3 = tmpr3 + abs(currcnt%Psi1_A2(ikr,iX,iKcm))
 				enddo
-				currcnt%Psi_t(:,iX,iKcm) = currcnt%Psi_t(:,iX,iKcm) / dcmplx(sqrt(tmpr))
+				currcnt%Psi_A1(:,iX,iKcm) = currcnt%Psi_A1(:,iX,iKcm) / dcmplx(sqrt(tmpr1))
+				currcnt%Psi0_A2(:,iX,iKcm) = currcnt%Psi0_A2(:,iX,iKcm) / dcmplx(sqrt(tmpr2))
+				currcnt%Psi1_A2(:,iX,iKcm) = currcnt%Psi1_A2(:,iX,iKcm) / dcmplx(sqrt(tmpr3))
 			enddo
 		enddo
+
+
+		! set the information of the target exciton type
+		allocate(currcnt%Ex_t(1:currcnt%nX,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+		allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+
+		select case (trim(currcnt%targetExcitonType))
+		case ('Ex_A1')
+			call writeLog("Target exciton: Ex_A1")
+			currcnt%Ex_t = currcnt%Ex_A1
+			currcnt%Psi_t = currcnt%Psi_A1
+			currcnt%ex_symmetry = -1.d0
+		case ('Ex0_A2')
+			call writeLog("Target exciton: Ex0_A2")
+			currcnt%Ex_t = currcnt%Ex0_A2
+			currcnt%Psi_t = currcnt%Psi0_A2
+			currcnt%ex_symmetry = +1.d0
+		case ('Ex1_A2')
+			call writeLog("Target exciton: Ex1_A2")
+			currcnt%Ex_t = currcnt%Ex1_A2
+			currcnt%Psi_t = currcnt%Psi1_A2
+			currcnt%ex_symmetry = +1.d0
+		case default
+			call writeLog("Could not recognize target exciton type!!!!")
+			call exit()
+		end select
 
 		return
 	end subroutine input_exciton

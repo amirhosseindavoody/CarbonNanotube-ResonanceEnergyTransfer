@@ -1,12 +1,13 @@
 module math_functions_mod
 	implicit none
 	private
-	public :: gcd, bessk0
+	public :: gcd, bessk0, bisect_root
 
 contains
 	!**********************************************************************************************************************
 	! This subroutine calculates the greatest common divisor of the arguments na and nb
 	!**********************************************************************************************************************
+	
 	subroutine gcd(ngcd,na,nb)
 	integer, intent(in) :: na,nb
 	integer, intent(out) :: ngcd
@@ -26,6 +27,7 @@ contains
 	!**********************************************************************************************************************
 	! This function calculates the modified bessel function of the first kind with parameter nu=0: I0(x)
 	!**********************************************************************************************************************
+	
 	real*8 function bessi0(x)
 		real*8 :: x
 		real*8 :: ax
@@ -49,6 +51,7 @@ contains
 	!**********************************************************************************************************************
 	! This function calculates the modified bessel function of the second kind with parameter nu=0: K0(x)
 	!**********************************************************************************************************************
+	
 	real*8 function bessk0(x)
 		real*8 :: x
 		real*8 :: y
@@ -66,5 +69,69 @@ contains
 		end if
 		return 
 	end function bessk0
+
+	!**********************************************************************************************************************
+	! This subroutine calculates crossing point of an array using bisection method, here we use the fact that the array is decreasing with respect to its index
+	!**********************************************************************************************************************
+
+	subroutine bisect_root (n, ya, x0, ind)
+		integer, intent(in) :: n
+		integer, intent(out) :: ind
+		real*8, intent(in) :: x0
+		real*8, dimension(n), intent(in) :: ya
+
+		integer :: ix_lower, ix_upper, ix_mid
+		real*8, dimension(n) :: tmpArray
+
+		ind = 0
+		ix_lower=1
+		ix_upper=n
+		tmpArray = ya-x0
+
+		if (tmpArray(ix_lower) * tmpArray(ix_upper) .ge. 0.d0) then
+			if (tmpArray(ix_lower) .eq. 0.d0) then
+				ind = ix_lower
+				return
+			elseif (tmpArray(ix_upper) .eq. 0.d0) then
+				ind = ix_upper
+				return
+			else
+				ind = 0
+				return
+			endif
+		elseif (tmpArray(ix_lower) .gt. 0.d0) then
+			do while((ix_upper-ix_lower) .gt. 1)
+				ix_mid = (ix_upper + ix_lower)/2
+				if (tmpArray(ix_mid) .gt. 0.d0) then
+					ix_lower = ix_mid
+				elseif(tmpArray(ix_mid) .lt. 0.d0) then
+					ix_upper = ix_mid
+				else
+					ind = ix_mid
+					return
+				endif
+			enddo
+			ind = ix_upper
+			return
+		else
+			do while((ix_upper-ix_lower) .gt. 1)
+				ix_mid = (ix_upper + ix_lower)/2
+				if (tmpArray(ix_mid) .gt. 0.d0) then
+					ix_upper = ix_mid
+				else if(tmpArray(ix_mid) .lt. 0.d0) then
+					ix_lower = ix_mid
+				else
+					ind = ix_mid
+					return
+				endif
+			enddo
+			ind = ix_lower
+			return
+		endif
+
+		write(*,*) "Error in finding bisection root!!!!"
+		call exit()
+
+	end subroutine bisect_root
 
 end module math_Functions_mod

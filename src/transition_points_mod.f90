@@ -20,7 +20,7 @@ contains
 		integer, dimension(:,:), allocatable :: tempCrossingPoints
 		real*8 :: rtmp1, rtmp2
         
-		tmp = cnt1%nX * cnt2%nX * (2*cnt1%iKcm_max+1) * (2*cnt2%iKcm_max+1)
+		tmp = cnt1%nX * cnt2%nX * (2*cnt1%iKcm_max_fine+1) * (2*cnt2%iKcm_max_fine+1)
 		allocate(tempCrossingPoints(tmp,3))
 		do i = 1,tmp
 			tempCrossingPoints(i,1) = 0    
@@ -31,7 +31,7 @@ contains
 		nCrossing = 0
 		do ix1 = 1,cnt1%nX
 			do ix2 = 1,cnt2%nX
-				do iKcm = cnt1%iKcm_min+1 , cnt1%iKcm_max
+				do iKcm = cnt1%iKcm_min_fine+1 , cnt1%iKcm_max_fine
 					rtmp1 = (cnt1%Ex_t(ix1,iKcm)-cnt2%Ex_t(ix2,iKcm))
 					rtmp2 = (cnt1%Ex_t(ix1,iKcm-1)-cnt2%Ex_t(ix2,iKcm-1))
 					if ((rtmp1 * rtmp2) .le. 0.d0) then
@@ -63,62 +63,66 @@ contains
 	
 	subroutine findSameEnergy(cnt1,cnt2)
 		use cnt_class, only: cnt
+		use comparams, only: Temperature
+		use math_functions_mod, only: bisect_root
+		use physicalConstants, only: kb
 		use write_log_mod, only: writeLog
 
 		type(cnt), intent(in) :: cnt1,cnt2
 		integer :: ix1,ix2
 		integer :: iKcm1, iKcm2
-		integer :: tmp,i, nSameEnergy
+		integer :: tmp, nSameEnergy
+		integer :: n, iKcm_raw
 		integer, dimension(:,:), allocatable :: tempSameEnergy
-		real*8 :: rtmp1, rtmp2
+		real*8 :: min_energy, deltaE
 
-		tmp = cnt1%nX * cnt2%nX * (2*cnt1%iKcm_max+1) * (2*cnt2%iKcm_max+1)
+		tmp = cnt1%nX * cnt2%nX * (2*cnt1%iKcm_max_fine+1) * (2*cnt2%iKcm_max_fine+1)
 		allocate(tempSameEnergy(tmp,4))
-		do i = 1,tmp
-			tempSameEnergy(i,1) = 0    
-			tempSameEnergy(i,2) = 0
-			tempSameEnergy(i,3) = 0
-			tempSameEnergy(i,4) = 0
-		end do
-        
+
+		! calculate relevant same energy points for transition from cnt1 to cnt2
+		tempSameEnergy = 0 * tempSameEnergy
+		deltaE = (-1.d0) * log(1.d-5) * kb*Temperature
+
+		min_energy = max(minval(cnt1%Ex_t),minval(cnt2%Ex_t))
+
+		n = cnt2%iKcm_max_fine
+
 		nSameEnergy = 0
 		do ix1 = 1,cnt1%nX
-			do iKcm1 = cnt1%iKcm_min , cnt1%iKcm_max
-				do ix2 = 1,cnt2%nX
-					
-					if (cnt1%Ex_t(ix1,iKcm1) .eq. cnt2%Ex_t(ix2,cnt2%iKcm_min)) then
-							nSameEnergy = nSameEnergy+1
-							tempSameEnergy(nSameEnergy,1) = ix1
-							tempSameEnergy(nSameEnergy,2) = ix2
-							tempSameEnergy(nSameEnergy,3) = iKcm1
-							tempSameEnergy(nSameEnergy,4) = cnt2%iKcm_min
-					endif
+			do iKcm1 = cnt1%iKcm_min_fine , -1
+				if ((cnt1%Ex_t(ix1,iKcm1) - min_energy) .lt. deltaE) then
+					do ix2 = 1, cnt2%nX
+						call bisect_root(n, cnt2%Ex_t(ix2,cnt2%iKcm_min_fine:-1), cnt1%Ex_t(ix1,iKcm1), iKcm_raw)
+						if (iKcm_raw .gt. 0) then
+							iKcm2 = cnt2%iKcm_min_fine + iKcm_raw - 1
 
-					do iKcm2 = cnt2%iKcm_min+1 , cnt2%iKcm_max
-						rtmp1 = (cnt1%Ex_t(ix1,iKcm1)-cnt2%Ex_t(ix2,iKcm2))
-						rtmp2 = (cnt1%Ex_t(ix1,iKcm1)-cnt2%Ex_t(ix2,iKcm2-1))
-						if (rtmp1 .eq. 0.d0) then
-							nSameEnergy = nSameEnergy+1
-							tempSameEnergy(nSameEnergy,1) = ix1
-							tempSameEnergy(nSameEnergy,2) = ix2
-							tempSameEnergy(nSameEnergy,3) = iKcm1
-							tempSameEnergy(nSameEnergy,4) = iKcm2
-						elseif ((rtmp1 * rtmp2) .lt. 0.d0) then
-							nSameEnergy = nSameEnergy+1
-							if (abs(rtmp1) .lt. abs(rtmp2)) then
-								tempSameEnergy(nSameEnergy,1) = ix1
-								tempSameEnergy(nSameEnergy,2) = ix2
-								tempSameEnergy(nSameEnergy,3) = iKcm1
-								tempSameEnergy(nSameEnergy,4) = iKcm2
-							else
-								tempSameEnergy(nSameEnergy,1) = ix1
-								tempSameEnergy(nSameEnergy,2) = ix2
-								tempSameEnergy(nSameEnergy,3) = iKcm1
-								tempSameEnergy(nSameEnergy,4) = iKcm2-1
-							endif
+							nSameEnergy = nSameEnergy + 1
+							tempSameEnergy(nSameEnergy, 1) = ix1
+							tempSameEnergy(nSameEnergy, 2) = ix2
+							tempSameEnergy(nSameEnergy, 3) = +iKcm1
+							tempSameEnergy(nSameEnergy, 4) = +iKcm2
+
+							nSameEnergy = nSameEnergy + 1
+							tempSameEnergy(nSameEnergy, 1) = ix1
+							tempSameEnergy(nSameEnergy, 2) = ix2
+							tempSameEnergy(nSameEnergy, 3) = +iKcm1
+							tempSameEnergy(nSameEnergy, 4) = -iKcm2
+
+							nSameEnergy = nSameEnergy + 1
+							tempSameEnergy(nSameEnergy, 1) = ix1
+							tempSameEnergy(nSameEnergy, 2) = ix2
+							tempSameEnergy(nSameEnergy, 3) = -iKcm1
+							tempSameEnergy(nSameEnergy, 4) = +iKcm2
+
+							nSameEnergy = nSameEnergy + 1
+							tempSameEnergy(nSameEnergy, 1) = ix1
+							tempSameEnergy(nSameEnergy, 2) = ix2
+							tempSameEnergy(nSameEnergy, 3) = -iKcm1
+							tempSameEnergy(nSameEnergy, 4) = -iKcm2
+
 						endif
-					end do
-				end do
+					enddo
+				endif
 			end do
 		end do	
         
@@ -145,55 +149,51 @@ contains
 
 		!write carbon nanotube 1 k_vector
 		open(unit=100,file='cnt1_kvec.dat',status="unknown")
-		do iKcm=cnt1%iKcm_min,cnt1%iKcm_max
-			write(100,10, advance='no') dble(iKcm)*cnt1%dk
+		do iKcm=cnt1%iKcm_min_fine,cnt1%iKcm_max_fine
+			write(100,'(E16.8)', advance='no') dble(iKcm)*cnt1%dkx
 		enddo
 		close(100)
 
 		!write carbon nanotube 2 k_vector
 		open(unit=100,file='cnt2_kvec.dat',status="unknown")
-		do iKcm=cnt2%iKcm_min,cnt2%iKcm_max
-			write(100,10, advance='no') dble(iKcm)*cnt2%dk
+		do iKcm=cnt2%iKcm_min_fine,cnt2%iKcm_max_fine
+			write(100,'(E16.8)', advance='no') dble(iKcm)*cnt2%dkx
 		enddo
 		close(100)
 
 		!write carbon nanotube 1 Ex_t dispersion
 		open(unit=100,file='cnt1_Ex_t.dat',status="unknown")
-		do iKcm=cnt1%iKcm_min,cnt1%iKcm_max
+		do iKcm=cnt1%iKcm_min_fine,cnt1%iKcm_max_fine
 			do iX=1,cnt1%nX
-				write(100,10, advance='no') cnt1%Ex_t(iX,iKcm)
+				write(100,'(E16.8)', advance='no') cnt1%Ex_t(iX,iKcm)
 			enddo
-			write(100,10)
+			write(100,*)
 		enddo
 		close(100)
 
 		!write carbon nanotube 2 Ex_t dispersion
 		open(unit=100,file='cnt2_Ex_t.dat',status="unknown")
-		do iKcm=cnt2%iKcm_min,cnt2%iKcm_max
+		do iKcm=cnt2%iKcm_min_fine,cnt2%iKcm_max_fine
 			do iX=1,cnt2%nX
-				write(100,10, advance='no') cnt2%Ex_t(iX,iKcm)
+				write(100,'(E16.8)', advance='no') cnt2%Ex_t(iX,iKcm)
 			enddo
-			write(100,10)
+			write(100,*)
 		enddo
 		close(100) 
 
 		!write crossing points indexes
 		open(unit=100,file='crossingPoints.dat',status="unknown")
 		do i=1,ubound(crossingPoints,1)
-			write(100,11) crossingPoints(i,1), crossingPoints(i,2), crossingPoints(i,3)
+			write(100,'(4I8, 4I8, 4I8)') crossingPoints(i,1), crossingPoints(i,2), crossingPoints(i,3)
 		enddo
 		close(100) 
 
-		!write crossing points indexes
+		!write same energy points indexes for transition from cnt1 to cnt2
 		open(unit=100,file='sameEnergy.dat',status="unknown")
 		do i=1,ubound(sameEnergy,1)
-			write(100,12) sameEnergy(i,1), sameEnergy(i,2), sameEnergy(i,3), sameEnergy(i,4)
+			write(100,'(4I8, 4I8, 4I8, 4I8)') sameEnergy(i,1), sameEnergy(i,2), sameEnergy(i,3), sameEnergy(i,4)
 		enddo
 		close(100) 
-
-10		FORMAT (E16.8)
-11		FORMAT (4I8, 4I8, 4I8)
-12		FORMAT (4I8, 4I8, 4I8, 4I8)
 
 		return    
 	end subroutine saveTransitionPoints

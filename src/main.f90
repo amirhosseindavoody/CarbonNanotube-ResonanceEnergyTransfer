@@ -12,7 +12,7 @@ program cnt_resonance_energy_transfer
 	use occupation_mod, only: calculate_occupation_table
 	use parse_input_file_mod, only: parse_input_file
 	use prepareForster_module, only: saveDOS
-	use transitionTable_module
+	use transitionTable_module, only: calculateTransitionTable
 	use write_log_mod, only: writeLog
 	
 	implicit none
@@ -28,14 +28,14 @@ program cnt_resonance_energy_transfer
 	call saveDOS(cnt1)
 	call calculate_occupation_table(cnt1)
 
-	call exit()
+! 	call exit()
 
 	call writeLog(new_line('A')//"************** Reading cnt2 ****************")
 	call input_cnt(cnt2)
 	call saveDOS(cnt2)
 	call calculate_occupation_table(cnt2)
 
- 	call exit()
+!  	call exit()
 
  	call calculateTransitionTable(cnt1,cnt2)
 	

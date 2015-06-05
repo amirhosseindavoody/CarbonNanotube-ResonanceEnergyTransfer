@@ -9,19 +9,25 @@ contains
 	!**************************************************************************************************************************
 	
 	subroutine calculatePartitionFunction(currcnt, partitionFunction)
-		use physicalConstants, only : kb
-		use comparams, only : Temperature
 		use cnt_class, only: cnt
+		use comparams, only : Temperature
+		use physicalConstants, only : kb
 
 		type(cnt), intent(in) :: currcnt
 		real*8, intent(out) :: partitionFunction
 		integer :: ix, iKcm
+		real*8 :: min_energy, deltaE
+
+		min_energy = minval(currcnt%Ex_t)
+		deltaE = (-1.d0) * log(1.d-5) * kb * Temperature
         
 		partitionFunction = 0.d0
         
 		do ix = 1,currcnt%nX
-			do iKcm = currcnt%iKcm_min,currcnt%iKcm_max
-				partitionFunction = partitionFunction + exp(-currcnt%Ex_t(ix,iKcm)/kb/Temperature)    
+			do iKcm = currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
+				if((currcnt%Ex_t(ix,iKcm)-min_energy) .le. deltaE) then
+					partitionFunction = partitionFunction + exp(-currcnt%Ex_t(ix,iKcm)/kb/Temperature)    
+				endif
 			end do
 		end do
         
@@ -38,9 +44,9 @@ contains
 		integer, intent(in) :: iKcm,iX
 		real*8, intent(out) :: dos
 		
-		if (iKcm .le. (currcnt%iKcm_min+1)) then
+		if (iKcm .le. (currcnt%iKcm_min_fine+1)) then
 			dos = 2.d0*currcnt%dk/abs(-3.d0*currcnt%Ex_t(iX,iKcm)+4.d0*currcnt%Ex_t(iX,iKcm+1)-currcnt%Ex_t(iX,iKcm+2))
-		else if(iKcm .ge. (currcnt%iKcm_max-1)) then
+		else if(iKcm .ge. (currcnt%iKcm_max_fine-1)) then
 			dos = 2.d0*currcnt%dk/abs(3.d0*currcnt%Ex_t(iX,iKcm)-4.d0*currcnt%Ex_t(iX,iKcm-1)+currcnt%Ex_t(iX,iKcm-2))
 		else if(iKcm == 0) then
 			dos = 2.d0*currcnt%dk/abs(3.d0*currcnt%Ex_t(iX,iKcm)-4.d0*currcnt%Ex_t(iX,iKcm-1)+currcnt%Ex_t(iX,iKcm-2))
@@ -66,7 +72,7 @@ contains
 
 		!write currcnt dos
 		open(unit=100,file=filename,status="unknown")
-		do iKcm=currcnt%iKcm_min,currcnt%iKcm_max
+		do iKcm=currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
 			do iX=1,currcnt%nX
 				call calculateDOS(currcnt,iKcm,iX,DOS)
 				write(100,'(E16.8)', advance='no') dos
