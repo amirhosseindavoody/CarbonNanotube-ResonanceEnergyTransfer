@@ -85,7 +85,7 @@ contains
 			
 		!allocate the transition rate table
 		allocate(transitionRate(2,nTheta,nc2c))
-		transitionRate = 0.d0 * transitionRate
+		transitionRate = 0.d0
 
 		call calculatePartitionFunction(cnt1, partitionFunction1)
 		call calculatePartitionFunction(cnt2, partitionFunction2)
@@ -100,29 +100,49 @@ contains
 					write(logInput,*) 'Calculating finite transition rate: iTheta=', iTheta, ', nTheta=', nTheta, 'iC2C=', ic2c, ', nC2C=', nc2c
 					call writeLog(logInput)
 					call calculate_finiteGeometricMatrixElement(theta, c2cDistance)
+
+					nSameEnergy = size(sameEnergy,1)
+									
+					do iC = 1,nSameEnergy
+													
+						ix1 = sameEnergy(iC,1)
+						ix2 = sameEnergy(iC,2)
+						iKcm1 = sameEnergy(iC,3)
+						iKcm2 = sameEnergy(iC,4)
+						
+						matrixElement = geometricMatrixElement(iKcm1, iKcm2) * kSpaceMatrixElement(iC)
+						call calculateDOS(cnt1,iKcm1,ix1,dos1)
+						call calculateDOS(cnt2,iKcm2,ix2,dos2)
+
+						transitionRate(1,iTheta,ic2c) = transitionRate(1,iTheta,ic2c) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/Temperature) * (abs(matrixElement)**2) * dos2 / hb / cnt1%length / partitionFunction1
+						transitionRate(2,iTheta,ic2c) = transitionRate(2,iTheta,ic2c) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/Temperature) * (abs(matrixElement)**2) * dos1 / hb / cnt2%length / partitionFunction2
+
+					end do
+
 				else
 					write(logInput,*) 'Calculating infinite transition rate: iTheta=', iTheta, ', nTheta=', nTheta, 'iC2C=', ic2c, ', nC2C=', nc2c
 					call writeLog(logInput)	
 					call calculate_infiniteGeometricMatrixElement_unparallel(theta, c2cDistance)
-				end if
 
-				nSameEnergy = size(sameEnergy,1)
+					nSameEnergy = size(sameEnergy,1)
 									
-				do iC = 1,nSameEnergy
+					do iC = 1,nSameEnergy
+							
+						ix1 = sameEnergy(iC,1)
+						ix2 = sameEnergy(iC,2)
+						iKcm1 = sameEnergy(iC,3)
+						iKcm2 = sameEnergy(iC,4)
 						
-					ix1 = sameEnergy(iC,1)
-					ix2 = sameEnergy(iC,2)
-					iKcm1 = sameEnergy(iC,3)
-					iKcm2 = sameEnergy(iC,4)
-					
-					matrixElement = geometricMatrixElement(iKcm1, iKcm2) * kSpaceMatrixElement(iC)
-					call calculateDOS(cnt1,iKcm1,ix1,dos1)
-					call calculateDOS(cnt2,iKcm2,ix2,dos2)
+						matrixElement = geometricMatrixElement(iKcm1, iKcm2) * kSpaceMatrixElement(iC)
+						call calculateDOS(cnt1,iKcm1,ix1,dos1)
+						call calculateDOS(cnt2,iKcm2,ix2,dos2)
 
-					transitionRate(1,iTheta,ic2c) = transitionRate(1,iTheta,ic2c) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/Temperature) * (abs(matrixElement)**2) * dos2 * (sin(theta)) / hb / ppLen/ partitionFunction1
-					transitionRate(2,iTheta,ic2c) = transitionRate(2,iTheta,ic2c) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/Temperature) * (abs(matrixElement)**2) * dos1 * (sin(theta)) / hb / ppLen/ partitionFunction2
+						transitionRate(1,iTheta,ic2c) = transitionRate(1,iTheta,ic2c) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/Temperature) * (abs(matrixElement)**2) * dos2 * (sin(theta)) / hb / ppLen/ partitionFunction1
+						transitionRate(2,iTheta,ic2c) = transitionRate(2,iTheta,ic2c) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/Temperature) * (abs(matrixElement)**2) * dos1 * (sin(theta)) / hb / ppLen/ partitionFunction2
 
-				end do
+					end do
+
+				end if
 
 			end do
 		end do

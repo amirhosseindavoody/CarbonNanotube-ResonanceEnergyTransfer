@@ -20,7 +20,7 @@ contains
 
 		character(len=100) :: filename
 		character(len=200) :: buffer, command, label, value
-		character(len=200) :: outdir	
+		character(len=300) :: outdir	
 		character(len=200) :: indir
 		integer :: istat=0
 		integer :: ios=0
@@ -152,9 +152,11 @@ contains
 
 		write(cnt1%directory,"( A, 'CNT(', I2.2, ',', I2.2, ')-nkg(', I4.4, ')-nr(', I4.4, ')-E_th(', F3.1, ')-Kcm_max(', F3.1, ')-i_sub(', I1.1, ')-Ckappa(', F3.1, ')/' )") trim(indir), cnt1%n_ch, cnt1%m_ch, cnt1%nkg, cnt1%nr, cnt1%E_th/eV, cnt1%Kcm_max*1.d-9, cnt1%i_sub, cnt1%Ckappa
 		write(cnt2%directory,"( A, 'CNT(', I2.2, ',', I2.2, ')-nkg(', I4.4, ')-nr(', I4.4, ')-E_th(', F3.1, ')-Kcm_max(', F3.1, ')-i_sub(', I1.1, ')-Ckappa(', F3.1, ')/' )") trim(indir), cnt2%n_ch, cnt2%m_ch, cnt2%nkg, cnt2%nr, cnt2%E_th/eV, cnt2%Kcm_max*1.d-9, cnt2%i_sub, cnt2%Ckappa
-		write(outdir,"(A, 'Transfer-',A,'(',I2.2,',',I2.2,')-to-',A,'(',I2.2,',',I2.2,')-Ckappa(',F3.1,')')") trim(outdir), trim(cnt1%targetExcitonType), cnt1%n_ch, cnt1%m_ch, trim(cnt2%targetExcitonType), cnt2%n_ch, cnt2%m_ch, cnt1%Ckappa
+		write(outdir,"(A, 'Transfer-(', I2.2, ',', I2.2, ')-', A, '-Length(', I2.2, 'nm)-Center(', I2.2, 'nm)-Ckappa(', F3.1, ')-to-(', I2.2, ',', I2.2, ')-', A, '-Length(', I2.2, 'nm)-Center(', I2.2, 'nm)-Ckappa(', F3.1, ')-C2C(', F4.1, 'nm-', F4.1, 'nm)-Theta(', I3.3, '-', I3.3, ')')") trim(outdir), cnt1%n_ch, cnt1%m_ch, trim(cnt1%targetExcitonType), nint(cnt1%length*1.d9), nint(cnt1%center_position*1.d9), cnt1%Ckappa, cnt2%n_ch, cnt2%m_ch, trim(cnt2%targetExcitonType), nint(cnt2%length*1.d9), nint(cnt2%center_position*1.d9), cnt2%Ckappa, c2cMin, c2cMax, nint(thetaMin), nint(thetaMax)
 
-		call create_outdir(outdir)
+
+
+		call create_outdir(trim(outdir))
 
 		call writeLog(new_line('A'))
 		call writeLog("cnt1 directory: "//cnt1%directory)
@@ -170,9 +172,9 @@ contains
 	subroutine create_outdir(outdir)
 		use write_log_mod, only: writeLog
 
-		character(len=200), intent(in) :: outdir
+		character(len=*), intent(in) :: outdir
 		integer :: istat=0
-		character(len=300) :: command
+		character(len=400) :: command
 		integer, dimension(3) :: date, time
 		character(len=100) :: logInput
 

@@ -4,7 +4,7 @@ clear all; clc; fig=0;
 
 %%
 
-dir='C:\Users\amirhossein\Google Drive\Research\Exciton\Data\Transition-Rate\Transfer-Ex0_A2(07,05)-to-Ex0_A2(08,07)-Ckappa(2.0)\';
+dir='C:\Users\amirhossein\Google Drive\Research\Exciton\Data\Transition-Rate\Second-Subband\Transfer-(07,05)-Ex0_A2-Length(30nm)-Center(00nm)-Ckappa(2.0)-to-(08,07)-Ex0_A2-Length(30nm)-Center(00nm)-Ckappa(2.0)-C2C( 0.0nm- 0.0nm)-Theta(000-002)\';
 FileName=[dir,'transitionRates12.dat'];
 kappa12=load(FileName);
 
@@ -29,11 +29,11 @@ c2c=load(FileName);
 %%
 nTheta = numel(theta);
 fig=fig+1; figure(fig); box on;
-plot(theta(2:nTheta),kappa12(2:nTheta),'-','LineWidth',3); hold on;
+plot(theta(1:nTheta),kappa12(1:nTheta),'-','LineWidth',3); hold on;
 axis tight;
 
 fig=fig+1; figure(fig); box on;
-plot(theta(2:nTheta),kappa21(2:nTheta),'-','LineWidth',3); hold on;
+plot(theta(1:nTheta),kappa21(1:nTheta),'-','LineWidth',3); hold on;
 axis tight;
 
 %%
