@@ -1,8 +1,8 @@
 directory, input= /cygdrive/c/Users/Amirhossein/Google Drive/Research/Exciton/Data/Exciton-Energy/
-directory, output= /cygdrive/c/Users/Amirhossein/Google Drive/Research/Exciton/Data/Transition-Rate/Second-Subband/
+directory, output= /cygdrive/c/Users/Amirhossein/Google Drive/Research/Exciton/Data/Transition-Rate/
 
-cnt1, n_ch=	7
-cnt1, m_ch=	5
+cnt1, n_ch=	8
+cnt1, m_ch=	7
 cnt1, nkg=	1001
 cnt1, dk/dkx=	10
 cnt1, nr=		200
@@ -21,7 +21,7 @@ cnt2, dk/dkx=	10
 cnt2, nr=	200
 cnt2, E_th[eV]=	0.5
 cnt2, Kcm_max[1/nm]=	1.5
-cnt2, i_sub=	2
+cnt2, i_sub=	1
 cnt2, Ckappa=	2.0
 cnt2, target_exciton_type=	Ex0_A2
 cnt2, length[nm]=	30

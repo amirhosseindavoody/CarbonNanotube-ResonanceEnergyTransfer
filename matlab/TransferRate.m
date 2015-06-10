@@ -4,7 +4,7 @@ clear all; clc; fig=0;
 
 %%
 
-dir='C:\Users\amirhossein\Google Drive\Research\Exciton\Data\Transition-Rate\Second-Subband\Transfer-(07,05)-Ex0_A2-Length(30nm)-Center(00nm)-Ckappa(2.0)-to-(08,07)-Ex0_A2-Length(30nm)-Center(00nm)-Ckappa(2.0)-C2C( 0.0nm- 0.0nm)-Theta(000-002)\';
+dir='C:\Users\amirhossein\Google Drive\Research\Exciton\Data\Transition-Rate\Transfer-(08,07)-Ex0_A2-iSub(2)-Length(30nm)-Center(00nm)-Ckappa(2.0)-to-(07,05)-Ex0_A2-iSub(1)-Length(30nm)-Center(00nm)-Ckappa(2.0)-C2C( 0.0nm- 0.0nm)-Theta(000-090)\';
 FileName=[dir,'transitionRates12.dat'];
 kappa12=load(FileName);
 
@@ -43,3 +43,29 @@ axis tight;
 % figure(fig); hold on; box on;
 % plot(c2c/1e-9,kappa21,'-r','LineWidth',3);
 % axis tight;
+return;
+%%
+clear all;
+
+r1=1;
+r2=5;
+thetaMax=2*pi;
+thetaMin=0;
+ntheta=100;
+theta1=linspace(thetaMin,thetaMax,ntheta);
+theta2=linspace(thetaMin,thetaMax,ntheta);
+D=10;
+y=zeros(ntheta,ntheta);
+
+for i=1:ntheta
+    for j=1:ntheta
+%         y(i,j)=(r1*sin(theta1(i))-r2*sin(theta2(j)))^2+(D+r1*cos(theta1(i))-r2*cos(theta2(j)))^2;
+        y(i,j)=(r1*sin(theta1(i)-theta1(j)))^2+(D+r2*cos(theta1(i)-theta1(j)))^2;
+    end;
+end;
+
+fig=100;
+fig=fig+1; figure(fig); box on;
+surf(theta1,theta2,y);
+axis equal;
+axis tight;

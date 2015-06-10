@@ -32,7 +32,7 @@ contains
 	subroutine calculateTransitionTable (cnt1,cnt2)
 		use cnt_class, only: cnt
 		use comparams, only: ppLen, Temperature
-		use matrix_element_mod, only: calculate_kSpaceMatrixElement, calculate_finiteGeometricMatrixElement, calculate_infiniteGeometricMatrixElement_unparallel, geometricMatrixElement, kSpaceMatrixElement
+		use matrix_element_mod, only: calculate_kSpaceMatrixElement, calculate_finiteGeometricMatrixElement, calculate_infiniteGeometricMatrixElement_unparallel, kSpaceMatrixElement
 		use physicalConstants, only: pi, kb, hb
 		use prepareForster_module, only: calculatePartitionFunction, calculateDOS
 		use transition_points_mod, only: findSameEnergy, sameEnergy
@@ -45,7 +45,7 @@ contains
 		integer :: ix1, ix2, iKcm1, iKcm2
 		real*8 :: partitionFunction1, partitionFunction2
 		real*8 :: dos1, dos2
-		complex*16 :: matrixElement
+		complex*16 :: matrixElement, geometricMatrixElement
 		
 		
 		call writeLog(new_line('A')//"************** Start calculating transitionTable ****************")
@@ -99,7 +99,6 @@ contains
 				if ((cnt1%length .lt. huge(1.d0)) .and. (cnt2%length .lt. huge(1.d0))) then
 					write(logInput,*) 'Calculating finite transition rate: iTheta=', iTheta, ', nTheta=', nTheta, 'iC2C=', ic2c, ', nC2C=', nc2c
 					call writeLog(logInput)
-					call calculate_finiteGeometricMatrixElement(theta, c2cDistance)
 
 					nSameEnergy = size(sameEnergy,1)
 									
@@ -109,8 +108,10 @@ contains
 						ix2 = sameEnergy(iC,2)
 						iKcm1 = sameEnergy(iC,3)
 						iKcm2 = sameEnergy(iC,4)
+
+						call calculate_finiteGeometricMatrixElement(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
 						
-						matrixElement = geometricMatrixElement(iKcm1, iKcm2) * kSpaceMatrixElement(iC)
+						matrixElement = geometricMatrixElement * kSpaceMatrixElement(iC)
 						call calculateDOS(cnt1,iKcm1,ix1,dos1)
 						call calculateDOS(cnt2,iKcm2,ix2,dos2)
 
@@ -121,19 +122,24 @@ contains
 
 				else
 					write(logInput,*) 'Calculating infinite transition rate: iTheta=', iTheta, ', nTheta=', nTheta, 'iC2C=', ic2c, ', nC2C=', nc2c
-					call writeLog(logInput)	
-					call calculate_infiniteGeometricMatrixElement_unparallel(theta, c2cDistance)
+					call writeLog(logInput)
+					
+					if (theta .eq. 0.d0) then
+						theta = thetaMin + dble(iTheta)*dTheta/2.d0
+					endif
 
 					nSameEnergy = size(sameEnergy,1)
 									
 					do iC = 1,nSameEnergy
-							
+						
 						ix1 = sameEnergy(iC,1)
 						ix2 = sameEnergy(iC,2)
 						iKcm1 = sameEnergy(iC,3)
 						iKcm2 = sameEnergy(iC,4)
+
+						call calculate_infiniteGeometricMatrixElement_unparallel(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
 						
-						matrixElement = geometricMatrixElement(iKcm1, iKcm2) * kSpaceMatrixElement(iC)
+						matrixElement = geometricMatrixElement * kSpaceMatrixElement(iC)
 						call calculateDOS(cnt1,iKcm1,ix1,dos1)
 						call calculateDOS(cnt2,iKcm2,ix2,dos2)
 

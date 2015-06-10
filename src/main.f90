@@ -25,15 +25,15 @@ program cnt_resonance_energy_transfer
 	
 	call writeLog(new_line('A')//"************** Reading cnt1 ****************")
 	call input_cnt(cnt1)
-	call saveDOS(cnt1)
-	call calculate_occupation_table(cnt1)
+! 	call saveDOS(cnt1)
+! 	call calculate_occupation_table(cnt1)
 
 ! 	call exit()
 
 	call writeLog(new_line('A')//"************** Reading cnt2 ****************")
 	call input_cnt(cnt2)
-	call saveDOS(cnt2)
-	call calculate_occupation_table(cnt2)
+! 	call saveDOS(cnt2)
+! 	call calculate_occupation_table(cnt2)
 
 !  	call exit()
 
