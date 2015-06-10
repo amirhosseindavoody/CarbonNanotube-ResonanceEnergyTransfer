@@ -9,7 +9,8 @@ module cnt_class
 		integer, public :: i_sub !subband index used in exciton energy calculation
 	
 		!Geometrical properties
-		real*8, dimension(2) :: a1,a2,b1,b2,ch_vec,t_vec,aCC_vec
+		real*8, dimension(2) :: a1,a2,b1,b2,ch_vec,t_vec
+		real*8, dimension(2), public :: aCC_vec
 		real*8 :: len_ch,radius
 		integer :: Nu
 		integer, public :: nr

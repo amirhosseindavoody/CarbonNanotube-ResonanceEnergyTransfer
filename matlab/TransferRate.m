@@ -1,10 +1,10 @@
 %% This file visulaized the calculated transfer rates
-clear all; clc; fig=0;
+clear all; clc; fig=2;
 % close all;
 
 %%
 
-dir='C:\Users\amirhossein\Google Drive\Research\Exciton\Data\Transition-Rate\Transfer-(08,07)-Ex0_A2-iSub(2)-Length(30nm)-Center(00nm)-Ckappa(2.0)-to-(07,05)-Ex0_A2-iSub(1)-Length(30nm)-Center(00nm)-Ckappa(2.0)-C2C( 0.0nm- 0.0nm)-Theta(000-090)\';
+dir='C:\Users\amirhossein\Google Drive\Research\Exciton\Data\Transition-Rate\Transfer-(07,05)-Ex0_A2-iSub(1)-Length(30nm)-Center(00nm)-Ckappa(2.0)-to-(07,05)-Ex0_A2-iSub(1)-Length(30nm)-Center(00nm)-Ckappa(2.0)-C2C( 0.0nm- 0.0nm)-Theta(000-090)\';
 FileName=[dir,'transitionRates12.dat'];
 kappa12=load(FileName);
 

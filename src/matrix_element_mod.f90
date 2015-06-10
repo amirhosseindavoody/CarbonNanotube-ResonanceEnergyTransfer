@@ -13,7 +13,7 @@ contains
 	
 	subroutine calculate_kSpaceMatrixElement()
 		use comparams, only: cnt1, cnt2
-		use physicalConstants, only: pi, eps0, q0
+		use physicalConstants, only: pi, eps0, q0, i1
 		use transition_points_mod, only: sameEnergy
 		use write_log_mod, only: writeLog
 
@@ -26,11 +26,19 @@ contains
 		integer :: iC
 		integer :: nSameEnergy
 		character(len=200) :: logInput
+		real*8 :: K1, K2
+		real*8 , dimension(2,2) :: ds1, ds2 ! this are relative displacement of carbon atoms in graphene unit cell
 
 		nSameEnergy = size(sameEnergy,1)
 
 		allocate(kSpaceMatrixElement(nSameEnergy))
 		kSpaceMatrixElement = kSpaceMatrixElement * dcmplx(0.d0,0.d0)
+
+		ds1(1,:) = 0.d0
+		ds1(2,:) = cnt1%aCC_vec
+
+		ds2(1,:) = 0.d0
+		ds2(2,:) = cnt2%aCC_vec		
 		
 		do iC = 1,nSameEnergy
 			if (mod(iC,100) .eq. 0) then
@@ -43,6 +51,9 @@ contains
 			iKcm1 = sameEnergy(iC,3)
 			iKcm2 = sameEnergy(iC,4)
 			kSpaceMatrixElement(iC) = (0.d0,0.d0)
+
+			K1 = dble(iKcm1) * cnt1%dkx
+			K2 = dble(iKcm2) * cnt2%dkx
 
 			tmpc = (0.d0,0.d0)
 			do ikr1 = cnt1%ikr_low, cnt1%ikr_high
@@ -61,7 +72,7 @@ contains
 							tmpc2 = conjg(cnt1%Cc(1,ikc1_p,is))*cnt1%Cv(1,ikv1_p,is)*cnt2%Cc(2,ikc2_m,isp)*conjg(cnt2%Cv(2,ikv2_m,isp))*dcmplx(cnt2%ex_symmetry)
 							tmpc3 = conjg(cnt1%Cc(2,ikc1_m,is))*cnt1%Cv(2,ikv1_m,is)*cnt2%Cc(1,ikc2_p,isp)*conjg(cnt2%Cv(1,ikv2_p,isp))*dcmplx(cnt1%ex_symmetry)
 							tmpc4 = conjg(cnt1%Cc(2,ikc1_m,is))*cnt1%Cv(2,ikv1_m,is)*cnt2%Cc(2,ikc2_m,isp)*conjg(cnt2%Cv(2,ikv2_m,isp))*dcmplx(cnt1%ex_symmetry*cnt2%ex_symmetry)
-							tmpc = tmpc + tmpc1 + tmpc2 + tmpc3 + tmpc4
+							tmpc = tmpc + (tmpc1 + tmpc2 + tmpc3 + tmpc4)*exp(dcmplx(-2.d0*K1*ds1(is,2)+2.d0*K2*ds2(isp,2))*i1)
 						end do  
 					end do
 					kSpaceMatrixElement(iC) = kSpaceMatrixElement(iC) + tmpc*conjg(cnt1%Psi_t(ikr1,ix1,iKcm1))*cnt2%Psi_t(ikr2,ix2,iKcm2)/dcmplx(2.d0,0.d0)
