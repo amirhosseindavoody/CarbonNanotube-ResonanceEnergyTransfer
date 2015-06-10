@@ -14,8 +14,8 @@ cnt1, target_exciton_type=	Ex0_A2
 cnt1, length[nm]=	30
 cnt1, center_position[nm]=	0
 
-cnt2, n_ch=	7
-cnt2, m_ch=	5
+cnt2, n_ch=	8
+cnt2, m_ch=	7
 cnt2, nkg=	1001
 cnt2, dk/dkx=	10
 cnt2, nr=	200
@@ -33,4 +33,6 @@ geometry, nc2c= 1
 
 geometry, thetaMin[degree]= 0
 geometry, thetaMax[degree]= 90
-geometry, nTheta=100
+geometry, nTheta= 100
+
+simulation, partition_function= target

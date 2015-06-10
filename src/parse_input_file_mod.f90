@@ -15,7 +15,7 @@ contains
 	subroutine parse_input_file()
 		use comparams, only: cnt1, cnt2
 		use physicalConstants, only: eV, pi
-		use transitionTable_module, only: c2cMin, c2cMax, nc2c, thetaMin, thetaMax, nTheta
+		use transitionTable_module, only: c2cMin, c2cMax, nc2c, thetaMin, thetaMax, nTheta, partition_function_type
 		use write_log_mod, only: writeLog
 
 		character(len=100) :: filename
@@ -141,6 +141,13 @@ contains
 						case ('nTheta')
 							read(value, *) nTheta
 						end select
+					case('simulation')
+						select case (trim(label))
+						case ('partition_function')
+							partition_function_type = -1
+							if (trim(value) .eq. 'total') partition_function_type = 0
+							if (trim(value) .eq. 'target') partition_function_type = 1
+						end select
 					end select
 				end if
 			else if (ios .gt. 0) then
@@ -152,7 +159,7 @@ contains
 
 		write(cnt1%directory,"( A, 'CNT(', I2.2, ',', I2.2, ')-nkg(', I4.4, ')-nr(', I4.4, ')-E_th(', F3.1, ')-Kcm_max(', F3.1, ')-i_sub(', I1.1, ')-Ckappa(', F3.1, ')/' )") trim(indir), cnt1%n_ch, cnt1%m_ch, cnt1%nkg, cnt1%nr, cnt1%E_th/eV, cnt1%Kcm_max*1.d-9, cnt1%i_sub, cnt1%Ckappa
 		write(cnt2%directory,"( A, 'CNT(', I2.2, ',', I2.2, ')-nkg(', I4.4, ')-nr(', I4.4, ')-E_th(', F3.1, ')-Kcm_max(', F3.1, ')-i_sub(', I1.1, ')-Ckappa(', F3.1, ')/' )") trim(indir), cnt2%n_ch, cnt2%m_ch, cnt2%nkg, cnt2%nr, cnt2%E_th/eV, cnt2%Kcm_max*1.d-9, cnt2%i_sub, cnt2%Ckappa
-		write(outdir,"(A, 'Transfer-(', I2.2, ',', I2.2, ')-', A,'-iSub(',I1.1, ')-Length(', I2.2, 'nm)-Center(', I2.2, 'nm)-Ckappa(', F3.1, ')-to-(', I2.2, ',', I2.2, ')-', A,'-iSub(',I1.1, ')-Length(', I2.2, 'nm)-Center(', I2.2, 'nm)-Ckappa(', F3.1, ')-C2C(', F4.1, 'nm-', F4.1, 'nm)-Theta(', I3.3, '-', I3.3, ')')") trim(outdir), cnt1%n_ch, cnt1%m_ch, trim(cnt1%targetExcitonType), cnt1%i_sub, nint(cnt1%length*1.d9), nint(cnt1%center_position*1.d9), cnt1%Ckappa, cnt2%n_ch, cnt2%m_ch, trim(cnt2%targetExcitonType), cnt2%i_sub, nint(cnt2%length*1.d9), nint(cnt2%center_position*1.d9), cnt2%Ckappa, c2cMin, c2cMax, nint(thetaMin*180/pi), nint(thetaMax*180/pi)
+		write(outdir,"(A, 'Transfer-(', I2.2, ',', I2.2, ')-', A,'-iSub(',I1.1, ')-Length(', I2.2, 'nm)-Center(', I2.2, 'nm)-Ckappa(', F3.1, ')-to-(', I2.2, ',', I2.2, ')-', A,'-iSub(',I1.1, ')-Length(', I2.2, 'nm)-Center(', I2.2, 'nm)-Ckappa(', F3.1, ')-C2C(', F4.1, 'nm-', F4.1, 'nm)-Theta(', I3.3, '-', I3.3, ')-partition(', I1.1,')')") trim(outdir), cnt1%n_ch, cnt1%m_ch, trim(cnt1%targetExcitonType), cnt1%i_sub, nint(cnt1%length*1.d9), nint(cnt1%center_position*1.d9), cnt1%Ckappa, cnt2%n_ch, cnt2%m_ch, trim(cnt2%targetExcitonType), cnt2%i_sub, nint(cnt2%length*1.d9), nint(cnt2%center_position*1.d9), cnt2%Ckappa, c2cMin, c2cMax, nint(thetaMin*180/pi), nint(thetaMax*180/pi), partition_function_type
 
 
 

@@ -22,6 +22,8 @@ module transitionTable_module
 	real*8 :: theta
 	integer :: iTheta
 	real*8 :: dTheta
+
+	integer, public :: partition_function_type
 	
 	
 contains
@@ -87,8 +89,8 @@ contains
 		allocate(transitionRate(2,nTheta,nc2c))
 		transitionRate = 0.d0
 
-		call calculatePartitionFunction(cnt1, partitionFunction1)
-		call calculatePartitionFunction(cnt2, partitionFunction2)
+		call calculatePartitionFunction(partition_function_type, cnt1, partitionFunction1)
+		call calculatePartitionFunction(partition_function_type, cnt2, partitionFunction2)
 		
 		do ic2c = 1, nc2c
 			c2cDistance = c2cMin+dble(ic2c-1)*dc2c

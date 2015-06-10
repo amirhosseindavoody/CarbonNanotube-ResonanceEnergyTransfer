@@ -1,18 +1,19 @@
 module prepareForster_module
 	implicit none
 	private
-    public  :: calculateDOS, calculatePartitionFunction, saveDOS
+    public  :: calculateDOS,calculatePartitionFunction, saveDOS
     
 contains
 	!**************************************************************************************************************************
-	! calculate the partition function for a given carbon nanotube
+	! calculate the partition function for target or all exciton types of a given carbon nanotube
 	!**************************************************************************************************************************
 	
-	subroutine calculatePartitionFunction(currcnt, partitionFunction)
+	subroutine calculatePartitionFunction(partition_function_type, currcnt, partitionFunction)
 		use cnt_class, only: cnt
 		use comparams, only : Temperature
 		use physicalConstants, only : kb
 
+		integer, intent(in) :: partition_function_type
 		type(cnt), intent(in) :: currcnt
 		real*8, intent(out) :: partitionFunction
 		integer :: ix, iKcm
@@ -23,13 +24,31 @@ contains
         
 		partitionFunction = 0.d0
         
-		do ix = 1,currcnt%nX
-			do iKcm = currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
-				if((currcnt%Ex_t(ix,iKcm)-min_energy) .le. deltaE) then
-					partitionFunction = partitionFunction + exp(-currcnt%Ex_t(ix,iKcm)/kb/Temperature)    
-				endif
+        if (partition_function_type .eq. 0) then
+			do ix = 1,currcnt%nX
+				do iKcm = currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
+					if((currcnt%Ex_A1(ix,iKcm)-min_energy) .le. deltaE) then
+						partitionFunction = partitionFunction + exp(-currcnt%Ex_A1(ix,iKcm)/kb/Temperature)    
+					endif
+					if((currcnt%Ex0_A2(ix,iKcm)-min_energy) .le. deltaE) then
+						partitionFunction = partitionFunction + exp(-currcnt%Ex0_A2(ix,iKcm)/kb/Temperature)    
+					endif
+					if((currcnt%Ex1_A2(ix,iKcm)-min_energy) .le. deltaE) then
+						partitionFunction = partitionFunction + exp(-currcnt%Ex1_A2(ix,iKcm)/kb/Temperature)    
+					endif
+				end do
 			end do
-		end do
+		elseif (partition_function_type .eq. 1) then
+			do ix = 1,currcnt%nX
+				do iKcm = currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
+					if((currcnt%Ex_t(ix,iKcm)-min_energy) .le. deltaE) then
+						partitionFunction = partitionFunction + exp(-currcnt%Ex_t(ix,iKcm)/kb/Temperature)    
+					endif
+				end do
+			end do
+		else
+			write(*,*) "Error in determining the type of partition function!"
+		endif
         
 	end subroutine calculatePartitionFunction
 

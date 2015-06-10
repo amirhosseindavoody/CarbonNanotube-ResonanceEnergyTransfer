@@ -27,8 +27,8 @@ contains
 		complex*16 :: matrixElement
 				
 				
-        call calculatePartitionFunction(cnt1, partitionFunction1)
-		call calculatePartitionFunction(cnt2, partitionFunction2)
+        call calculatePartitionFunction(1,cnt1, partitionFunction1)
+		call calculatePartitionFunction(1,cnt2, partitionFunction2)
 				
 		totalTransitionRate12 = 0.d0
 		totalTransitionRate21 = 0.d0
