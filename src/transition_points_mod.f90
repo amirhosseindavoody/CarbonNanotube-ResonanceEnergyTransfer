@@ -20,7 +20,7 @@ contains
 		integer, dimension(:,:), allocatable :: tempCrossingPoints
 		real*8 :: rtmp1, rtmp2
         
-		tmp = cnt1%nX * cnt2%nX * (2*cnt1%iKcm_max_fine+1) * (2*cnt2%iKcm_max_fine+1)
+		tmp = cnt1%nX_a * cnt2%nX_a * (2*cnt1%iKcm_max_fine+1) * (2*cnt2%iKcm_max_fine+1)
 		allocate(tempCrossingPoints(tmp,3))
 		do i = 1,tmp
 			tempCrossingPoints(i,1) = 0    
@@ -29,8 +29,8 @@ contains
 		end do
         
 		nCrossing = 0
-		do ix1 = 1,cnt1%nX
-			do ix2 = 1,cnt2%nX
+		do ix1 = 1,cnt1%nX_a
+			do ix2 = 1,cnt2%nX_a
 				do iKcm = cnt1%iKcm_min_fine+1 , cnt1%iKcm_max_fine
 					rtmp1 = (cnt1%Ex_t(ix1,iKcm)-cnt2%Ex_t(ix2,iKcm))
 					rtmp2 = (cnt1%Ex_t(ix1,iKcm-1)-cnt2%Ex_t(ix2,iKcm-1))
@@ -76,7 +76,7 @@ contains
 		integer, dimension(:,:), allocatable :: tempSameEnergy
 		real*8 :: min_energy, deltaE
 
-		tmp = cnt1%nX * cnt2%nX * (2*cnt1%iKcm_max_fine+1) * (2*cnt2%iKcm_max_fine+1)
+		tmp = cnt1%nX_a * cnt2%nX_a * (2*cnt1%iKcm_max_fine+1) * (2*cnt2%iKcm_max_fine+1)
 		allocate(tempSameEnergy(tmp,4))
 
 		! calculate relevant same energy points for transition from cnt1 to cnt2
@@ -88,10 +88,10 @@ contains
 		n = cnt2%iKcm_max_fine
 
 		nSameEnergy = 0
-		do ix1 = 1,cnt1%nX
+		do ix1 = 1,cnt1%nX_a
 			do iKcm1 = cnt1%iKcm_min_fine , -1
 				if ((cnt1%Ex_t(ix1,iKcm1) - min_energy) .lt. deltaE) then
-					do ix2 = 1, cnt2%nX
+					do ix2 = 1, cnt2%nX_a
 						call bisect_root(n, cnt2%Ex_t(ix2,cnt2%iKcm_min_fine:-1), cnt1%Ex_t(ix1,iKcm1), iKcm_raw)
 						if (iKcm_raw .gt. 0) then
 							iKcm2 = cnt2%iKcm_min_fine + iKcm_raw - 1
@@ -164,7 +164,7 @@ contains
 		!write carbon nanotube 1 Ex_t dispersion
 		open(unit=100,file='cnt1_Ex_t.dat',status="unknown")
 		do iKcm=cnt1%iKcm_min_fine,cnt1%iKcm_max_fine
-			do iX=1,cnt1%nX
+			do iX=1,cnt1%nX_a
 				write(100,'(E16.8)', advance='no') cnt1%Ex_t(iX,iKcm)
 			enddo
 			write(100,*)
@@ -174,7 +174,7 @@ contains
 		!write carbon nanotube 2 Ex_t dispersion
 		open(unit=100,file='cnt2_Ex_t.dat',status="unknown")
 		do iKcm=cnt2%iKcm_min_fine,cnt2%iKcm_max_fine
-			do iX=1,cnt2%nX
+			do iX=1,cnt2%nX_a
 				write(100,'(E16.8)', advance='no') cnt2%Ex_t(iX,iKcm)
 			enddo
 			write(100,*)

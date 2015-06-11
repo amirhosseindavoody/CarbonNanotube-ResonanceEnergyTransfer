@@ -21,7 +21,7 @@ contains
 		character(len=200) :: buffer, label
 		integer :: ios=0
 		integer :: pos=0
-		integer, parameter :: nparam=11
+		integer, parameter :: nparam=12
 		integer :: iparam=0
 		character(len=100) :: logInput
 
@@ -91,9 +91,14 @@ contains
 					write(logInput,"('kappa = ', f3.1)") currcnt%kappa
 					call writeLog(logInput)
 					iparam = iparam+1
-				case ('nX')
-					read(buffer, *, iostat=ios) currcnt%nX
-					write(logInput,"('nX = ', I3.3)") currcnt%nX
+				case ('nX_a')
+					read(buffer, *, iostat=ios) currcnt%nX_a
+					write(logInput,"('nX_a = ', I3.3)") currcnt%nX_a
+					call writeLog(logInput)
+					iparam = iparam+1
+				case ('nX_e')
+					read(buffer, *, iostat=ios) currcnt%nX_e
+					write(logInput,"('nX_e = ', I3.3)") currcnt%nX_e
 					call writeLog(logInput)
 					iparam = iparam+1
 				end select
@@ -110,16 +115,22 @@ contains
 		! create the cnt object and calculate bands and load exciton wavefunction
 		call cnt_geometry(currcnt)
 		call cnt_band(currcnt)
-		call input_exciton(currcnt)
+		call input_A_exciton(currcnt)
+		call input_E_exciton(currcnt)
+
+		if (.not. allocated(currcnt%Ex_t)) then
+			call writeLog("Error in setting target exciton type!!!!")
+			call exit()
+		endif
 
 		return
 	end subroutine input_cnt
 
 	!**************************************************************************************************************************
-	! load the exciton wavefunction and energies from the ExcitonEnergy calculation
+	! load the A-type exciton wavefunction and energies from the ExcitonEnergy calculation
 	!**************************************************************************************************************************
 	
-	subroutine input_exciton(currcnt)
+	subroutine input_A_exciton(currcnt)
 		use cnt_class, only: cnt
 		use write_log_mod, only: writeLog
 
@@ -128,13 +139,13 @@ contains
 		real*8 :: tmpr1, tmpr2, tmpr3
 
 		! read the information of A1 exciton
-		allocate(currcnt%Ex_A1(1:currcnt%nX,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
-		allocate(currcnt%Psi_A1(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+		allocate(currcnt%Ex_A1(1:currcnt%nX_a,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+		allocate(currcnt%Psi_A1(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_a,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
 		
 		open(unit=100,file=trim(currcnt%directory)//'Ex_A1.dat',status="old")
 		open(unit=101,file=trim(currcnt%directory)//'Psi_A1.dat',status="old")
 		do iKcm=currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
-			do iX=1,currcnt%nX
+			do iX=1,currcnt%nX_a
 				read(100,'(E16.8)', advance='no') currcnt%Ex_A1(iX,iKcm)
 				do ikr=currcnt%ikr_low,currcnt%ikr_high
 					read(101,'(E16.8,E16.8)', advance='no') currcnt%Psi_A1(ikr,iX,iKcm)
@@ -148,13 +159,13 @@ contains
 		close(101)
 
 		! read the information of singlet A2 exciton
-		allocate(currcnt%Ex0_A2(1:currcnt%nX,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
-		allocate(currcnt%Psi0_A2(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+		allocate(currcnt%Ex0_A2(1:currcnt%nX_a,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+		allocate(currcnt%Psi0_A2(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_a,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
 		
 		open(unit=100,file=trim(currcnt%directory)//'Ex0_A2.dat',status="old")
 		open(unit=101,file=trim(currcnt%directory)//'Psi0_A2.dat',status="old")
 		do iKcm=currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
-			do iX=1,currcnt%nX
+			do iX=1,currcnt%nX_a
 				read(100,'(E16.8)', advance='no') currcnt%Ex0_A2(iX,iKcm)
 				do ikr=currcnt%ikr_low,currcnt%ikr_high
 					read(101,'(E16.8,E16.8)', advance='no') currcnt%Psi0_A2(ikr,iX,iKcm)
@@ -168,13 +179,13 @@ contains
 		close(101)
 
 		! read the information of triplet A2 exciton
-		allocate(currcnt%Ex1_A2(1:currcnt%nX,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
-		allocate(currcnt%Psi1_A2(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+		allocate(currcnt%Ex1_A2(1:currcnt%nX_a,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+		allocate(currcnt%Psi1_A2(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_a,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
 		
 		open(unit=100,file=trim(currcnt%directory)//'Ex1_A2.dat',status="old")
 		open(unit=101,file=trim(currcnt%directory)//'Psi1_A2.dat',status="old")
 		do iKcm=currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
-			do iX=1,currcnt%nX
+			do iX=1,currcnt%nX_a
 				read(100,'(E16.8)', advance='no') currcnt%Ex1_A2(iX,iKcm)
 				do ikr=currcnt%ikr_low,currcnt%ikr_high
 					read(101,'(E16.8,E16.8)', advance='no') currcnt%Psi1_A2(ikr,iX,iKcm)
@@ -188,7 +199,7 @@ contains
 		close(101)
 
 		!make sure the exciton wavefunctions are normalized
-		do iX=1,currcnt%nX
+		do iX=1,currcnt%nX_a
 			do iKcm=currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
 				tmpr1 = 0.d0
 				tmpr2 = 0.d0
@@ -206,32 +217,174 @@ contains
 
 
 		! set the information of the target exciton type
-		allocate(currcnt%Ex_t(1:currcnt%nX,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
-		allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
-
 		select case (trim(currcnt%targetExcitonType))
 		case ('Ex_A1')
 			call writeLog("Target exciton: Ex_A1")
+			allocate(currcnt%Ex_t(1:currcnt%nX_a,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+			allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_a,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
 			currcnt%Ex_t = currcnt%Ex_A1
 			currcnt%Psi_t = currcnt%Psi_A1
 			currcnt%ex_symmetry = -1.d0
 		case ('Ex0_A2')
 			call writeLog("Target exciton: Ex0_A2")
+			allocate(currcnt%Ex_t(1:currcnt%nX_a,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+			allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_a,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
 			currcnt%Ex_t = currcnt%Ex0_A2
 			currcnt%Psi_t = currcnt%Psi0_A2
 			currcnt%ex_symmetry = +1.d0
 		case ('Ex1_A2')
 			call writeLog("Target exciton: Ex1_A2")
+			allocate(currcnt%Ex_t(1:currcnt%nX_a,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+			allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_a,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
 			currcnt%Ex_t = currcnt%Ex1_A2
 			currcnt%Psi_t = currcnt%Psi1_A2
 			currcnt%ex_symmetry = +1.d0
-		case default
-			call writeLog("Could not recognize target exciton type!!!!")
-			call exit()
 		end select
 
 		return
-	end subroutine input_exciton
+	end subroutine input_A_exciton
 
+	!**************************************************************************************************************************
+	! load the E-type exciton wavefunction and energies from the ExcitonEnergy calculation
+	!**************************************************************************************************************************
+	
+	subroutine input_E_exciton(currcnt)
+		use cnt_class, only: cnt
+		use write_log_mod, only: writeLog
+
+		type(cnt), intent(inout) :: currcnt
+		integer :: iX, iKcm, ikr
+		real*8 :: tmpr1, tmpr2, tmpr3
+
+		! read the information of singlet E+ exciton
+		allocate(currcnt%Ex0_Ep(1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+		allocate(currcnt%Psi0_Ep(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+		
+		open(unit=100,file=trim(currcnt%directory)//'Ex0_Ep.dat',status="old")
+		open(unit=101,file=trim(currcnt%directory)//'Psi0_Ep.dat',status="old")
+		do iKcm=currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
+			do iX=1,currcnt%nX_e
+				read(100,'(E16.8)', advance='no') currcnt%Ex0_Ep(iX,iKcm)
+				do ikr=currcnt%ikr_low,currcnt%ikr_high
+					read(101,'(E16.8,E16.8)', advance='no') currcnt%Psi0_Ep(ikr,iX,iKcm)
+				enddo
+			enddo
+			
+			read(100,'(E16.8)')
+			read(101,'(E16.8)')
+		enddo
+		close(100)
+		close(101)
+
+		! read the information of singlet E- exciton
+		allocate(currcnt%Ex0_Em(1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+		allocate(currcnt%Psi0_Em(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+		
+		open(unit=100,file=trim(currcnt%directory)//'Ex0_Em.dat',status="old")
+		open(unit=101,file=trim(currcnt%directory)//'Psi0_Em.dat',status="old")
+		do iKcm=currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
+			do iX=1,currcnt%nX_e
+				read(100,'(E16.8)', advance='no') currcnt%Ex0_Em(iX,iKcm)
+				do ikr=currcnt%ikr_low,currcnt%ikr_high
+					read(101,'(E16.8,E16.8)', advance='no') currcnt%Psi0_Em(ikr,iX,iKcm)
+				enddo
+			enddo
+			
+			read(100,'(E16.8)')
+			read(101,'(E16.8)')
+		enddo
+		close(100)
+		close(101)
+
+		! read the information of triplet E+ exciton
+		allocate(currcnt%Ex1_Ep(1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+		allocate(currcnt%Psi1_Ep(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+		
+		open(unit=100,file=trim(currcnt%directory)//'Ex1_Ep.dat',status="old")
+		open(unit=101,file=trim(currcnt%directory)//'Psi1_Ep.dat',status="old")
+		do iKcm=currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
+			do iX=1,currcnt%nX_e
+				read(100,'(E16.8)', advance='no') currcnt%Ex1_Ep(iX,iKcm)
+				do ikr=currcnt%ikr_low,currcnt%ikr_high
+					read(101,'(E16.8,E16.8)', advance='no') currcnt%Psi1_Ep(ikr,iX,iKcm)
+				enddo
+			enddo
+			
+			read(100,'(E16.8)')
+			read(101,'(E16.8)')
+		enddo
+		close(100)
+		close(101)
+
+		! read the information of triplet E- exciton
+		allocate(currcnt%Ex1_Em(1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+		allocate(currcnt%Psi1_Em(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+		
+		open(unit=100,file=trim(currcnt%directory)//'Ex1_Em.dat',status="old")
+		open(unit=101,file=trim(currcnt%directory)//'Psi1_Em.dat',status="old")
+		do iKcm=currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
+			do iX=1,currcnt%nX_e
+				read(100,'(E16.8)', advance='no') currcnt%Ex1_Em(iX,iKcm)
+				do ikr=currcnt%ikr_low,currcnt%ikr_high
+					read(101,'(E16.8,E16.8)', advance='no') currcnt%Psi1_Em(ikr,iX,iKcm)
+				enddo
+			enddo
+			
+			read(100,'(E16.8)')
+			read(101,'(E16.8)')
+		enddo
+		close(100)
+		close(101)
+
+		!make sure the exciton wavefunctions are normalized
+		do iX=1,currcnt%nX_e
+			do iKcm=currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
+				tmpr1 = 0.d0
+				tmpr2 = 0.d0
+				tmpr3 = 0.d0
+				do ikr=currcnt%ikr_low,currcnt%ikr_high
+					tmpr1 = tmpr1 + abs(currcnt%Psi0_Ep(ikr,iX,iKcm))
+					tmpr2 = tmpr2 + abs(currcnt%Psi0_Em(ikr,iX,iKcm))
+					tmpr3 = tmpr3 + abs(currcnt%Psi1_Ep(ikr,iX,iKcm))
+					tmpr3 = tmpr3 + abs(currcnt%Psi1_Em(ikr,iX,iKcm))
+				enddo
+				currcnt%Psi0_Ep(:,iX,iKcm) = currcnt%Psi0_Ep(:,iX,iKcm) / dcmplx(sqrt(tmpr1))
+				currcnt%Psi0_Em(:,iX,iKcm) = currcnt%Psi0_Em(:,iX,iKcm) / dcmplx(sqrt(tmpr2))
+				currcnt%Psi1_Ep(:,iX,iKcm) = currcnt%Psi1_Ep(:,iX,iKcm) / dcmplx(sqrt(tmpr3))
+				currcnt%Psi1_Em(:,iX,iKcm) = currcnt%Psi1_Em(:,iX,iKcm) / dcmplx(sqrt(tmpr3))
+			enddo
+		enddo
+
+
+		! set the information of the target exciton type
+		select case (trim(currcnt%targetExcitonType))
+		case ('Ex0_Ep')
+			call writeLog("Target exciton: Ex0_Ep")
+			allocate(currcnt%Ex_t(1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+			allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+			currcnt%Ex_t = currcnt%Ex0_Ep
+			currcnt%Psi_t = currcnt%Psi0_Ep
+		case ('Ex0_Em')
+			call writeLog("Target exciton: Ex0_Em")
+			allocate(currcnt%Ex_t(1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+			allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+			currcnt%Ex_t = currcnt%Ex0_Em
+			currcnt%Psi_t = currcnt%Psi0_Em
+		case ('Ex1_Ep')
+			call writeLog("Target exciton: Ex1_Ep")
+			allocate(currcnt%Ex_t(1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+			allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+			currcnt%Ex_t = currcnt%Ex1_Ep
+			currcnt%Psi_t = currcnt%Psi1_Ep
+		case ('Ex1_Em')
+			call writeLog("Target exciton: Ex1_Em")
+			allocate(currcnt%Ex_t(1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+			allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
+			currcnt%Ex_t = currcnt%Ex1_Em
+			currcnt%Psi_t = currcnt%Psi1_Em
+		end select
+
+		return
+	end subroutine input_E_exciton
 	
 end module input_cnt_mod

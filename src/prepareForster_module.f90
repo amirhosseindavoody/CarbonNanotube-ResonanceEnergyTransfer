@@ -25,7 +25,7 @@ contains
 		partitionFunction = 0.d0
         
         if (partition_function_type .eq. 0) then
-			do ix = 1,currcnt%nX
+			do ix = 1,currcnt%nX_a
 				do iKcm = currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
 					if((currcnt%Ex_A1(ix,iKcm)-min_energy) .le. deltaE) then
 						partitionFunction = partitionFunction + exp(-currcnt%Ex_A1(ix,iKcm)/kb/Temperature)    
@@ -39,7 +39,7 @@ contains
 				end do
 			end do
 		elseif (partition_function_type .eq. 1) then
-			do ix = 1,currcnt%nX
+			do ix = 1,currcnt%nX_a
 				do iKcm = currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
 					if((currcnt%Ex_t(ix,iKcm)-min_energy) .le. deltaE) then
 						partitionFunction = partitionFunction + exp(-currcnt%Ex_t(ix,iKcm)/kb/Temperature)    
@@ -92,7 +92,7 @@ contains
 		!write currcnt dos
 		open(unit=100,file=filename,status="unknown")
 		do iKcm=currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
-			do iX=1,currcnt%nX
+			do iX=1,currcnt%nX_a
 				call calculateDOS(currcnt,iKcm,iX,DOS)
 				write(100,'(E16.8)', advance='no') dos
 			enddo

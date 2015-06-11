@@ -35,7 +35,7 @@ contains
 		partitionFunction = 0.d0
 
 		counter = 0
-		do ix = 1,currcnt%nX
+		do ix = 1,currcnt%nX_a
 			do iKcm = iKcm_min_fine,iKcm_max_fine
 				counter = counter + 1
 				occupation_table(counter,1) = currcnt%Ex_t(ix,iKcm)

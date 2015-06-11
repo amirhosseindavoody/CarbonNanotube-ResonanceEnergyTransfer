@@ -44,6 +44,8 @@ module cnt_class
 		!Exciton wavefunction and energies
 		real*8, dimension(:,:), allocatable, public :: Ex_A1, Ex0_A2, Ex1_A2 !the first index is subband, the second index is iKcm
 		complex*16, dimension(:,:,:), allocatable, public :: Psi_A1, Psi0_A2, Psi1_A2 !the first index is ikr, the scond index is the subband, the third index is iKcm
+		real*8, dimension(:,:), allocatable, public :: Ex0_Em, Ex0_Ep, Ex1_Em, Ex1_Ep !the first index is subband, the second index is iKcm
+		complex*16, dimension(:,:,:), allocatable, public :: Psi0_Em, Psi0_Ep, Psi1_Em, Psi1_Ep !the first index is ikr, the scond index is the subband, the third index is iKcm
 
 		!Target exciton wavefunction and energies
 		real*8, dimension(:,:), allocatable, public :: Ex_t !the first index is subband, the second index is iKcm
@@ -52,7 +54,7 @@ module cnt_class
 		real*8, public :: ex_symmetry
 
 		!number of exciton bands below free-electron free-hole energy level
-		integer, public :: nX
+		integer, public :: nX_a, nX_e
 		real*8, public :: E_th
 		real*8, public :: Kcm_max
 
