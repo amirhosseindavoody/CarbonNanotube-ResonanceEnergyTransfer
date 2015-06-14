@@ -123,6 +123,8 @@ contains
 			call exit()
 		endif
 
+		currcnt%nX_t = size(currcnt%Ex_t,1)
+
 		return
 	end subroutine input_cnt
 

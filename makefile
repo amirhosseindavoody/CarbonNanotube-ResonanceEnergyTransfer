@@ -7,18 +7,19 @@ FCFLAGS = -O3 -ffree-line-length-none
 SRCDIR = ./src
 OBJDIR = ./obj
 
+a2a_matrix_element_mod.o: comparams.o physicalConstants.o transition_points_mod.o write_log_mod.o
+a2ep_matrix_element_mod.o: comparams.o physicalConstants.o transition_points_mod.o write_log_mod.o
 cnt_class.o: physicalConstants.o math_functions_mod.o
 comparams.o: cnt_class.o
 input_cnt_mod.o: cnt_class.o physicalConstants.o write_log_mod.o
 kappaMatrix_module.o: cnt_class.o comparams.o parallel_geometry_mod.o physicalConstants.o transition_points_mod.o write_log_mod.o
 main.o: cnt_class.o comparams.o input_cnt_mod.o kappaMatrix_module.o occupation_mod.o parse_input_file_mod.o prepareForster_module.o transitionTable_module.o write_log_mod.o
-matrix_element_mod.o: comparams.o physicalConstants.o transition_points_mod.o write_log_mod.o
 occupation_mod.o: comparams.o cnt_class.o physicalConstants.o
 parallel_geometry_mod.o: cnt_class.o comparams.o math_functions_mod.o physicalConstants.o prepareForster_module.o transition_points_mod.o write_log_mod.o  
 parse_input_file_mod.o: comparams.o physicalConstants.o transitionTable_module.o write_log_mod.o
 prepareForster_module.o: cnt_class.o comparams.o physicalConstants.o
 transition_points_mod.o: cnt_class.o comparams.o math_functions_mod.o physicalConstants.o write_log_mod.o
-transitionTable_module.o: cnt_class.o comparams.o matrix_element_mod.o physicalConstants.o prepareForster_module.o transition_points_mod.o write_log_mod.o
+transitionTable_module.o: a2a_matrix_element_mod.o a2ep_matrix_element_mod.o cnt_class.o comparams.o physicalConstants.o prepareForster_module.o transition_points_mod.o write_log_mod.o
 
 main: main.o
 	$(FC) $(FCFLAGS) -o $@.exe $(wildcard $(OBJDIR)/*.o) 

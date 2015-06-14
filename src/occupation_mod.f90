@@ -22,6 +22,7 @@ contains
 		integer :: iKcm_max_fine, iKcm_min_fine
 		real*8 :: partitionFunction
 		real*8 , dimension(:,:), allocatable :: occupation_table
+		real*8 :: occupation_Atype, occupation_Etype
 		character(len=100) :: filename
 		
 		iKcm_min_fine = currcnt%dk_dkx_ratio * currcnt%iKcm_min
@@ -34,8 +35,31 @@ contains
 
 		partitionFunction = 0.d0
 
-		counter = 0
+		occupation_Atype = 0.d0
 		do ix = 1,currcnt%nX_a
+			do iKcm = iKcm_min_fine,iKcm_max_fine
+				occupation_Atype = occupation_Atype + exp(-currcnt%Ex0_A2(ix,iKcm)/kb/Temperature)
+			end do
+		end do
+
+		occupation_Etype = 0.d0
+		do ix = 1,currcnt%nX_e
+			do iKcm = iKcm_min_fine,iKcm_max_fine
+				occupation_Etype = occupation_Etype + exp(-currcnt%Ex0_Ep(ix,iKcm)/kb/Temperature)
+				occupation_Etype = occupation_Etype + exp(-currcnt%Ex0_Em(ix,iKcm)/kb/Temperature)
+			end do
+		end do
+		write(*,*) "minimum energy of A2  excitons: ", minval(currcnt%Ex0_A2)/eV
+		write(*,*) "minimum energy of E+ excitons: ", minval(currcnt%Ex0_Ep)/eV
+		write(*,*) "minimum energy of E- excitons: ", minval(currcnt%Ex0_Em)/eV
+		write(*,*) "A-type occupation percentage is: ", occupation_Atype/(occupation_Atype+occupation_Etype)
+		write(*,*) "E-type occupation percentage is: ", occupation_Etype/(occupation_Atype+occupation_Etype)
+
+! 		call exit()
+
+
+		counter = 0
+		do ix = 1,currcnt%nX_t
 			do iKcm = iKcm_min_fine,iKcm_max_fine
 				counter = counter + 1
 				occupation_table(counter,1) = currcnt%Ex_t(ix,iKcm)

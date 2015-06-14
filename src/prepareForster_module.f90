@@ -25,6 +25,7 @@ contains
 		partitionFunction = 0.d0
         
         if (partition_function_type .eq. 0) then
+			! partition function due to A-type excitons
 			do ix = 1,currcnt%nX_a
 				do iKcm = currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
 					if((currcnt%Ex_A1(ix,iKcm)-min_energy) .le. deltaE) then
@@ -38,8 +39,26 @@ contains
 					endif
 				end do
 			end do
+			! partition function due to E-type excitons
+			do ix = 1,currcnt%nX_e
+				do iKcm = currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
+					if((currcnt%Ex0_Ep(ix,iKcm)-min_energy) .le. deltaE) then
+						partitionFunction = partitionFunction + exp(-currcnt%Ex0_Ep(ix,iKcm)/kb/Temperature)    
+					endif
+					if((currcnt%Ex0_Em(ix,iKcm)-min_energy) .le. deltaE) then
+						partitionFunction = partitionFunction + exp(-currcnt%Ex0_Em(ix,iKcm)/kb/Temperature)    
+					endif
+					if((currcnt%Ex1_Ep(ix,iKcm)-min_energy) .le. deltaE) then
+						partitionFunction = partitionFunction + exp(-currcnt%Ex1_Ep(ix,iKcm)/kb/Temperature)    
+					endif
+					if((currcnt%Ex1_Em(ix,iKcm)-min_energy) .le. deltaE) then
+						partitionFunction = partitionFunction + exp(-currcnt%Ex1_Em(ix,iKcm)/kb/Temperature)    
+					endif
+				end do
+			end do
+
 		elseif (partition_function_type .eq. 1) then
-			do ix = 1,currcnt%nX_a
+			do ix = 1,currcnt%nX_t
 				do iKcm = currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
 					if((currcnt%Ex_t(ix,iKcm)-min_energy) .le. deltaE) then
 						partitionFunction = partitionFunction + exp(-currcnt%Ex_t(ix,iKcm)/kb/Temperature)    
@@ -92,7 +111,7 @@ contains
 		!write currcnt dos
 		open(unit=100,file=filename,status="unknown")
 		do iKcm=currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
-			do iX=1,currcnt%nX_a
+			do iX=1,currcnt%nX_t
 				call calculateDOS(currcnt,iKcm,iX,DOS)
 				write(100,'(E16.8)', advance='no') dos
 			enddo

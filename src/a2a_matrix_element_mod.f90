@@ -1,9 +1,7 @@
-module matrix_element_mod
+module a2a_matrix_element_mod
 	implicit none
 	private
-    public  :: calculate_kSpaceMatrixElement, calculate_finitegeometricMatrixElement, calculate_infiniteGeometricMatrixElement_unparallel
-
-	complex*16, dimension(:), allocatable, public :: kSpaceMatrixElement
+    public  :: calculate_a2a_kSpaceMatrixElement, calculate_a2a_finitegeometricMatrixElement, calculate_a2a_infiniteGeometricMatrixElement_unparallel
     
 contains
 	
@@ -11,12 +9,13 @@ contains
 	! calculate the k-space part of matrix element for the crossing point number iC
 	!**************************************************************************************************************************
 	
-	subroutine calculate_kSpaceMatrixElement()
+	subroutine calculate_a2a_kSpaceMatrixElement(kSpaceMatrixElement)
 		use comparams, only: cnt1, cnt2
 		use physicalConstants, only: pi, eps0, q0, i1
 		use transition_points_mod, only: sameEnergy
 		use write_log_mod, only: writeLog
 
+		complex*16, dimension(:), allocatable, intent(inout) :: kSpaceMatrixElement
 		complex*16 :: tmpc, tmpc1, tmpc2, tmpc3, tmpc4
 		integer :: ix1,ix2
 		integer :: iKcm1, iKcm2
@@ -84,13 +83,13 @@ contains
 		kSpaceMatrixElement = kSpaceMatrixElement * dcmplx(q0**2/(4.d0*pi*eps0*4.d0*(pi*pi)*sqrt(2.d0*pi/cnt1%dk * 2.d0*pi/cnt2%dk)))
 			
 		return		
-	end subroutine calculate_kSpaceMatrixElement
+	end subroutine calculate_a2a_kSpaceMatrixElement
 
 	!**************************************************************************************************************************
 	! calculate the geometric part of matrix element for two finite tubes forming angle theta
 	!**************************************************************************************************************************
 	
-	subroutine calculate_finiteGeometricMatrixElement(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
+	subroutine calculate_a2a_finiteGeometricMatrixElement(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
 		use comparams, only: cnt1, cnt2
 		use physicalConstants, only: i1, pi
 
@@ -142,14 +141,14 @@ contains
 		geometricMatrixElement = geometricMatrixElement * dcmplx((2.d0*pi*dx)**2)
 						
 		return		
-	end subroutine calculate_finiteGeometricMatrixElement
+	end subroutine calculate_a2a_finiteGeometricMatrixElement
 
 
 	!**************************************************************************************************************************
 	! calculate the geometric part of matrix element for two infinite tubes forming angle theta
 	!**************************************************************************************************************************
 	
-	subroutine calculate_infiniteGeometricMatrixElement_unparallel(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
+	subroutine calculate_a2a_infiniteGeometricMatrixElement_unparallel(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
 		use comparams, only: cnt1, cnt2
 		use physicalConstants, only: i1, pi
 
@@ -173,7 +172,7 @@ contains
 		radius1 = cnt1%radius
 		radius2	= cnt2%radius
 
-		nPhi1 = 20
+		nPhi1 = 8
 		dPhi1 = 2.d0*pi/nPhi1
 		
 		nPhi2 = nPhi1
@@ -206,7 +205,7 @@ contains
 		end if
 						
 		return		
-	end subroutine calculate_infiniteGeometricMatrixElement_unparallel
+	end subroutine calculate_a2a_infiniteGeometricMatrixElement_unparallel
 
 				
-end module matrix_element_mod
+end module a2a_matrix_element_mod

@@ -35,6 +35,7 @@ module cnt_class
 		integer, dimension(:), allocatable :: min_sub
 		integer, public :: ikc_max, ikc_min, ik_max, ik_min, iKcm_max, iKcm_min, ik_high, ik_low, ikr_high, ikr_low, iq_max, iq_min
 		integer, public :: iKcm_min_fine, iKcm_max_fine
+		integer, public :: mu_cm
 		
 		!CNT self energy and tight binding coefficients
 		real*8, dimension(:,:,:), allocatable, public :: Ek  !Tight-binding energy
@@ -54,7 +55,7 @@ module cnt_class
 		real*8, public :: ex_symmetry
 
 		!number of exciton bands below free-electron free-hole energy level
-		integer, public :: nX_a, nX_e
+		integer, public :: nX_a, nX_e, nX_t
 		real*8, public :: E_th
 		real*8, public :: Kcm_max
 
@@ -295,6 +296,20 @@ contains
 
 		currcnt%iKcm_max_fine = currcnt%iKcm_max * currcnt%dk_dkx_ratio
 		currcnt%iKcm_min_fine = currcnt%iKcm_min * currcnt%dk_dkx_ratio
+
+		select case (trim(currcnt%targetExcitonType))
+		case('Ex_A1', 'Ex0_A2', 'Ex1_A2')
+			currcnt%mu_cm = 0
+		case('Ex0_Ep', 'Ex1_Ep')
+			currcnt%mu_cm = +1 * currcnt%min_sub(currcnt%i_sub)
+! 			currcnt%mu_cm = 0
+		case('Ex0_Em', 'Ex1_Em')
+			currcnt%mu_cm = -1 * currcnt%min_sub(currcnt%i_sub)
+! 			currcnt%mu_cm = 0
+		case default
+			write(*,*) "ERROR: undetermined target exciton type!!!!"
+			call exit()
+		end select
 		
 		! calculate the tight-binding energies and coefficients.
 		allocate(currcnt%Ek(2,currcnt%ik_low*currcnt%dk_dkx_ratio:currcnt%ik_high*currcnt%dk_dkx_ratio,2))
