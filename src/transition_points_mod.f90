@@ -81,7 +81,7 @@ contains
 
 		! calculate relevant same energy points for transition from cnt1 to cnt2
 		tempSameEnergy = 0 * tempSameEnergy
-		deltaE = (-1.d0) * log(1.d-5) * kb*Temperature
+		deltaE = (-1.d0) * log(1.d-3) * kb*Temperature
 
 		min_energy = max(minval(cnt1%Ex_t),minval(cnt2%Ex_t))
 

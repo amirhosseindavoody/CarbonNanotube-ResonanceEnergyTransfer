@@ -20,7 +20,7 @@ contains
 		real*8 :: min_energy, deltaE
 
 		min_energy = minval(currcnt%Ex_t)
-		deltaE = (-1.d0) * log(1.d-5) * kb * Temperature
+		deltaE = (-1.d0) * log(1.d-3) * kb * Temperature
         
 		partitionFunction = 0.d0
         
@@ -83,13 +83,13 @@ contains
 		real*8, intent(out) :: dos
 		
 		if (iKcm .le. (currcnt%iKcm_min_fine+1)) then
-			dos = 2.d0*currcnt%dk/abs(-3.d0*currcnt%Ex_t(iX,iKcm)+4.d0*currcnt%Ex_t(iX,iKcm+1)-currcnt%Ex_t(iX,iKcm+2))
+			dos = 2.d0*currcnt%dkx/abs(-3.d0*currcnt%Ex_t(iX,iKcm)+4.d0*currcnt%Ex_t(iX,iKcm+1)-currcnt%Ex_t(iX,iKcm+2))
 		else if(iKcm .ge. (currcnt%iKcm_max_fine-1)) then
-			dos = 2.d0*currcnt%dk/abs(3.d0*currcnt%Ex_t(iX,iKcm)-4.d0*currcnt%Ex_t(iX,iKcm-1)+currcnt%Ex_t(iX,iKcm-2))
+			dos = 2.d0*currcnt%dkx/abs(3.d0*currcnt%Ex_t(iX,iKcm)-4.d0*currcnt%Ex_t(iX,iKcm-1)+currcnt%Ex_t(iX,iKcm-2))
 		else if(iKcm == 0) then
-			dos = 2.d0*currcnt%dk/abs(3.d0*currcnt%Ex_t(iX,iKcm)-4.d0*currcnt%Ex_t(iX,iKcm-1)+currcnt%Ex_t(iX,iKcm-2))
+			dos = 2.d0*currcnt%dkx/abs(3.d0*currcnt%Ex_t(iX,iKcm)-4.d0*currcnt%Ex_t(iX,iKcm-1)+currcnt%Ex_t(iX,iKcm-2))
 		else
-			dos = 12.d0*currcnt%dk / abs(currcnt%Ex_t(iX,iKcm-2)-8.d0*currcnt%Ex_t(iX,iKcm-1)+8.d0*currcnt%Ex_t(iX,iKcm+1)-currcnt%Ex_t(iX,iKcm+2))
+			dos = 12.d0*currcnt%dkx / abs(currcnt%Ex_t(iX,iKcm-2)-8.d0*currcnt%Ex_t(iX,iKcm-1)+8.d0*currcnt%Ex_t(iX,iKcm+1)-currcnt%Ex_t(iX,iKcm+2))
 		end if
 		return
 	end subroutine calculateDOS

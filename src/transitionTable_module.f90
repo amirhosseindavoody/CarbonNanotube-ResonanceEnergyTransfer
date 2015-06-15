@@ -63,10 +63,11 @@ contains
 		use comparams, only: ppLen, Temperature
 		use physicalConstants, only: pi, kb, hb
 		use prepareForster_module, only: calculatePartitionFunction, calculateDOS
+		use rotate_shift_mod, only: rotate_shift_cnt
 		use transition_points_mod, only: findSameEnergy, sameEnergy
 		use write_log_mod, only: writeLog
 
-		type(cnt), intent(in) :: cnt1,cnt2
+		type(cnt), intent(inout) :: cnt1,cnt2
 		character(len=200) :: logInput
 
 		integer :: nSameEnergy, iC
@@ -153,6 +154,11 @@ contains
 					call writeLog(logInput)
 
 					nSameEnergy = size(sameEnergy,1)
+
+					call rotate_shift_cnt(cnt1, 0.d0, 0.d0)
+					call rotate_shift_cnt(cnt2, theta, c2cDistance)
+
+! 					write(*,*) "iTheta = ", iTheta
 									
 					do iC = 1,nSameEnergy
 													

@@ -91,85 +91,24 @@ contains
 	
 	subroutine calculate_a2ep_finiteGeometricMatrixElement(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
 		use comparams, only: cnt1, cnt2
-		use physicalConstants, only: i1, pi
+		use physicalConstants, only: i1, pi, A_u
 
 		real*8, intent(in) :: theta
 		real*8, intent(in) :: c2cDistance
 		integer, intent(in) :: iKcm1, iKcm2
 		complex*16, intent(out) :: geometricMatrixElement
-		real*8 :: dx
-		real*8 :: x1, x2, xp1, xp2
+
 		real*8 :: K1, K2
-		integer :: ix1, ix2
-		integer :: nx1, nx2
-		integer :: iPhi1, iPhi2
-		integer :: nPhi1, nPhi2
-		real*8 :: dPhi1, dPhi2
-		real*8, dimension(:), allocatable :: xvec1, xvec2
-		real*8, dimension(:), allocatable :: phi1, phi2
-		complex*16, dimension(:), allocatable :: integrand
-
-		real*8 :: radius1, radius2
-
-! 		write(*,*) "Calculating A to Ep finite length geometric matrix element"
-! 		read(*,*)
-
-		radius1 = cnt1%radius
-		radius2	= cnt2%radius
-
-		nPhi1 = 20
-		dPhi1 = 2.d0*pi/nPhi1
-		
-		nPhi2 = nPhi1
-		dPhi2 = 2.d0*pi/nPhi2
-
-		allocate(phi1(nPhi1))
-		do iPhi1 = 1, nPhi1
-			phi1(iPhi1) = dble(iPhi1)*dPhi1
-		end do
-
-		allocate(phi2(nPhi2))
-		do iPhi2 = 1, nPhi2
-			phi2(iPhi2) = dble(iPhi2)*dPhi2
-		end do
-
-
-
-		dx = 5.0d-10
-
-		x1 = cnt1%center_position - cnt1%length/2.d0
-		x2 = cnt1%center_position + cnt1%length/2.d0
-		xp1 = cnt2%center_position - cnt2%length/2.d0
-		xp2 = cnt2%center_position + cnt2%length/2.d0
-
-		nx1 = nint((x2-x1)/dx)
-		nx2 = nint((xp2-xp1)/dx)
-
-		allocate(xvec1(nx1))
-		do ix1 = 1, nx1
-			xvec1(ix1) = x1+dble(ix1-1)*dx
-		end do
-
-		allocate(xvec2(nx2))
-		do ix2 = 1, nx2
-			xvec2(ix2) = xp1+dble(ix2-1)*dx
-		end do
-
-		allocate(integrand(nx2))
+		integer :: iu
 
 		K2 = dble(iKcm2)*cnt2%dkx
 		K1 = dble(iKcm1)*cnt1%dkx
 		geometricMatrixElement = (0.d0, 0.d0)
-		do ix1 = 1, nx1
-			integrand = dcmplx(0.d0, 0.d0)
-			do iPhi1 = 1, nPhi1
-				do iPhi2 = 1, nPhi2
-					integrand = integrand + exp(-i1*dcmplx(2.d0*(K1*xvec1(ix1)+dble(cnt1%mu_cm)*phi1(iPhi1))))*exp(i1*dcmplx(2.d0*(K2*xvec2+dble(cnt2%mu_cm)*phi2(iPhi2))))/dcmplx(sqrt((xvec2*cos(theta)-radius2*cos(phi2(iPhi2))*sin(theta)-xvec1(ix1))**2+(xvec2*sin(theta)+radius2*cos(phi2(iPhi2))*cos(theta)-radius1*cos(phi1(iPhi1)))**2+(c2cDistance+radius2*sin(phi2(iPhi2))-radius1*sin(phi1(iPhi1)))**2))
-				enddo
-			enddo
-			geometricMatrixElement = geometricMatrixElement + sum(integrand)
+		do iu = lbound(cnt1%r_posA3,1), ubound(cnt1%r_posA3,1)
+			geometricMatrixElement = geometricMatrixElement + sum(exp(-i1*dcmplx(2.d0*(K1*cnt1%ur_posA3(iu,1)+dble(cnt1%mu_cm)*cnt1%az_angle(iu))))*exp(i1*dcmplx(2.d0*(K2*cnt2%ur_posA3(:,1)+dble(cnt2%mu_cm)*cnt2%az_angle(:))))/dcmplx(sqrt((cnt2%r_posA3(:,1)-cnt1%r_posA3(iu,1))**2+(cnt2%r_posA3(:,2)-cnt1%r_posA3(iu,2))**2+(cnt2%r_posA3(:,3)-cnt1%r_posA3(iu,3))**2)))
 		end do
-		geometricMatrixElement = geometricMatrixElement * dcmplx(dPhi1*dPhi2*(dx**2))
+
+		geometricMatrixElement = geometricMatrixElement * dcmplx(A_u*A_u/cnt1%radius/cnt2%radius)
 						
 		return		
 	end subroutine calculate_a2ep_finiteGeometricMatrixElement

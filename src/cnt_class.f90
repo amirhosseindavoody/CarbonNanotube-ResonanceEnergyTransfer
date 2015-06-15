@@ -17,6 +17,8 @@ module cnt_class
 		real*8, dimension(:,:), allocatable, public :: posA,posB,posAA,posBB,posAB,posBA
 		real*8, dimension(:,:), allocatable, public :: posA3, posB3
 		real*8, dimension(:,:,:), allocatable, public :: pos2d, pos3d
+		real*8, dimension(:,:), allocatable, public :: r_posA3, ur_posA3 ! this is the rotated and unrotated position of carbon atoms in 3D.
+		real*8, dimension(:), allocatable, public :: az_angle ! this is azimuthal angle of carbon atoms in roled CNT
 
 		!Length and location of cnt for calculating the resonance energy transfer rate
 		real*8, public :: Length

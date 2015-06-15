@@ -91,54 +91,24 @@ contains
 	
 	subroutine calculate_a2a_finiteGeometricMatrixElement(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
 		use comparams, only: cnt1, cnt2
-		use physicalConstants, only: i1, pi
+		use physicalConstants, only: i1, pi, A_u
 
 		real*8, intent(in) :: theta
 		real*8, intent(in) :: c2cDistance
 		integer, intent(in) :: iKcm1, iKcm2
 		complex*16, intent(out) :: geometricMatrixElement
 
-! 		integer :: iKcm1, iKcm2
-
-		real*8 :: dx
-		real*8 :: x1, x2, xp1, xp2
 		real*8 :: K1, K2
-		integer :: ix1, ix2
-		integer :: nx1, nx2
-		real*8, dimension(:), allocatable :: xvec1, xvec2
-
-		real*8 :: radius1, radius2
-
-		radius1 = cnt1%radius
-		radius2	= cnt2%radius
-
-		dx = 5.0d-10
-
-		x1 = cnt1%center_position - cnt1%length/2.d0
-		x2 = cnt1%center_position + cnt1%length/2.d0
-		xp1 = cnt2%center_position - cnt2%length/2.d0
-		xp2 = cnt2%center_position + cnt2%length/2.d0
-
-		nx1 = nint((x2-x1)/dx)
-		nx2 = nint((xp2-xp1)/dx)
-
-		allocate(xvec1(nx1))
-		do ix1 = 1, nx1
-			xvec1(ix1) = x1+dble(ix1-1)*dx
-		end do
-
-		allocate(xvec2(nx2))
-		do ix2 = 1, nx2
-			xvec2(ix2) = xp1+dble(ix2-1)*dx
-		end do
+		integer :: iu
 
 		K2 = dble(iKcm2)*cnt2%dkx
 		K1 = dble(iKcm1)*cnt1%dkx
 		geometricMatrixElement = (0.d0, 0.d0)
-		do ix1 = 1, nx1
-			geometricMatrixElement = geometricMatrixElement + sum(exp(-i1*dcmplx(2.d0*K1*xvec1(ix1)))*exp(i1*dcmplx(2.d0*K2*xvec2))/dcmplx(sqrt((xvec2*cos(theta)-xvec1(ix1))**2+(xvec2*sin(theta))**2+c2cDistance**2)))
+		do iu = lbound(cnt1%r_posA3,1), ubound(cnt1%r_posA3,1)
+			geometricMatrixElement = geometricMatrixElement + sum(exp(-i1*dcmplx(2.d0*K1*cnt1%ur_posA3(iu,1)))*exp(i1*dcmplx(2.d0*K2*cnt2%ur_posA3(:,1)))/dcmplx(sqrt((cnt2%r_posA3(:,1)-cnt1%r_posA3(iu,1))**2+(cnt2%r_posA3(:,2)-cnt1%r_posA3(iu,2))**2+(cnt2%r_posA3(:,3)-cnt1%r_posA3(iu,3))**2)))
 		end do
-		geometricMatrixElement = geometricMatrixElement * dcmplx((2.d0*pi*dx)**2)
+
+		geometricMatrixElement = geometricMatrixElement * dcmplx(A_u*A_u/cnt1%radius/cnt2%radius)
 						
 		return		
 	end subroutine calculate_a2a_finiteGeometricMatrixElement

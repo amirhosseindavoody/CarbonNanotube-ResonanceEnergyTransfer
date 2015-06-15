@@ -16,7 +16,8 @@ module physicalConstants
   real*8, public, parameter :: kb=1.3865d-23 ![J/K]
   
   real*8, public, parameter :: a_cc=1.42d-10 !carbon-carbon distance [meters] 
-  real*8, public, parameter :: a_l=dsqrt(3.d0)*a_cc !lattice constants
+  real*8, public, parameter :: a_l=sqrt(3.d0)*a_cc !lattice constants
+  real*8, public, parameter :: A_u=(a_l**2)*sqrt(3.d0)/2.d0
   
   real*8, public, parameter :: e2p = 0.d0 !tight binding constants
   real*8, public, parameter :: t0 = 2.7d0*eV  !tight binding constants
