@@ -157,8 +157,6 @@ contains
 
 					call rotate_shift_cnt(cnt1, 0.d0, 0.d0)
 					call rotate_shift_cnt(cnt2, theta, c2cDistance)
-
-! 					write(*,*) "iTheta = ", iTheta
 									
 					do iC = 1,nSameEnergy
 													

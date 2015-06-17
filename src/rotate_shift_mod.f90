@@ -54,6 +54,7 @@ contains
 		Rot=reshape((/ cos(theta), -sin(theta) , sin(theta), cos(theta) /), (/2,2/))
 		do i = lbound(currcnt%ur_posA3,1), ubound(currcnt%ur_posA3,1)
 			currcnt%r_posA3(i,1:2) = matmul(Rot,currcnt%ur_posA3(i,1:2))
+			currcnt%r_posA3(i,3) = currcnt%ur_posA3(i,3)
 		enddo
 
 			
