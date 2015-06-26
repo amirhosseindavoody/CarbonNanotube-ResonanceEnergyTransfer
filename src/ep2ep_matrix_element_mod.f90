@@ -1,7 +1,7 @@
-module ep2a_matrix_element_mod
+module ep2ep_matrix_element_mod
 	implicit none
 	private
-    public  :: calculate_ep2a_kSpaceMatrixElement, calculate_ep2a_finitegeometricMatrixElement, calculate_ep2a_infiniteGeometricMatrixElement_unparallel
+    public  :: calculate_ep2ep_kSpaceMatrixElement, calculate_ep2ep_finitegeometricMatrixElement, calculate_ep2ep_infiniteGeometricMatrixElement_unparallel
     
 contains
 	
@@ -9,18 +9,18 @@ contains
 	! calculate the k-space part of matrix element for the crossing point number iC
 	!**************************************************************************************************************************
 	
-	subroutine calculate_ep2a_kSpaceMatrixElement(kSpaceMatrixElement)
+	subroutine calculate_ep2ep_kSpaceMatrixElement(kSpaceMatrixElement)
 		use comparams, only: cnt1, cnt2
 		use physicalConstants, only: pi, eps0, q0, i1
 		use transition_points_mod, only: sameEnergy
 		use write_log_mod, only: writeLog
 
 		complex*16, dimension(:), allocatable, intent(inout) :: kSpaceMatrixElement
-		complex*16 :: tmpc, tmpc1, tmpc2
+		complex*16 :: tmpc, tmpc1
 		integer :: ix1,ix2
 		integer :: iKcm1, iKcm2
 		integer :: ikr1, ikr2
-		integer :: ikc2_p, ikc2_m, ikv2_p, ikv2_m
+		integer :: ikc2, ikv2
 		integer :: ikc1, ikv1
 		integer :: is,isp
 		integer :: iC
@@ -60,15 +60,12 @@ contains
 				ikc1 = +ikr1 * cnt1%dk_dkx_ratio + iKcm1
 				ikv1 = +ikr1 * cnt1%dk_dkx_ratio - iKcm1
 				do ikr2 = cnt2%ikr_low, cnt2%ikr_high
-					ikc2_p = +ikr2 * cnt2%dk_dkx_ratio + iKcm2
-					ikv2_p = +ikr2 * cnt2%dk_dkx_ratio - iKcm2
-					ikc2_m = -ikr2 * cnt2%dk_dkx_ratio + iKcm2
-					ikv2_m = -ikr2 * cnt2%dk_dkx_ratio - iKcm2
+					ikc2 = +ikr2 * cnt2%dk_dkx_ratio + iKcm2
+					ikv2 = +ikr2 * cnt2%dk_dkx_ratio - iKcm2
 					do is = 1,2
 						do isp = 1,2
-							tmpc1 = conjg(cnt1%Cc(1,ikc1,is))*cnt1%Cv(2,ikv1,is)*cnt2%Cc(1,ikc2_p,isp)*conjg(cnt2%Cv(1,ikv2_p,isp))
-							tmpc2 = conjg(cnt1%Cc(1,ikc1,is))*cnt1%Cv(2,ikv1,is)*cnt2%Cc(2,ikc2_m,isp)*conjg(cnt2%Cv(2,ikv2_m,isp))*dcmplx(cnt2%ex_symmetry)
-							tmpc = tmpc + (tmpc1 + tmpc2)*exp(i1*dcmplx(-2.d0* dot_product(Kcm1,ds1(is,:)) + 2.d0*dot_product(Kcm2,ds2(isp,:))))
+							tmpc1 = conjg(cnt1%Cc(1,ikc1,is))*cnt1%Cv(2,ikv1,is)*cnt2%Cc(1,ikc2,isp)*conjg(cnt2%Cv(2,ikv2,isp))
+							tmpc = tmpc + (tmpc1)*exp(i1*dcmplx(-2.d0* dot_product(Kcm1,ds1(is,:)) + 2.d0*dot_product(Kcm2,ds2(isp,:))))
 						end do  
 					end do
 					kSpaceMatrixElement(iC) = kSpaceMatrixElement(iC) + tmpc*conjg(cnt1%Psi_t(ikr1,ix1,iKcm1))*cnt2%Psi_t(ikr2,ix2,iKcm2)/dcmplx(sqrt(2.d0),0.d0)
@@ -80,13 +77,13 @@ contains
 		kSpaceMatrixElement = kSpaceMatrixElement * dcmplx(q0**2/(4.d0*pi*eps0*4.d0*(pi*pi)*sqrt(2.d0*pi/cnt1%dk * 2.d0*pi/cnt2%dk)))
 			
 		return		
-	end subroutine calculate_ep2a_kSpaceMatrixElement
+	end subroutine calculate_ep2ep_kSpaceMatrixElement
 
 	!**************************************************************************************************************************
 	! calculate the geometric part of matrix element for two finite tubes forming angle theta
 	!**************************************************************************************************************************
 	
-	subroutine calculate_ep2a_finiteGeometricMatrixElement(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
+	subroutine calculate_ep2ep_finiteGeometricMatrixElement(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
 		use comparams, only: cnt1, cnt2
 		use physicalConstants, only: i1, pi, A_u
 
@@ -108,14 +105,14 @@ contains
 		geometricMatrixElement = geometricMatrixElement * dcmplx(A_u*A_u/cnt1%radius/cnt2%radius)
 						
 		return		
-	end subroutine calculate_ep2a_finiteGeometricMatrixElement
+	end subroutine calculate_ep2ep_finiteGeometricMatrixElement
 
 
 	!**************************************************************************************************************************
 	! calculate the geometric part of matrix element for two infinite tubes forming angle theta
 	!**************************************************************************************************************************
 	
-	subroutine calculate_ep2a_infiniteGeometricMatrixElement_unparallel(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
+	subroutine calculate_ep2ep_infiniteGeometricMatrixElement_unparallel(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
 		use comparams, only: cnt1, cnt2
 		use physicalConstants, only: i1, pi
 
@@ -165,14 +162,13 @@ contains
 					arg2 = 2.d0 * (K1*(radius2*cos(phi2(iPhi2))-radius1*cos(phi1(iPhi1))*cos(theta))+K2*(radius1*cos(phi1(iPhi1))-radius2*cos(phi2(iPhi2))*cos(theta))) / (sin(theta))
 					arg3 = 2.d0 * abs((c2cDistance+radius2*sin(phi2(iPhi2))-radius1*sin(phi1(iPhi1)))/(sin(theta)))
 					geometricMatrixElement = geometricMatrixElement + exp(i1*dcmplx(-2.d0*dble(cnt1%mu_cm)*phi1(iPhi1)+2.d0*dble(cnt2%mu_cm)*phi2(iPhi2))) * exp(i1*dcmplx(arg2)) * dcmplx(exp(-arg3 * arg1))
-! 					geometricMatrixElement = geometricMatrixElement + exp(i1*dcmplx(arg2)) * dcmplx(exp(-arg3 * arg1))
 				end do
 			end do
 			geometricMatrixElement = geometricMatrixElement * dcmplx(dPhi1*dPhi2*pi/arg1)
 		end if
 						
 		return		
-	end subroutine calculate_ep2a_infiniteGeometricMatrixElement_unparallel
+	end subroutine calculate_ep2ep_infiniteGeometricMatrixElement_unparallel
 
 				
-end module ep2a_matrix_element_mod
+end module ep2ep_matrix_element_mod

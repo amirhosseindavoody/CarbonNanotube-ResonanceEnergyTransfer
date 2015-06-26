@@ -59,8 +59,12 @@ contains
 	subroutine calculateTransitionTable (cnt1,cnt2)
 		use a2a_matrix_element_mod, only: calculate_a2a_kSpaceMatrixElement, calculate_a2a_finiteGeometricMatrixElement, calculate_a2a_infiniteGeometricMatrixElement_unparallel
 		use a2ep_matrix_element_mod, only: calculate_a2ep_kSpaceMatrixElement, calculate_a2ep_finiteGeometricMatrixElement, calculate_a2ep_infiniteGeometricMatrixElement_unparallel
+		use a2em_matrix_element_mod, only: calculate_a2em_kSpaceMatrixElement, calculate_a2em_finiteGeometricMatrixElement, calculate_a2em_infiniteGeometricMatrixElement_unparallel
 		use cnt_class, only: cnt
 		use comparams, only: ppLen, Temperature
+		use ep2a_matrix_element_mod, only: calculate_ep2a_kSpaceMatrixElement, calculate_ep2a_finiteGeometricMatrixElement, calculate_ep2a_infiniteGeometricMatrixElement_unparallel
+		use ep2ep_matrix_element_mod, only: calculate_ep2ep_kSpaceMatrixElement, calculate_ep2ep_finiteGeometricMatrixElement, calculate_ep2ep_infiniteGeometricMatrixElement_unparallel
+		use ep2em_matrix_element_mod, only: calculate_ep2em_kSpaceMatrixElement, calculate_ep2em_finiteGeometricMatrixElement, calculate_ep2em_infiniteGeometricMatrixElement_unparallel
 		use physicalConstants, only: pi, kb, hb
 		use prepareForster_module, only: calculatePartitionFunction, calculateDOS
 		use rotate_shift_mod, only: rotate_shift_cnt
@@ -126,12 +130,28 @@ contains
 				finite_geometric_melement_ptr => calculate_a2ep_finiteGeometricMatrixElement
 				infinite_geometric_melement_ptr => calculate_a2ep_infiniteGeometricMatrixElement_unparallel
 			case('Ex0_Em', 'Ex1_Em')
-				write(*,*) "calculate_a2em_kSpaceMatrixElement not implemented yet!!!"
+				k_space_melement_ptr => calculate_a2em_kSpaceMatrixElement
+				finite_geometric_melement_ptr => calculate_a2em_finiteGeometricMatrixElement
+				infinite_geometric_melement_ptr => calculate_a2em_infiniteGeometricMatrixElement_unparallel
 			end select
 		case('Ex0_Ep', 'Ex1_Ep')
-			write(*,*) "calculate_ep2**_kSpaceMatrixElement not implemented yet!!!"
+			select case (trim(cnt2%targetExcitonType))
+			case('Ex_A1', 'Ex0_A2', 'Ex1_A2')
+				k_space_melement_ptr => calculate_ep2a_kSpaceMatrixElement
+				finite_geometric_melement_ptr => calculate_ep2a_finiteGeometricMatrixElement
+				infinite_geometric_melement_ptr => calculate_ep2a_infiniteGeometricMatrixElement_unparallel
+			case('Ex0_Ep', 'Ex1_Ep')
+				k_space_melement_ptr => calculate_ep2ep_kSpaceMatrixElement
+				finite_geometric_melement_ptr => calculate_ep2ep_finiteGeometricMatrixElement
+				infinite_geometric_melement_ptr => calculate_ep2ep_infiniteGeometricMatrixElement_unparallel
+			case('Ex0_Em', 'Ex1_Em')
+				k_space_melement_ptr => calculate_ep2em_kSpaceMatrixElement
+				finite_geometric_melement_ptr => calculate_ep2em_finiteGeometricMatrixElement
+				infinite_geometric_melement_ptr => calculate_ep2em_infiniteGeometricMatrixElement_unparallel
+			end select
 		case('Ex0_Em', 'Ex1_Em')
 			write(*,*) "calculate_em2**_kSpaceMatrixElement not implemented yet!!!"
+			call exit()
 		end select
 
 		call k_space_melement_ptr(kSpaceMatrixElement)
