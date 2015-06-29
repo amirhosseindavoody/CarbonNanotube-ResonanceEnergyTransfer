@@ -33,39 +33,22 @@ module transitionTable_module
 		end subroutine calculate_kSpaceMatrixElement
 	end interface
 	
-	abstract interface 
-		subroutine calculate_finiteGeometricMatrixElement(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
-			real*8, intent(in) :: theta
-			real*8, intent(in) :: c2cDistance
-			integer, intent(in) :: iKcm1, iKcm2
-			complex*16, intent(out) :: geometricMatrixElement
-		end subroutine calculate_finiteGeometricMatrixElement
-	end interface
-
-	abstract interface 
-		subroutine calculate_infiniteGeometricMatrixElement_unparallel(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
-			real*8, intent(in) :: theta
-			real*8, intent(in) :: c2cDistance
-			integer, intent(in) :: iKcm1, iKcm2
-			complex*16, intent(out) :: geometricMatrixElement
-		end subroutine calculate_infiniteGeometricMatrixElement_unparallel
-	end interface
-	
 contains
 	!**************************************************************************************************************************
 	! calculate transition table
 	!**************************************************************************************************************************
 	
 	subroutine calculateTransitionTable (cnt1,cnt2)
-		use a2a_matrix_element_mod, only: calculate_a2a_kSpaceMatrixElement, calculate_a2a_finiteGeometricMatrixElement, calculate_a2a_infiniteGeometricMatrixElement_unparallel
-		use a2ep_matrix_element_mod, only: calculate_a2ep_kSpaceMatrixElement, calculate_a2ep_finiteGeometricMatrixElement, calculate_a2ep_infiniteGeometricMatrixElement_unparallel
-		use a2em_matrix_element_mod, only: calculate_a2em_kSpaceMatrixElement, calculate_a2em_finiteGeometricMatrixElement, calculate_a2em_infiniteGeometricMatrixElement_unparallel
+		use a2a_kspace_matrix_element_mod, only: calculate_a2a_kSpaceMatrixElement
+		use a2ep_kspace_matrix_element_mod, only: calculate_a2ep_kSpaceMatrixElement
+		use a2em_kspace_matrix_element_mod, only: calculate_a2em_kSpaceMatrixElement
 		use cnt_class, only: cnt
 		use comparams, only: ppLen, Temperature
-		use ep2a_matrix_element_mod, only: calculate_ep2a_kSpaceMatrixElement, calculate_ep2a_finiteGeometricMatrixElement, calculate_ep2a_infiniteGeometricMatrixElement_unparallel
-		use ep2ep_matrix_element_mod, only: calculate_ep2ep_kSpaceMatrixElement, calculate_ep2ep_finiteGeometricMatrixElement, calculate_ep2ep_infiniteGeometricMatrixElement_unparallel
-		use ep2em_matrix_element_mod, only: calculate_ep2em_kSpaceMatrixElement, calculate_ep2em_finiteGeometricMatrixElement, calculate_ep2em_infiniteGeometricMatrixElement_unparallel
-		use physicalConstants, only: pi, kb, hb
+		use ep2a_kspace_matrix_element_mod, only: calculate_ep2a_kSpaceMatrixElement
+		use ep2ep_kspace_matrix_element_mod, only: calculate_ep2ep_kSpaceMatrixElement
+		use ep2em_kspace_matrix_element_mod, only: calculate_ep2em_kSpaceMatrixElement
+		use geometric_matrix_element_mod, only: calculate_finite_geometric_matrix_element, calculate_infinite_geometric_matrix_element
+		use physicalConstants, only: pi, kb, hb, A_u
 		use prepareForster_module, only: calculatePartitionFunction, calculateDOS
 		use rotate_shift_mod, only: rotate_shift_cnt
 		use transition_points_mod, only: findSameEnergy, sameEnergy
@@ -81,9 +64,6 @@ contains
 		complex*16 :: matrixElement, geometricMatrixElement
 
 		procedure(calculate_kSpaceMatrixElement), pointer :: k_space_melement_ptr => null()
-		procedure(calculate_finiteGeometricMatrixElement), pointer :: finite_geometric_melement_ptr => null()
-		procedure(calculate_infiniteGeometricMatrixElement_unparallel), pointer :: infinite_geometric_melement_ptr => null()
-		
 		
 		call writeLog(new_line('A')//"************** Start calculating transitionTable ****************")
 		
@@ -123,31 +103,19 @@ contains
 			select case (trim(cnt2%targetExcitonType))
 			case('Ex_A1', 'Ex0_A2', 'Ex1_A2')
 				k_space_melement_ptr => calculate_a2a_kSpaceMatrixElement
-				finite_geometric_melement_ptr => calculate_a2a_finiteGeometricMatrixElement
-				infinite_geometric_melement_ptr => calculate_a2a_infiniteGeometricMatrixElement_unparallel
 			case('Ex0_Ep', 'Ex1_Ep')
 				k_space_melement_ptr => calculate_a2ep_kSpaceMatrixElement
-				finite_geometric_melement_ptr => calculate_a2ep_finiteGeometricMatrixElement
-				infinite_geometric_melement_ptr => calculate_a2ep_infiniteGeometricMatrixElement_unparallel
 			case('Ex0_Em', 'Ex1_Em')
 				k_space_melement_ptr => calculate_a2em_kSpaceMatrixElement
-				finite_geometric_melement_ptr => calculate_a2em_finiteGeometricMatrixElement
-				infinite_geometric_melement_ptr => calculate_a2em_infiniteGeometricMatrixElement_unparallel
 			end select
 		case('Ex0_Ep', 'Ex1_Ep')
 			select case (trim(cnt2%targetExcitonType))
 			case('Ex_A1', 'Ex0_A2', 'Ex1_A2')
 				k_space_melement_ptr => calculate_ep2a_kSpaceMatrixElement
-				finite_geometric_melement_ptr => calculate_ep2a_finiteGeometricMatrixElement
-				infinite_geometric_melement_ptr => calculate_ep2a_infiniteGeometricMatrixElement_unparallel
 			case('Ex0_Ep', 'Ex1_Ep')
 				k_space_melement_ptr => calculate_ep2ep_kSpaceMatrixElement
-				finite_geometric_melement_ptr => calculate_ep2ep_finiteGeometricMatrixElement
-				infinite_geometric_melement_ptr => calculate_ep2ep_infiniteGeometricMatrixElement_unparallel
 			case('Ex0_Em', 'Ex1_Em')
 				k_space_melement_ptr => calculate_ep2em_kSpaceMatrixElement
-				finite_geometric_melement_ptr => calculate_ep2em_finiteGeometricMatrixElement
-				infinite_geometric_melement_ptr => calculate_ep2em_infiniteGeometricMatrixElement_unparallel
 			end select
 		case('Ex0_Em', 'Ex1_Em')
 			write(*,*) "calculate_em2**_kSpaceMatrixElement not implemented yet!!!"
@@ -185,14 +153,14 @@ contains
 						iKcm1 = sameEnergy(iC,3)
 						iKcm2 = sameEnergy(iC,4)
 
-						call finite_geometric_melement_ptr(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
+						call calculate_finite_geometric_matrix_element(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
 						
 						matrixElement = geometricMatrixElement * kSpaceMatrixElement(iC)
 						call calculateDOS(cnt1,iKcm1,ix1,dos1)
 						call calculateDOS(cnt2,iKcm2,ix2,dos2)
 
-						transitionRate(1,iTheta,ic2c) = transitionRate(1,iTheta,ic2c) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/Temperature) * (abs(matrixElement)**2) * dos2 / hb / cnt1%length / partitionFunction1
-						transitionRate(2,iTheta,ic2c) = transitionRate(2,iTheta,ic2c) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/Temperature) * (abs(matrixElement)**2) * dos1 / hb / cnt2%length / partitionFunction2
+						transitionRate(1,iTheta,ic2c) = transitionRate(1,iTheta,ic2c) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/Temperature) * (abs(matrixElement)**2) * dos2 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 / hb / cnt1%length / partitionFunction1 
+						transitionRate(2,iTheta,ic2c) = transitionRate(2,iTheta,ic2c) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/Temperature) * (abs(matrixElement)**2) * dos1 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 / hb / cnt2%length / partitionFunction2
 
 					end do
 
@@ -213,7 +181,7 @@ contains
 						iKcm1 = sameEnergy(iC,3)
 						iKcm2 = sameEnergy(iC,4)
 
-						call infinite_geometric_melement_ptr(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
+						call calculate_infinite_geometric_matrix_element(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
 						
 						matrixElement = geometricMatrixElement * kSpaceMatrixElement(iC)
 						call calculateDOS(cnt1,iKcm1,ix1,dos1)
