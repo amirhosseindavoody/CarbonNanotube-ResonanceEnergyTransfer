@@ -25,7 +25,7 @@ contains
 		K1 = dble(iKcm1)*cnt1%dkx
 		geometricMatrixElement = (0.d0, 0.d0)
 		do iu = lbound(cnt1%r_posA3,1), ubound(cnt1%r_posA3,1)
-			geometricMatrixElement = geometricMatrixElement + sum(exp(-i1*dcmplx(2.d0*K1*cnt1%ur_posA3(iu,1)))*exp(i1*dcmplx(2.d0*K2*cnt2%ur_posA3(:,1)))/dcmplx(sqrt((cnt2%r_posA3(:,1)-cnt1%r_posA3(iu,1))**2+(cnt2%r_posA3(:,2)-cnt1%r_posA3(iu,2))**2+(cnt2%r_posA3(:,3)-cnt1%r_posA3(iu,3))**2)))
+			geometricMatrixElement = geometricMatrixElement + sum(exp(-i1*dcmplx(2.d0*(K1*cnt1%ur_posA3(iu,1)+dble(cnt1%mu_cm)*cnt1%az_angle(iu))))*exp(i1*dcmplx(2.d0*(K2*cnt2%ur_posA3(:,1)+dble(cnt2%mu_cm)*cnt2%az_angle(:))))/dcmplx(sqrt((cnt2%r_posA3(:,1)-cnt1%r_posA3(iu,1))**2+(cnt2%r_posA3(:,2)-cnt1%r_posA3(iu,2))**2+(cnt2%r_posA3(:,3)-cnt1%r_posA3(iu,3))**2)))
 		end do
 						
 		return		
@@ -86,7 +86,7 @@ contains
 				do iPhi2 = 1,nPhi2
 					arg2 = 2.d0 * (K1*(radius2*cos(phi2(iPhi2))-radius1*cos(phi1(iPhi1))*cos(theta))+K2*(radius1*cos(phi1(iPhi1))-radius2*cos(phi2(iPhi2))*cos(theta))) / (sin(theta))
 					arg3 = 2.d0 * abs((c2cDistance+radius2*sin(phi2(iPhi2))-radius1*sin(phi1(iPhi1)))/(sin(theta)))
-					geometricMatrixElement = geometricMatrixElement + exp(i1*dcmplx(arg2)) * dcmplx(exp(-arg3 * arg1))
+					geometricMatrixElement = geometricMatrixElement + exp(i1*dcmplx(-2.d0*dble(cnt1%mu_cm)*phi1(iPhi1)+2.d0*dble(cnt2%mu_cm)*phi2(iPhi2))) * exp(i1*dcmplx(arg2)) * dcmplx(exp(-arg3 * arg1))
 				end do
 			end do
 			geometricMatrixElement = geometricMatrixElement * dcmplx(dPhi1*dPhi2*pi/arg1)
