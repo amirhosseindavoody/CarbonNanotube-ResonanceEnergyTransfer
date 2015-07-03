@@ -8,7 +8,7 @@ program cnt_resonance_energy_transfer
 	use cnt_class, only: cnt
 	use comparams, only: starttime, endtime, cnt1, cnt2
 	use input_cnt_mod, only: input_cnt
-	use kappaMatrix_module
+! 	use kappaMatrix_module
 	use occupation_mod, only: calculate_occupation_table
 	use parse_input_file_mod, only: parse_input_file
 	use prepareForster_module, only: saveDOS

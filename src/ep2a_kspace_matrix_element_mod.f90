@@ -6,15 +6,16 @@ module ep2a_kspace_matrix_element_mod
 contains
 	
 	!**************************************************************************************************************************
-	! calculate the k-space part of matrix element for the crossing point number iC
+	! calculate the k-space part of matrix element for the crossing point number iT
 	!**************************************************************************************************************************
 	
-	subroutine calculate_ep2a_kSpaceMatrixElement(kSpaceMatrixElement)
+	subroutine calculate_ep2a_kSpaceMatrixElement(nTransitionPoints, transitionPoints, kSpaceMatrixElement)
 		use comparams, only: cnt1, cnt2
 		use physicalConstants, only: pi, eps0, q0, i1
-		use transition_points_mod, only: sameEnergy
 		use write_log_mod, only: writeLog
 
+		integer, intent(in) :: nTransitionPoints
+		integer, dimension(nTransitionPoints,4), intent(in) :: transitionPoints
 		complex*16, dimension(:), allocatable, intent(inout) :: kSpaceMatrixElement
 		complex*16 :: tmpc, tmpc1, tmpc2
 		integer :: ix1,ix2
@@ -23,15 +24,12 @@ contains
 		integer :: ikc2_p, ikc2_m, ikv2_p, ikv2_m
 		integer :: ikc1, ikv1
 		integer :: is,isp
-		integer :: iC
-		integer :: nSameEnergy
+		integer :: iT
 		character(len=200) :: logInput
 		real*8, dimension(2) :: Kcm1, Kcm2
 		real*8 , dimension(2,2) :: ds1, ds2 ! this are relative displacement of carbon atoms in graphene unit cell
 
-		nSameEnergy = size(sameEnergy,1)
-
-		allocate(kSpaceMatrixElement(nSameEnergy))
+		allocate(kSpaceMatrixElement(nTransitionPoints))
 		kSpaceMatrixElement = kSpaceMatrixElement * dcmplx(0.d0,0.d0)
 
 		ds1(1,:) = 0.d0
@@ -40,17 +38,17 @@ contains
 		ds2(1,:) = 0.d0
 		ds2(2,:) = cnt2%aCC_vec
 		
-		do iC = 1,nSameEnergy
-			if (mod(iC,100) .eq. 0) then
-				write(logInput, '("Calculating k-space matrix element: iC = ", I6.6, "  nSameEnergy = ", I6.6)') iC, nSameEnergy
+		do iT = 1,nTransitionPoints
+			if (mod(iT,100) .eq. 0) then
+				write(logInput, '("Calculating k-space matrix element: iT = ", I6.6, "  nTransitionPoints = ", I6.6)') iT, nTransitionPoints
 				call writeLog(logInput)
 			end if
 
-			ix1 = sameEnergy(iC,1)
-			ix2 = sameEnergy(iC,2)
-			iKcm1 = sameEnergy(iC,3)
-			iKcm2 = sameEnergy(iC,4)
-			kSpaceMatrixElement(iC) = (0.d0,0.d0)
+			ix1 = transitionPoints(iT,1)
+			ix2 = transitionPoints(iT,2)
+			iKcm1 = transitionPoints(iT,3)
+			iKcm2 = transitionPoints(iT,4)
+			kSpaceMatrixElement(iT) = (0.d0,0.d0)
 
 			Kcm1 = dble(cnt1%mu_cm) * cnt1%K1 + dble(iKcm1) * cnt1%dkx * cnt1%K2
 			Kcm2 = dble(cnt2%mu_cm) * cnt2%K1 + dble(iKcm2) * cnt2%dkx * cnt2%K2
@@ -71,7 +69,7 @@ contains
 							tmpc = tmpc + (tmpc1 + tmpc2)*exp(i1*dcmplx(-2.d0* dot_product(Kcm1,ds1(is,:)) + 2.d0*dot_product(Kcm2,ds2(isp,:))))
 						end do  
 					end do
-					kSpaceMatrixElement(iC) = kSpaceMatrixElement(iC) + tmpc*conjg(cnt1%Psi_t(ikr1,ix1,iKcm1))*cnt2%Psi_t(ikr2,ix2,iKcm2)/dcmplx(sqrt(2.d0),0.d0)
+					kSpaceMatrixElement(iT) = kSpaceMatrixElement(iT) + tmpc*conjg(cnt1%Psi_t(ikr1,ix1,iKcm1))*cnt2%Psi_t(ikr2,ix2,iKcm2)/dcmplx(sqrt(2.d0),0.d0)
 					tmpc = (0.d0,0.d0)
 				end do
 			end do
