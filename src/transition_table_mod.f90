@@ -2,10 +2,10 @@
 ! Calculate transition table
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	
-module transitionTable_module
+module transition_table_mod
 	implicit none
 	private
-	public :: calculateTransitionTable
+	public :: calculate_transition_table
 
 	real*8, dimension(:,:,:), allocatable :: transitionRate	
 
@@ -40,7 +40,7 @@ contains
 	! calculate transition table
 	!**************************************************************************************************************************
 	
-	subroutine calculateTransitionTable (cnt1,cnt2)
+	subroutine calculate_transition_table (cnt1,cnt2)
 		use a2a_kspace_matrix_element_mod, only: calculate_a2a_kSpaceMatrixElement
 		use a2ep_kspace_matrix_element_mod, only: calculate_a2ep_kSpaceMatrixElement
 		use a2em_kspace_matrix_element_mod, only: calculate_a2em_kSpaceMatrixElement
@@ -234,7 +234,7 @@ contains
 		
 		call saveTransitionRates()
 		return				
-	end subroutine calculateTransitionTable
+	end subroutine calculate_transition_table
 	
 	!**************************************************************************************************************************
 	! save the calculated transition table
@@ -277,4 +277,5 @@ contains
 		
 		return
 	end subroutine saveTransitionRates
-end module transitionTable_module
+
+end module transition_table_mod

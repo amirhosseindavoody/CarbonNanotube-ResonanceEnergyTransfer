@@ -15,7 +15,7 @@ contains
 	subroutine parse_input_file()
 		use comparams, only: cnt1, cnt2
 		use physicalConstants, only: eV, pi
-		use transitionTable_module, only: c2cMin, c2cMax, nc2c, thetaMin, thetaMax, nTheta, partition_function_type
+		use transition_table_mod, only: c2cMin, c2cMax, nc2c, thetaMin, thetaMax, nTheta, partition_function_type
 		use write_log_mod, only: writeLog
 
 		character(len=100) :: filename

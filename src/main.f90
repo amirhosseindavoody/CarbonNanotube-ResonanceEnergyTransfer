@@ -12,7 +12,7 @@ program cnt_resonance_energy_transfer
 	use occupation_mod, only: calculate_occupation_table
 	use parse_input_file_mod, only: parse_input_file
 	use prepareForster_module, only: saveDOS
-	use transitionTable_module, only: calculateTransitionTable
+	use transition_table_mod, only: calculate_transition_table
 	use write_log_mod, only: writeLog
 	
 	implicit none
@@ -37,7 +37,7 @@ program cnt_resonance_energy_transfer
 
 !  	call exit()
 
- 	call calculateTransitionTable(cnt1,cnt2)
+ 	call calculate_transition_table(cnt1,cnt2)
 	
 ! 	call calculateKappaMatrix(cnt1,cnt2)
 
