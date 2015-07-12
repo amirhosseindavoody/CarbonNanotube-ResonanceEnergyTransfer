@@ -7,7 +7,7 @@ module comparams
 
 	real*8 :: Temperature = 300.d0 !Temperature of the system in Kelvin units
 
-	real*8 :: ppLen = 40.d-9 !length per perpendicular tubes
+	real*8 :: ppLen = 10.d-9 !length per perpendicular tubes
 
 	type (cnt) :: cnt1, cnt2
 

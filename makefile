@@ -12,6 +12,9 @@ a2ep_kspace_matrix_element_mod.o: comparams.o physicalConstants.o transition_poi
 a2em_kspace_matrix_element_mod.o: comparams.o physicalConstants.o transition_points_mod.o write_log_mod.o
 cnt_class.o: physicalConstants.o math_functions_mod.o
 comparams.o: cnt_class.o
+em2a_kspace_matrix_element_mod.o: comparams.o physicalConstants.o transition_points_mod.o write_log_mod.o
+em2ep_kspace_matrix_element_mod.o: comparams.o physicalConstants.o transition_points_mod.o write_log_mod.o
+em2em_kspace_matrix_element_mod.o: comparams.o physicalConstants.o transition_points_mod.o write_log_mod.o	
 ep2a_kspace_matrix_element_mod.o: comparams.o physicalConstants.o transition_points_mod.o write_log_mod.o
 ep2ep_kspace_matrix_element_mod.o: comparams.o physicalConstants.o transition_points_mod.o write_log_mod.o
 ep2em_kspace_matrix_element_mod.o: comparams.o physicalConstants.o transition_points_mod.o write_log_mod.o
@@ -24,7 +27,7 @@ parse_input_file_mod.o: comparams.o physicalConstants.o transitionTable_module.o
 prepareForster_module.o: cnt_class.o comparams.o physicalConstants.o
 rotate_shift_mod.o: cnt_class.o physicalConstants.o
 transition_points_mod.o: cnt_class.o comparams.o math_functions_mod.o physicalConstants.o write_log_mod.o
-transitionTable_module.o: a2a_kspace_matrix_element_mod.o a2ep_kspace_matrix_element_mod.o a2em_kspace_matrix_element_mod.o cnt_class.o comparams.o ep2a_kspace_matrix_element_mod.o ep2em_kspace_matrix_element_mod.o ep2ep_kspace_matrix_element_mod.o geometric_matrix_element_mod.o physicalConstants.o prepareForster_module.o rotate_shift_mod.o transition_points_mod.o write_log_mod.o
+transitionTable_module.o: a2a_kspace_matrix_element_mod.o a2ep_kspace_matrix_element_mod.o a2em_kspace_matrix_element_mod.o cnt_class.o comparams.o ep2a_kspace_matrix_element_mod.o ep2em_kspace_matrix_element_mod.o ep2ep_kspace_matrix_element_mod.o em2a_kspace_matrix_element_mod.o em2em_kspace_matrix_element_mod.o em2ep_kspace_matrix_element_mod.o geometric_matrix_element_mod.o physicalConstants.o prepareForster_module.o rotate_shift_mod.o transition_points_mod.o write_log_mod.o
 
 main: main.o
 	$(FC) $(FCFLAGS) -o $@.exe $(wildcard $(OBJDIR)/*.o) 

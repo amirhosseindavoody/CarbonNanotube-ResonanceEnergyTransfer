@@ -46,6 +46,9 @@ contains
 		use a2em_kspace_matrix_element_mod, only: calculate_a2em_kSpaceMatrixElement
 		use cnt_class, only: cnt
 		use comparams, only: ppLen, Temperature
+		use em2a_kspace_matrix_element_mod, only: calculate_em2a_kSpaceMatrixElement
+		use em2ep_kspace_matrix_element_mod, only: calculate_em2ep_kSpaceMatrixElement
+		use em2em_kspace_matrix_element_mod, only: calculate_em2em_kSpaceMatrixElement
 		use ep2a_kspace_matrix_element_mod, only: calculate_ep2a_kSpaceMatrixElement
 		use ep2ep_kspace_matrix_element_mod, only: calculate_ep2ep_kSpaceMatrixElement
 		use ep2em_kspace_matrix_element_mod, only: calculate_ep2em_kSpaceMatrixElement
@@ -122,8 +125,14 @@ contains
 				k_space_melement_ptr => calculate_ep2em_kSpaceMatrixElement
 			end select
 		case('Ex0_Em', 'Ex1_Em')
-			write(*,*) "calculate_em2**_kSpaceMatrixElement not implemented yet!!!"
-			call exit()
+			select case (trim(cnt2%targetExcitonType))
+			case('Ex_A1', 'Ex0_A2', 'Ex1_A2')
+				k_space_melement_ptr => calculate_em2a_kSpaceMatrixElement
+			case('Ex0_Ep', 'Ex1_Ep')
+				k_space_melement_ptr => calculate_em2ep_kSpaceMatrixElement
+			case('Ex0_Em', 'Ex1_Em')
+				k_space_melement_ptr => calculate_em2em_kSpaceMatrixElement
+			end select
 		end select
 
 		call k_space_melement_ptr(size(sameEnergy,1), sameEnergy, kSpaceMatrixElement_sameEnergy)
