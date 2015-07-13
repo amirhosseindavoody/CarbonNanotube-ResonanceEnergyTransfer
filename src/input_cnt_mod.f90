@@ -118,13 +118,6 @@ contains
 		call input_A_exciton(currcnt)
 		call input_E_exciton(currcnt)
 
-		if (.not. allocated(currcnt%Ex_t)) then
-			call writeLog("Error in setting target exciton type!!!!")
-			call exit()
-		endif
-
-		currcnt%nX_t = size(currcnt%Ex_t,1)
-
 		return
 	end subroutine input_cnt
 
@@ -216,32 +209,6 @@ contains
 				currcnt%Psi1_A2(:,iX,iKcm) = currcnt%Psi1_A2(:,iX,iKcm) / dcmplx(sqrt(tmpr3))
 			enddo
 		enddo
-
-
-		! set the information of the target exciton type
-		select case (trim(currcnt%targetExcitonType))
-		case ('Ex_A1')
-			call writeLog("Target exciton: Ex_A1")
-			allocate(currcnt%Ex_t(1:currcnt%nX_a,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
-			allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_a,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
-			currcnt%Ex_t = currcnt%Ex_A1
-			currcnt%Psi_t = currcnt%Psi_A1
-			currcnt%ex_symmetry = -1.d0
-		case ('Ex0_A2')
-			call writeLog("Target exciton: Ex0_A2")
-			allocate(currcnt%Ex_t(1:currcnt%nX_a,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
-			allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_a,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
-			currcnt%Ex_t = currcnt%Ex0_A2
-			currcnt%Psi_t = currcnt%Psi0_A2
-			currcnt%ex_symmetry = +1.d0
-		case ('Ex1_A2')
-			call writeLog("Target exciton: Ex1_A2")
-			allocate(currcnt%Ex_t(1:currcnt%nX_a,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
-			allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_a,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
-			currcnt%Ex_t = currcnt%Ex1_A2
-			currcnt%Psi_t = currcnt%Psi1_A2
-			currcnt%ex_symmetry = +1.d0
-		end select
 
 		return
 	end subroutine input_A_exciton
@@ -356,35 +323,6 @@ contains
 				currcnt%Psi1_Em(:,iX,iKcm) = currcnt%Psi1_Em(:,iX,iKcm) / dcmplx(sqrt(tmpr3))
 			enddo
 		enddo
-
-
-		! set the information of the target exciton type
-		select case (trim(currcnt%targetExcitonType))
-		case ('Ex0_Ep')
-			call writeLog("Target exciton: Ex0_Ep")
-			allocate(currcnt%Ex_t(1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
-			allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
-			currcnt%Ex_t = currcnt%Ex0_Ep
-			currcnt%Psi_t = currcnt%Psi0_Ep
-		case ('Ex0_Em')
-			call writeLog("Target exciton: Ex0_Em")
-			allocate(currcnt%Ex_t(1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
-			allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
-			currcnt%Ex_t = currcnt%Ex0_Em
-			currcnt%Psi_t = currcnt%Psi0_Em
-		case ('Ex1_Ep')
-			call writeLog("Target exciton: Ex1_Ep")
-			allocate(currcnt%Ex_t(1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
-			allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
-			currcnt%Ex_t = currcnt%Ex1_Ep
-			currcnt%Psi_t = currcnt%Psi1_Ep
-		case ('Ex1_Em')
-			call writeLog("Target exciton: Ex1_Em")
-			allocate(currcnt%Ex_t(1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
-			allocate(currcnt%Psi_t(currcnt%ikr_low:currcnt%ikr_high,1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
-			currcnt%Ex_t = currcnt%Ex1_Em
-			currcnt%Psi_t = currcnt%Psi1_Em
-		end select
 
 		return
 	end subroutine input_E_exciton

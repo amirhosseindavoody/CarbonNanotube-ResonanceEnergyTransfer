@@ -29,8 +29,9 @@ contains
 		real*8, dimension(2) :: Kcm1, Kcm2
 		real*8 , dimension(2,2) :: ds1, ds2 ! this are relative displacement of carbon atoms in graphene unit cell
 
+		if (allocated(kSpaceMatrixElement)) deallocate(kSpaceMatrixElement)
 		allocate(kSpaceMatrixElement(nTransitionPoints))
-		kSpaceMatrixElement = kSpaceMatrixElement * dcmplx(0.d0,0.d0)
+		kSpaceMatrixElement = dcmplx(0.d0,0.d0)
 
 		ds1(1,:) = 0.d0
 		ds1(2,:) = cnt1%aCC_vec
@@ -66,7 +67,7 @@ contains
 							tmpc = tmpc + (tmpc1)*exp(i1*dcmplx(-2.d0* dot_product(Kcm1,ds1(is,:)) + 2.d0*dot_product(Kcm2,ds2(isp,:))))
 						end do  
 					end do
-					kSpaceMatrixElement(iT) = kSpaceMatrixElement(iT) + tmpc*conjg(cnt1%Psi_t(ikr1,ix1,iKcm1))*cnt2%Psi_t(ikr2,ix2,iKcm2)/dcmplx(sqrt(2.d0),0.d0)
+					kSpaceMatrixElement(iT) = kSpaceMatrixElement(iT) + tmpc*conjg(cnt1%Psi0_Ep(ikr1,ix1,iKcm1))*cnt2%Psi0_Em(ikr2,ix2,iKcm2)/dcmplx(sqrt(2.d0),0.d0)
 					tmpc = (0.d0,0.d0)
 				end do
 			end do

@@ -12,12 +12,12 @@ contains
 	! calculate the partition function for a given carbon nanotube
 	!**************************************************************************************************************************
 	
-	subroutine calculate_occupation_table(currcnt)
-		use comparams, only : Temperature
+	subroutine calculate_occupation_table(currcnt, temperature)
 		use cnt_class, only: cnt
 		use physicalConstants, only : kb, eV
 
 		type(cnt), intent(in) :: currcnt
+		real*8, intent(in) :: temperature
 		integer :: table_size, iX, iKcm, counter
 		integer :: iKcm_max_fine, iKcm_min_fine
 		real*8 :: partitionFunction
@@ -38,15 +38,15 @@ contains
 		occupation_Atype = 0.d0
 		do ix = 1,currcnt%nX_a
 			do iKcm = iKcm_min_fine,iKcm_max_fine
-				occupation_Atype = occupation_Atype + exp(-currcnt%Ex0_A2(ix,iKcm)/kb/Temperature)
+				occupation_Atype = occupation_Atype + exp(-currcnt%Ex0_A2(ix,iKcm)/kb/temperature)
 			end do
 		end do
 
 		occupation_Etype = 0.d0
 		do ix = 1,currcnt%nX_e
 			do iKcm = iKcm_min_fine,iKcm_max_fine
-				occupation_Etype = occupation_Etype + exp(-currcnt%Ex0_Ep(ix,iKcm)/kb/Temperature)
-				occupation_Etype = occupation_Etype + exp(-currcnt%Ex0_Em(ix,iKcm)/kb/Temperature)
+				occupation_Etype = occupation_Etype + exp(-currcnt%Ex0_Ep(ix,iKcm)/kb/temperature)
+				occupation_Etype = occupation_Etype + exp(-currcnt%Ex0_Em(ix,iKcm)/kb/temperature)
 			end do
 		end do
 		write(*,*) "minimum energy of A2  excitons: ", minval(currcnt%Ex0_A2)/eV
@@ -63,7 +63,7 @@ contains
 			do iKcm = iKcm_min_fine,iKcm_max_fine
 				counter = counter + 1
 				occupation_table(counter,1) = currcnt%Ex_t(ix,iKcm)
-				occupation_table(counter,2) = exp(-currcnt%Ex_t(ix,iKcm)/kb/Temperature)
+				occupation_table(counter,2) = exp(-currcnt%Ex_t(ix,iKcm)/kb/temperature)
 				partitionFunction = partitionFunction + occupation_table(counter,2)
 			end do
 		end do
