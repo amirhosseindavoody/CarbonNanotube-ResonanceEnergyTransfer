@@ -144,7 +144,7 @@ contains
 
 		write(cnt1%directory,"( A, 'CNT(', I2.2, ',', I2.2, ')-nkg(', I4.4, ')-nr(', I4.4, ')-E_th(', F3.1, ')-Kcm_max(', F3.1, ')-i_sub(', I1.1, ')-Ckappa(', F3.1, ')/' )") trim(indir), cnt1%n_ch, cnt1%m_ch, cnt1%nkg, cnt1%nr, cnt1%E_th/eV, cnt1%Kcm_max*1.d-9, cnt1%i_sub, cnt1%Ckappa
 		write(cnt2%directory,"( A, 'CNT(', I2.2, ',', I2.2, ')-nkg(', I4.4, ')-nr(', I4.4, ')-E_th(', F3.1, ')-Kcm_max(', F3.1, ')-i_sub(', I1.1, ')-Ckappa(', F3.1, ')/' )") trim(indir), cnt2%n_ch, cnt2%m_ch, cnt2%nkg, cnt2%nr, cnt2%E_th/eV, cnt2%Kcm_max*1.d-9, cnt2%i_sub, cnt2%Ckappa
-		write(outdir,"(A, 'Transfer-(', I2.2, ',', I2.2, ')-', A,'-iSub(',I1.1, ')-Length(', I2.2, 'nm)-Center(', I2.2, 'nm)-Ckappa(', F3.1, ')-to-(', I2.2, ',', I2.2, ')-', A,'-iSub(',I1.1, ')-Length(', I2.2, 'nm)-Center(', I2.2, 'nm)-Ckappa(', F3.1, ')-C2C(', F4.1, 'nm)-Temperature(', I3.3, 'K-', I3.3, 'K)')") trim(outdir), cnt1%n_ch, cnt1%m_ch, cnt1%i_sub, nint(cnt1%length*1.d9), nint(cnt1%center_position*1.d9), cnt1%Ckappa, cnt2%n_ch, cnt2%m_ch, cnt2%i_sub, nint(cnt2%length*1.d9), nint(cnt2%center_position*1.d9), cnt2%Ckappa, c2cDistance*1.d9, nint(min_temperature), nint(max_temperature)
+		write(outdir,"(A, 'Transfer-(', I2.2, ',', I2.2, ')-iSub(',I1.1, ')-Length(', I2.2, 'nm)-Center(', I2.2, 'nm)-Ckappa(', F3.1, ')-to-(', I2.2, ',', I2.2, ')-iSub(',I1.1, ')-Length(', I2.2, 'nm)-Center(', I2.2, 'nm)-Ckappa(', F3.1, ')-C2C(', F4.1, 'nm)-Temperature(', I3.3, 'K-', I3.3, 'K)')") trim(outdir), cnt1%n_ch, cnt1%m_ch, cnt1%i_sub, nint(cnt1%length*1.d9), nint(cnt1%center_position*1.d9), cnt1%Ckappa, cnt2%n_ch, cnt2%m_ch, cnt2%i_sub, nint(cnt2%length*1.d9), nint(cnt2%center_position*1.d9), cnt2%Ckappa, c2cDistance*1.d9, nint(min_temperature), nint(max_temperature)
 
 
 

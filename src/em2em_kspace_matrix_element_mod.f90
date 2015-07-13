@@ -67,7 +67,7 @@ contains
 							tmpc = tmpc + (tmpc1)*exp(i1*dcmplx(-2.d0* dot_product(Kcm1,ds1(is,:)) + 2.d0*dot_product(Kcm2,ds2(isp,:))))
 						end do  
 					end do
-					kSpaceMatrixElement(iT) = kSpaceMatrixElement(iT) + tmpc*conjg(cnt1%Psi0_Em(ikr1,ix1,iKcm1))*cnt2%Psi0_Em(ikr2,ix2,iKcm2)/dcmplx(sqrt(2.d0),0.d0)
+					kSpaceMatrixElement(iT) = kSpaceMatrixElement(iT) + tmpc*conjg(cnt1%Psi_t(ikr1,ix1,iKcm1))*cnt2%Psi_t(ikr2,ix2,iKcm2)/dcmplx(sqrt(2.d0),0.d0)
 					tmpc = (0.d0,0.d0)
 				end do
 			end do

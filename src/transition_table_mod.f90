@@ -52,7 +52,8 @@ contains
 		integer :: nSameEnergy, iS
 		integer :: nCrossing, iC
 		integer :: ix1, ix2, iKcm1, iKcm2
-		integer :: iTemperature, temperature
+		integer :: iTemperature
+		real*8 :: temperature
 		real*8 :: partitionFunction1, partitionFunction2
 		real*8 :: dos1, dos2
 		complex*16 :: matrixElement, geometricMatrixElement
@@ -251,6 +252,8 @@ contains
 			end do
 		endif
 		
+		k_space_melement_ptr => null()
+
 		return				
 	end subroutine calculate_transition_table
 	
@@ -263,6 +266,7 @@ contains
 		use comparams, only: min_temperature, max_temperature, temperature_steps
 
 		integer :: iTemperature
+		real*8 ::  temperature
 
 		open(unit=100,file='transition_rates.dat',status="unknown")
 		do iTemperature = 1,temperature_steps

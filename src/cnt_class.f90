@@ -298,20 +298,6 @@ contains
 
 		currcnt%iKcm_max_fine = currcnt%iKcm_max * currcnt%dk_dkx_ratio
 		currcnt%iKcm_min_fine = currcnt%iKcm_min * currcnt%dk_dkx_ratio
-
-		select case (trim(currcnt%targetExcitonType))
-		case('Ex_A1', 'Ex0_A2', 'Ex1_A2')
-			currcnt%mu_cm = 0
-		case('Ex0_Ep', 'Ex1_Ep')
-			currcnt%mu_cm = +1 * currcnt%min_sub(currcnt%i_sub)
-! 			currcnt%mu_cm = 0
-		case('Ex0_Em', 'Ex1_Em')
-			currcnt%mu_cm = -1 * currcnt%min_sub(currcnt%i_sub)
-! 			currcnt%mu_cm = 0
-		case default
-			write(*,*) "ERROR: undetermined target exciton type!!!!"
-			call exit()
-		end select
 		
 		! calculate the tight-binding energies and coefficients.
 		allocate(currcnt%Ek(2,currcnt%ik_low*currcnt%dk_dkx_ratio:currcnt%ik_high*currcnt%dk_dkx_ratio,2))
