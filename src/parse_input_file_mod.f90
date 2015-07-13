@@ -13,9 +13,9 @@ contains
 	!**************************************************************************************************************************
 
 	subroutine parse_input_file()
-		use comparams, only: cnt1, cnt2
+		use comparams, only: cnt1, cnt2, min_temperature, max_temperature, temperature_steps
 		use physicalConstants, only: eV, pi
-		use transition_table_mod, only: c2cMin, c2cMax, nc2c, thetaMin, thetaMax, nTheta, partition_function_type
+		use transition_table_mod, only: c2cDistance
 		use write_log_mod, only: writeLog
 
 		character(len=100) :: filename
@@ -82,8 +82,6 @@ contains
 							read(value, *) cnt1%i_sub
 						case ('Ckappa')
 							read(value, *) cnt1%Ckappa
-						case ('target_exciton_type')
-							read(value, *) cnt1%targetExcitonType
 						case ('length[nm]')
 							read(value, *) cnt1%length
 							cnt1%length = cnt1%length * 1.d-9
@@ -113,8 +111,6 @@ contains
 							read(value, *) cnt2%i_sub
 						case ('Ckappa')
 							read(value, *) cnt2%Ckappa
-						case ('target_exciton_type')
-							read(value, *) cnt2%targetExcitonType
 						case ('length[nm]')
 							read(value, *) cnt2%length
 							cnt2%length = cnt2%length * 1.d-9
@@ -124,29 +120,18 @@ contains
 						end select
 					case ('geometry')
 						select case (trim(label))
-						case('c2cMin[nm]')
-							read(value, *) c2cMin
-							c2cMin = c2cMin * 1.d-9
-						case('c2cMax[nm]')
-							read(value, *) c2cMax
-							c2cMax = c2cMax * 1.d-9
-						case('nc2c')
-							read(value, *) nc2c
-						case('thetaMin[degree]')
-							read(value, *) thetaMin
-							thetaMin = thetaMin * pi/180
-						case('thetaMax[degree]')
-							read(value, *) thetaMax
-							thetaMax = thetaMax * pi/180
-						case ('nTheta')
-							read(value, *) nTheta
+						case('c2c_distance[nm]')
+							read(value, *) c2cDistance
+							c2cDistance = c2cDistance * 1.d-9
 						end select
-					case('simulation')
+					case('environment')
 						select case (trim(label))
-						case ('partition_function')
-							partition_function_type = -1
-							if (trim(value) .eq. 'total') partition_function_type = 0
-							if (trim(value) .eq. 'target') partition_function_type = 1
+						case ('min_temperature[Kelvin]')
+							read(value, *) min_temperature
+						case ('max_temperature[Kelvin]')
+							read(value, *) max_temperature
+						case ('temperature_steps')
+							read(value, *) temperature_steps
 						end select
 					end select
 				end if
@@ -159,7 +144,7 @@ contains
 
 		write(cnt1%directory,"( A, 'CNT(', I2.2, ',', I2.2, ')-nkg(', I4.4, ')-nr(', I4.4, ')-E_th(', F3.1, ')-Kcm_max(', F3.1, ')-i_sub(', I1.1, ')-Ckappa(', F3.1, ')/' )") trim(indir), cnt1%n_ch, cnt1%m_ch, cnt1%nkg, cnt1%nr, cnt1%E_th/eV, cnt1%Kcm_max*1.d-9, cnt1%i_sub, cnt1%Ckappa
 		write(cnt2%directory,"( A, 'CNT(', I2.2, ',', I2.2, ')-nkg(', I4.4, ')-nr(', I4.4, ')-E_th(', F3.1, ')-Kcm_max(', F3.1, ')-i_sub(', I1.1, ')-Ckappa(', F3.1, ')/' )") trim(indir), cnt2%n_ch, cnt2%m_ch, cnt2%nkg, cnt2%nr, cnt2%E_th/eV, cnt2%Kcm_max*1.d-9, cnt2%i_sub, cnt2%Ckappa
-		write(outdir,"(A, 'Transfer-(', I2.2, ',', I2.2, ')-', A,'-iSub(',I1.1, ')-Length(', I2.2, 'nm)-Center(', I2.2, 'nm)-Ckappa(', F3.1, ')-to-(', I2.2, ',', I2.2, ')-', A,'-iSub(',I1.1, ')-Length(', I2.2, 'nm)-Center(', I2.2, 'nm)-Ckappa(', F3.1, ')-C2C(', F4.1, 'nm-', F4.1, 'nm)-Theta(', I3.3, '-', I3.3, ')-partition(', I1.1,')')") trim(outdir), cnt1%n_ch, cnt1%m_ch, trim(cnt1%targetExcitonType), cnt1%i_sub, nint(cnt1%length*1.d9), nint(cnt1%center_position*1.d9), cnt1%Ckappa, cnt2%n_ch, cnt2%m_ch, trim(cnt2%targetExcitonType), cnt2%i_sub, nint(cnt2%length*1.d9), nint(cnt2%center_position*1.d9), cnt2%Ckappa, c2cMin*1.d9, c2cMax*1.d9, nint(thetaMin*180/pi), nint(thetaMax*180/pi), partition_function_type
+		write(outdir,"(A, 'Transfer-(', I2.2, ',', I2.2, ')-', A,'-iSub(',I1.1, ')-Length(', I2.2, 'nm)-Center(', I2.2, 'nm)-Ckappa(', F3.1, ')-to-(', I2.2, ',', I2.2, ')-', A,'-iSub(',I1.1, ')-Length(', I2.2, 'nm)-Center(', I2.2, 'nm)-Ckappa(', F3.1, ')-C2C(', F4.1, 'nm)-Temperature(', I3.3, 'K-', I3.3, 'K)')") trim(outdir), cnt1%n_ch, cnt1%m_ch, trim(cnt1%targetExcitonType), cnt1%i_sub, nint(cnt1%length*1.d9), nint(cnt1%center_position*1.d9), cnt1%Ckappa, cnt2%n_ch, cnt2%m_ch, trim(cnt2%targetExcitonType), cnt2%i_sub, nint(cnt2%length*1.d9), nint(cnt2%center_position*1.d9), cnt2%Ckappa, c2cDistance*1.d9, nint(min_temperature), nint(max_temperature)
 
 
 

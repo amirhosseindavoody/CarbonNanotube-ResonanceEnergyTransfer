@@ -9,19 +9,8 @@ module transition_table_mod
 
 	real*8, dimension(:,:,:), allocatable :: transitionRate	
 
-	real*8, public :: c2cMin
-	real*8, public :: c2cMax
-	integer, public :: nc2c
-	real*8 :: c2cDistance
-	integer :: ic2c
-	real*8 :: dc2c
-	
-	real*8, public :: thetaMax
-	real*8, public :: thetaMin
-	integer, public :: nTheta
+	real*8, public :: c2cDistance
 	real*8 :: theta
-	integer :: iTheta
-	real*8 :: dTheta
 
 	integer, public :: partition_function_type
 
@@ -72,38 +61,10 @@ contains
 		procedure(calculate_kSpaceMatrixElement), pointer :: k_space_melement_ptr => null()
 		
 		call writeLog(new_line('A')//"************** Start calculating transitionTable ****************")
-		
-		! set seperation properties
-		if (nc2c .ne. 1) then
-			dc2c = (c2cMax-c2cMin)/dble(nc2c-1)
-		else
-			dc2c = 0.d0
-		end if
-
-		write(logInput, '("c2cMin[nm] = ", F4.1)') c2cMin*1.d9
-		call writeLog(trim(logInput))
-		write(logInput, '("c2cMax[nm] = ", F4.1)') c2cMax*1.d9
-		call writeLog(trim(logInput))
-		write(logInput, '("nC2C = ", I3.3)') nC2C
-		
-		! set orientation properties
-		if (nTheta .ne. 1) then
-			dTheta = (thetaMax-thetaMin)/dble(nTheta-1)
-		else
-			dTheta = 0.d0
-		end if
-
-		call writeLog(trim(logInput))
-		write(logInput, '("thetaMin = ", I3.3)') nint(thetaMin*180/pi)
-		call writeLog(trim(logInput))
-		write(logInput, '("thetaMax = ", I3.3)') nint(thetaMax*180/pi)
-		call writeLog(trim(logInput))
-		write(logInput, '("nTheta = ", I3.3)') nTheta
-		call writeLog(trim(logInput))
 	
 		!calculate the crossing points and points with the same energy between cnt1 and cnt2
-		call findSameEnergy(cnt1,cnt2)
 		call findCrossings(cnt1,cnt2)
+		call findSameEnergy(cnt1,cnt2)
 		
 		select case (trim(cnt1%targetExcitonType))
 		case('Ex_A1', 'Ex0_A2', 'Ex1_A2')
@@ -145,92 +106,116 @@ contains
 		call calculatePartitionFunction(partition_function_type, cnt1, partitionFunction1)
 		call calculatePartitionFunction(partition_function_type, cnt2, partitionFunction2)
 
-		do ic2c = 1, nc2c
-			c2cDistance = c2cMin+dble(ic2c-1)*dc2c
-
-			do iTheta = 1, nTheta				
-				theta = thetaMin + dble(iTheta-1)*dTheta
+		c2cDistance = 1.2e-9			
+		
+		! calculate transfer rate for parallel orientation
+		theta = 0.d0
 				
-				! calculate exciton transfer rate for finite length CNTs				
-				if ((cnt1%length .lt. huge(1.d0)) .and. (cnt2%length .lt. huge(1.d0))) then
-					write(logInput,*) 'Calculating finite transition rate: iTheta=', iTheta, ', nTheta=', nTheta, 'iC2C=', ic2c, ', nC2C=', nc2c
-					call writeLog(logInput)
+		! calculate exciton transfer rate for finite length CNTs				
+		if ((cnt1%length .lt. huge(1.d0)) .and. (cnt2%length .lt. huge(1.d0))) then
+			write(logInput,*) 'Calculating finite transition rate: iTheta=', iTheta, ', nTheta=', nTheta, 'iC2C=', ic2c, ', nC2C=', nc2c
+			call writeLog(logInput)
 
-					nSameEnergy = size(sameEnergy,1)
+			nSameEnergy = size(sameEnergy,1)
 
-					call rotate_shift_cnt(cnt1, 0.d0, 0.d0)
-					call rotate_shift_cnt(cnt2, theta, c2cDistance)
+			call rotate_shift_cnt(cnt1, 0.d0, 0.d0)
+			call rotate_shift_cnt(cnt2, theta, c2cDistance)
 									
-					do iS = 1,nSameEnergy
+			do iS = 1,nSameEnergy
 													
-						ix1 = sameEnergy(iS,1)
-						ix2 = sameEnergy(iS,2)
-						iKcm1 = sameEnergy(iS,3)
-						iKcm2 = sameEnergy(iS,4)
+				ix1 = sameEnergy(iS,1)
+				ix2 = sameEnergy(iS,2)
+				iKcm1 = sameEnergy(iS,3)
+				iKcm2 = sameEnergy(iS,4)
 
-						call calculate_finite_geometric_matrix_element(iKcm1, iKcm2, geometricMatrixElement)
-						
-						matrixElement = geometricMatrixElement * kSpaceMatrixElement_sameEnergy(iS)
-						call calculateDOS(cnt1,iKcm1,ix1,dos1)
-						call calculateDOS(cnt2,iKcm2,ix2,dos2)
-
-						transitionRate(1,iTheta,ic2c) = transitionRate(1,iTheta,ic2c) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/Temperature) * (abs(matrixElement)**2) * dos2 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 / hb / cnt1%length / partitionFunction1 
-						transitionRate(2,iTheta,ic2c) = transitionRate(2,iTheta,ic2c) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/Temperature) * (abs(matrixElement)**2) * dos1 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 / hb / cnt2%length / partitionFunction2
-
-					end do
-
-				! calculate exciton transfer rate for infinitely long CNTs
-				else
-					write(logInput,*) 'Calculating infinite transition rate: iTheta=', iTheta, ', nTheta=', nTheta, 'iC2C=', ic2c, ', nC2C=', nc2c
-					call writeLog(logInput)
-
-					if (theta .eq. 0.d0) then
-						nCrossing = size(crossingPoints,1)
-
-						do iC = 1,nCrossing
+				call calculate_finite_geometric_matrix_element(iKcm1, iKcm2, geometricMatrixElement)
 							
-							ix1 = crossingPoints(iC,1)
-							ix2 = crossingPoints(iC,2)
-							iKcm1 = crossingPoints(iC,3)
-							iKcm2 = crossingPoints(iC,4)
+				matrixElement = geometricMatrixElement * kSpaceMatrixElement_sameEnergy(iS)
+				call calculateDOS(cnt1,iKcm1,ix1,dos1)
+				call calculateDOS(cnt2,iKcm2,ix2,dos2)
 
-							call calculate_infinite_parallel_geometric_matrix_element(iKcm1,iKcm2,c2cDistance,geometricMatrixElement)
-
-							matrixElement = geometricMatrixElement * kSpaceMatrixElement_crossoingPoints(iC)
-							call calculateDOS(cnt1,iKcm1,ix1,dos1)
-							call calculateDOS(cnt2,iKcm2,ix2,dos2)
-
-							transitionRate(1,iTheta,ic2c) = transitionRate(1,iTheta,ic2c) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/Temperature) * (abs(matrixElement)**2) * dos1 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 * (2*pi/cnt1%dkx) / hb / partitionFunction1
-							transitionRate(2,iTheta,ic2c) = transitionRate(2,iTheta,ic2c) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/Temperature) * (abs(matrixElement)**2) * dos2 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 * (2*pi/cnt2%dkx) / hb / partitionFunction2
-
-						end do
-					
-					else
-						nSameEnergy = size(sameEnergy,1)
-									
-						do iS = 1,nSameEnergy
-						
-							ix1 = sameEnergy(iS,1)
-							ix2 = sameEnergy(iS,2)
-							iKcm1 = sameEnergy(iS,3)
-							iKcm2 = sameEnergy(iS,4)
-
-							call calculate_infinite_geometric_matrix_element(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
-						
-							matrixElement = geometricMatrixElement * kSpaceMatrixElement_sameEnergy(iS)
-							call calculateDOS(cnt1,iKcm1,ix1,dos1)
-							call calculateDOS(cnt2,iKcm2,ix2,dos2)
-
-							transitionRate(1,iTheta,ic2c) = transitionRate(1,iTheta,ic2c) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/Temperature) * (abs(matrixElement)**2) * dos2 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 * (sin(theta)) / hb / ppLen/ partitionFunction1
-							transitionRate(2,iTheta,ic2c) = transitionRate(2,iTheta,ic2c) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/Temperature) * (abs(matrixElement)**2) * dos1 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 * (sin(theta)) / hb / ppLen/ partitionFunction2
-
-						end do
-					endif
-
-				end if
+				transitionRate(1,iTheta,ic2c) = transitionRate(1,iTheta,ic2c) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/Temperature) * (abs(matrixElement)**2) * dos2 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 / hb / cnt1%length / partitionFunction1 
+				transitionRate(2,iTheta,ic2c) = transitionRate(2,iTheta,ic2c) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/Temperature) * (abs(matrixElement)**2) * dos1 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 / hb / cnt2%length / partitionFunction2
 
 			end do
-		end do
+
+		! calculate exciton transfer rate for infinitely long CNTs
+		else
+			write(logInput,*) 'Calculating infinite transition rate: iTheta=', iTheta, ', nTheta=', nTheta, 'iC2C=', ic2c, ', nC2C=', nc2c
+			call writeLog(logInput)
+
+			nCrossing = size(crossingPoints,1)
+
+			do iC = 1,nCrossing
+							
+				ix1 = crossingPoints(iC,1)
+				ix2 = crossingPoints(iC,2)
+				iKcm1 = crossingPoints(iC,3)
+				iKcm2 = crossingPoints(iC,4)
+
+				call calculate_infinite_parallel_geometric_matrix_element(iKcm1,iKcm2,c2cDistance,geometricMatrixElement)
+
+				matrixElement = geometricMatrixElement * kSpaceMatrixElement_crossoingPoints(iC)
+				call calculateDOS(cnt1,iKcm1,ix1,dos1)
+				call calculateDOS(cnt2,iKcm2,ix2,dos2)
+
+				transitionRate(1,iTheta,ic2c) = transitionRate(1,iTheta,ic2c) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/Temperature) * (abs(matrixElement)**2) * dos1 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 * (2*pi/cnt1%dkx) / hb / partitionFunction1
+				transitionRate(2,iTheta,ic2c) = transitionRate(2,iTheta,ic2c) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/Temperature) * (abs(matrixElement)**2) * dos2 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 * (2*pi/cnt2%dkx) / hb / partitionFunction2
+
+			end do
+		end if
+		
+
+		theta = pi/2.d0
+				
+		! calculate exciton transfer rate for finite length CNTs				
+		if ((cnt1%length .lt. huge(1.d0)) .and. (cnt2%length .lt. huge(1.d0))) then
+			write(logInput,*) 'Calculating finite transition rate: iTheta=', iTheta, ', nTheta=', nTheta, 'iC2C=', ic2c, ', nC2C=', nc2c
+			call writeLog(logInput)
+
+			nSameEnergy = size(sameEnergy,1)
+
+			call rotate_shift_cnt(cnt1, 0.d0, 0.d0)
+			call rotate_shift_cnt(cnt2, theta, c2cDistance)
+									
+			do iS = 1,nSameEnergy
+													
+				ix1 = sameEnergy(iS,1)
+				ix2 = sameEnergy(iS,2)
+				iKcm1 = sameEnergy(iS,3)
+				iKcm2 = sameEnergy(iS,4)
+
+				call calculate_finite_geometric_matrix_element(iKcm1, iKcm2, geometricMatrixElement)
+							
+				matrixElement = geometricMatrixElement * kSpaceMatrixElement_sameEnergy(iS)
+				call calculateDOS(cnt1,iKcm1,ix1,dos1)
+				call calculateDOS(cnt2,iKcm2,ix2,dos2)
+
+				transitionRate(1,iTheta,ic2c) = transitionRate(1,iTheta,ic2c) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/Temperature) * (abs(matrixElement)**2) * dos2 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 / hb / cnt1%length / partitionFunction1 
+				transitionRate(2,iTheta,ic2c) = transitionRate(2,iTheta,ic2c) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/Temperature) * (abs(matrixElement)**2) * dos1 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 / hb / cnt2%length / partitionFunction2
+
+			end do
+		else
+			nSameEnergy = size(sameEnergy,1)
+								
+			do iS = 1,nSameEnergy
+						
+				ix1 = sameEnergy(iS,1)
+				ix2 = sameEnergy(iS,2)
+				iKcm1 = sameEnergy(iS,3)
+				iKcm2 = sameEnergy(iS,4)
+
+				call calculate_infinite_geometric_matrix_element(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
+						
+				matrixElement = geometricMatrixElement * kSpaceMatrixElement_sameEnergy(iS)
+				call calculateDOS(cnt1,iKcm1,ix1,dos1)
+				call calculateDOS(cnt2,iKcm2,ix2,dos2)
+
+				transitionRate(1,iTheta,ic2c) = transitionRate(1,iTheta,ic2c) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/Temperature) * (abs(matrixElement)**2) * dos2 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 * (sin(theta)) / hb / ppLen/ partitionFunction1
+				transitionRate(2,iTheta,ic2c) = transitionRate(2,iTheta,ic2c) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/Temperature) * (abs(matrixElement)**2) * dos1 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 * (sin(theta)) / hb / ppLen/ partitionFunction2
+
+			end do
+		endif
 		
 		call saveTransitionRates()
 		return				
