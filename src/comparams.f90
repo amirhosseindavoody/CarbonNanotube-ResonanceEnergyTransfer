@@ -5,7 +5,7 @@ module comparams
 
 	real :: starttime,endtime !duration of simulation
 
-	real*8 :: temperature, min_temperature, max_temperature
+	real*8 :: min_temperature, max_temperature
 	integer :: temperature_steps
 
 	real*8 :: ppLen = 10.d-9 !length per perpendicular tubes

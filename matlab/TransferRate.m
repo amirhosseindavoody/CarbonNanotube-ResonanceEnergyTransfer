@@ -4,7 +4,7 @@ close all;
 
 %%
 
-dir='C:\Users\Amirhossein\Google Drive\Research\Exciton\Data\test-rates\Transfer-(07,05)-iSub(1)-Length(10nm)-Center(00nm)-Ckappa(2.0)-to-(07,05)-iSub(1)-Length(10nm)-Center(00nm)-Ckappa(2.0)-C2C( 1.2nm)-Temperature(010K-300K)\';
+dir='C:\Users\Amirhossein\Google Drive\Research\Exciton\Data\test-rates\Transfer-(07,05)-iSub(1)-Length(10nm)-Center(00nm)-Ckappa(2.0)-to-(08,07)-iSub(1)-Length(10nm)-Center(00nm)-Ckappa(2.0)-C2C( 1.2nm)-Temperature(010K-300K)\';
 FileName=[dir,'transition_rates.dat'];
 raw_data=load(FileName);
 

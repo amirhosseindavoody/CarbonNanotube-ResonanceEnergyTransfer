@@ -1,5 +1,5 @@
 directory, input= /cygdrive/c/Users/Amirhossein/Google Drive/Research/Exciton/Data/Exciton-Energy/
-directory, output= /cygdrive/c/Users/Amirhossein/Google Drive/Research/Exciton/Data/test-rates/
+directory, output= /cygdrive/c/Users/Amirhossein/Google Drive/Research/Exciton/Data/transition_rates_temperature_sweep/
 
 cnt1, n_ch=	7
 cnt1, m_ch=	5
@@ -28,5 +28,5 @@ cnt2, center_position[nm]=	0
 geometry, c2c_distance[nm]= 1.2
 
 environment, min_temperature[Kelvin]= 10
-environment, max_temperature[Kelvin]= 300
-environment, temperature_steps= 50
+environment, max_temperature[Kelvin]= 500
+environment, temperature_steps= 100
