@@ -2,8 +2,6 @@ module target_exciton_mod
 	implicit none
 	private
 	public :: set_target_exciton
-
-	real*8, dimension(:,:,:), allocatable :: transitionRate	
 	
 contains		
 	subroutine set_target_exciton(currcnt, exciton_type)

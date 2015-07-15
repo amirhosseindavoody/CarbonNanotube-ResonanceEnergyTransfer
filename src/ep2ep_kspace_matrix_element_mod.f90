@@ -40,7 +40,7 @@ contains
 		ds2(2,:) = cnt2%aCC_vec
 		
 		do iT = 1,nTransitionPoints
-			if (mod(iT,100) .eq. 0) then
+			if (mod(iT,1000) .eq. 0) then
 				write(logInput, '("Calculating k-space matrix element: iT = ", I6.6, "  nTransitionPoints = ", I6.6)') iT, nTransitionPoints
 				call writeLog(logInput)
 			end if

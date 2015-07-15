@@ -143,7 +143,7 @@ contains
 				call calculateDOS(cnt2,iKcm2,ix2,dos2)
 
 				do iTemperature = 1,temperature_steps
-					temperature = min_temperature + real(iTemperature-1) * (max_temperature-min_temperature) / real(temperature_steps-1)
+					temperature = min_temperature + dble(iTemperature-1) * (max_temperature-min_temperature) / dble(temperature_steps-1)
 
 					call calculatePartitionFunction(cnt1, temperature, partitionFunction1)
 					call calculatePartitionFunction(cnt2, temperature, partitionFunction2)
@@ -175,7 +175,7 @@ contains
 				call calculateDOS(cnt2,iKcm2,ix2,dos2)
 
 				do iTemperature = 1,temperature_steps
-					temperature = min_temperature + real(iTemperature-1) * (max_temperature-min_temperature) / real(temperature_steps-1)
+					temperature = min_temperature + dble(iTemperature-1) * (max_temperature-min_temperature) / dble(temperature_steps-1)
 
 					call calculatePartitionFunction(cnt1, temperature, partitionFunction1)
 					call calculatePartitionFunction(cnt2, temperature, partitionFunction2)
@@ -214,7 +214,7 @@ contains
 				call calculateDOS(cnt2,iKcm2,ix2,dos2)
 
 				do iTemperature = 1,temperature_steps
-					temperature = min_temperature + real(iTemperature-1) * (max_temperature-min_temperature) / real(temperature_steps-1)
+					temperature = min_temperature + dble(iTemperature-1) * (max_temperature-min_temperature) / dble(temperature_steps-1)
 
 					call calculatePartitionFunction(cnt1, temperature, partitionFunction1)
 					call calculatePartitionFunction(cnt2, temperature, partitionFunction2)
@@ -241,7 +241,7 @@ contains
 				call calculateDOS(cnt2,iKcm2,ix2,dos2)
 
 				do iTemperature = 1,temperature_steps
-					temperature = min_temperature + real(iTemperature-1) * (max_temperature-min_temperature) / real(temperature_steps-1)
+					temperature = min_temperature + dble(iTemperature-1) * (max_temperature-min_temperature) / dble(temperature_steps-1)
 
 					call calculatePartitionFunction(cnt1, temperature, partitionFunction1)
 					call calculatePartitionFunction(cnt2, temperature, partitionFunction2)
@@ -270,7 +270,7 @@ contains
 
 		open(unit=100,file='transition_rates.dat',status="unknown")
 		do iTemperature = 1,temperature_steps
-			temperature = min_temperature + real(iTemperature-1) * (max_temperature-min_temperature) / real(temperature_steps-1)
+			temperature = min_temperature + dble(iTemperature-1) * (max_temperature-min_temperature) / dble(temperature_steps-1)
 			write(100,'(E16.8)', advance='no') temperature
 			write(100,'(E16.8)', advance='no') transitionRate(1,1,iTemperature)
 			write(100,'(E16.8)', advance='no') transitionRate(2,1,iTemperature)
