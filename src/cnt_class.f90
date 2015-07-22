@@ -36,13 +36,16 @@ module cnt_class
 		!CNT band structure properties
 		integer, dimension(:), allocatable :: min_sub
 		integer, public :: ikc_max, ikc_min, ik_max, ik_min, iKcm_max, iKcm_min, ik_high, ik_low, ikr_high, ikr_low, iq_max, iq_min
-		integer, public :: iKcm_min_fine, iKcm_max_fine
+		integer, public :: iKcm_min_fine, iKcm_max_fine, ik_low_fine, ik_high_fine, ikr_high_fine, ikr_low_fine
 		integer, public :: mu_cm
 		
 		!CNT self energy and tight binding coefficients
 		real*8, dimension(:,:,:), allocatable, public :: Ek  !Tight-binding energy
 		real*8, dimension(:,:,:), allocatable:: Sk  !Self-energy 
 		complex*16, dimension(:,:,:), allocatable:: Cc,Cv !Tight-binding wavefunction coefficients
+
+		! free-electron free-hole transition energies
+		real*8, dimension(:,:,:,:), allocatable :: E_free_eh !the first index is mu for electron, the second index is mu for hole, the third index ikr, the second index is iKcm
 		
 		!Exciton wavefunction and energies
 		real*8, dimension(:,:), allocatable, public :: Ex_A1, Ex0_A2, Ex1_A2 !the first index is subband, the second index is iKcm
@@ -298,27 +301,31 @@ contains
 
 		currcnt%iKcm_max_fine = currcnt%iKcm_max * currcnt%dk_dkx_ratio
 		currcnt%iKcm_min_fine = currcnt%iKcm_min * currcnt%dk_dkx_ratio
+		
+		currcnt%ik_high_fine = currcnt%ik_high * currcnt%dk_dkx_ratio
+		currcnt%ik_low_fine = currcnt%ik_low * currcnt%dk_dkx_ratio
+
+		currcnt%ikr_high_fine = currcnt%ikr_high * currcnt%dk_dkx_ratio
+		currcnt%ikr_low_fine = currcnt%ikr_low * currcnt%dk_dkx_ratio
 
 		select case (trim(currcnt%targetExcitonType))
 		case('Ex_A1', 'Ex0_A2', 'Ex1_A2')
 			currcnt%mu_cm = 0
 		case('Ex0_Ep', 'Ex1_Ep')
 			currcnt%mu_cm = +1 * currcnt%min_sub(currcnt%i_sub)
-! 			currcnt%mu_cm = 0
 		case('Ex0_Em', 'Ex1_Em')
 			currcnt%mu_cm = -1 * currcnt%min_sub(currcnt%i_sub)
-! 			currcnt%mu_cm = 0
 		case default
 			write(*,*) "ERROR: undetermined target exciton type!!!!"
 			call exit()
 		end select
 		
 		! calculate the tight-binding energies and coefficients.
-		allocate(currcnt%Ek(2,currcnt%ik_low*currcnt%dk_dkx_ratio:currcnt%ik_high*currcnt%dk_dkx_ratio,2))
-		allocate(currcnt%Cc(2,currcnt%ik_low*currcnt%dk_dkx_ratio:currcnt%ik_high*currcnt%dk_dkx_ratio,2))
-		allocate(currcnt%Cv(2,currcnt%ik_low*currcnt%dk_dkx_ratio:currcnt%ik_high*currcnt%dk_dkx_ratio,2))
+		allocate(currcnt%Ek(2,currcnt%ik_low_fine:currcnt%ik_high_fine,2))
+		allocate(currcnt%Cc(2,currcnt%ik_low_fine:currcnt%ik_high_fine,2))
+		allocate(currcnt%Cv(2,currcnt%ik_low_fine:currcnt%ik_high_fine,2))
 	
-		do ik=currcnt%ik_low*currcnt%dk_dkx_ratio,currcnt%ik_high*currcnt%dk_dkx_ratio
+		do ik=currcnt%ik_low_fine,currcnt%ik_high_fine
 			mu=currcnt%min_sub(currcnt%i_sub) !first band
 			k=dble(mu)*currcnt%K1+dble(ik)*currcnt%dkx*currcnt%K2
 			call grapheneEnergy(currcnt,currcnt%Ek(1,ik,:),currcnt%Cc(1,ik,:),currcnt%Cv(1,ik,:),k)

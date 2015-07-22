@@ -117,6 +117,7 @@ contains
 		call cnt_band(currcnt)
 		call input_A_exciton(currcnt)
 		call input_E_exciton(currcnt)
+		call input_self_energy(currcnt)
 
 		if (.not. allocated(currcnt%Ex_t)) then
 			call writeLog("Error in setting target exciton type!!!!")
@@ -388,5 +389,39 @@ contains
 
 		return
 	end subroutine input_E_exciton
+
+	!**************************************************************************************************************************
+	! load the self-energies from from the exciton energy calculation
+	!**************************************************************************************************************************
+	
+	subroutine input_self_energy (currcnt)
+		use cnt_class, only: cnt
+
+		type(cnt), intent(inout) :: currcnt
+		integer :: ik
+
+		allocate(currcnt%Sk(2,currcnt%ik_low_fine:currcnt%ik_high_fine,2))
+
+		open(unit=100,file=trim(currcnt%directory)//'CondSelfEnergy_fine.dat',status="old")
+		open(unit=101,file=trim(currcnt%directory)//'ValeSelfEnergy_fine.dat',status="old")
+		
+		do ik=currcnt%ik_low_fine,currcnt%ik_high_fine
+			read(100,'(E16.8)', advance='no') currcnt%Sk(1,ik,1)
+			read(101,'(E16.8)', advance='no') currcnt%Sk(1,ik,2)
+		enddo
+
+			
+		read(100,'(E16.8)')
+		read(101,'(E16.8)')
+		
+		do ik=currcnt%ik_low_fine,currcnt%ik_high_fine
+			read(100,'(E16.8)', advance='no') currcnt%Sk(2,ik,1)
+			read(101,'(E16.8)', advance='no') currcnt%Sk(2,ik,2)
+		enddo
+
+		close(100)
+		close(101)
+
+	end subroutine input_self_energy
 	
 end module input_cnt_mod
