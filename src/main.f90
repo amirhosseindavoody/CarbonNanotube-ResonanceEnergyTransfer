@@ -25,13 +25,14 @@ program cnt_resonance_energy_transfer
 	
 	call writeLog(new_line('A')//"************** Reading cnt1 ****************")
 	call input_cnt(cnt1)
-	call calculate_free_electron_transition(cnt1)
+! 	call calculate_free_electron_transition(cnt1)
 ! 	call save_free_electron_transition(cnt1)
 ! 	call exit()
 
 	call writeLog(new_line('A')//"************** Reading cnt2 ****************")
 	call input_cnt(cnt2)
 	call calculate_free_electron_transition(cnt2)
+	call save_free_electron_transition(cnt2)
 
  	call calculate_transition_table(cnt1,cnt2)
 

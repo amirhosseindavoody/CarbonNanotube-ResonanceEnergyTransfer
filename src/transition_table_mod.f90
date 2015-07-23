@@ -44,6 +44,7 @@ contains
 		use a2a_kspace_matrix_element_mod, only: calculate_a2a_kSpaceMatrixElement
 		use a2ep_kspace_matrix_element_mod, only: calculate_a2ep_kSpaceMatrixElement
 		use a2em_kspace_matrix_element_mod, only: calculate_a2em_kSpaceMatrixElement
+		use a2free_kspace_matrix_element_mod, only: calculate_a2free_kSpaceMatrixElement
 		use cnt_class, only: cnt
 		use comparams, only: ppLen, Temperature
 		use em2a_kspace_matrix_element_mod, only: calculate_em2a_kSpaceMatrixElement
@@ -102,41 +103,43 @@ contains
 		call writeLog(trim(logInput))
 	
 		!calculate the crossing points and points with the same energy between cnt1 and cnt2
-		call findSameEnergy(cnt1,cnt2)
+! 		call findSameEnergy(cnt1,cnt2)
 		call findCrossings(cnt1,cnt2)
-		
-		select case (trim(cnt1%targetExcitonType))
-		case('Ex_A1', 'Ex0_A2', 'Ex1_A2')
-			select case (trim(cnt2%targetExcitonType))
-			case('Ex_A1', 'Ex0_A2', 'Ex1_A2')
-				k_space_melement_ptr => calculate_a2a_kSpaceMatrixElement
-			case('Ex0_Ep', 'Ex1_Ep')
-				k_space_melement_ptr => calculate_a2ep_kSpaceMatrixElement
-			case('Ex0_Em', 'Ex1_Em')
-				k_space_melement_ptr => calculate_a2em_kSpaceMatrixElement
-			end select
-		case('Ex0_Ep', 'Ex1_Ep')
-			select case (trim(cnt2%targetExcitonType))
-			case('Ex_A1', 'Ex0_A2', 'Ex1_A2')
-				k_space_melement_ptr => calculate_ep2a_kSpaceMatrixElement
-			case('Ex0_Ep', 'Ex1_Ep')
-				k_space_melement_ptr => calculate_ep2ep_kSpaceMatrixElement
-			case('Ex0_Em', 'Ex1_Em')
-				k_space_melement_ptr => calculate_ep2em_kSpaceMatrixElement
-			end select
-		case('Ex0_Em', 'Ex1_Em')
-			select case (trim(cnt2%targetExcitonType))
-			case('Ex_A1', 'Ex0_A2', 'Ex1_A2')
-				k_space_melement_ptr => calculate_em2a_kSpaceMatrixElement
-			case('Ex0_Ep', 'Ex1_Ep')
-				k_space_melement_ptr => calculate_em2ep_kSpaceMatrixElement
-			case('Ex0_Em', 'Ex1_Em')
-				k_space_melement_ptr => calculate_em2em_kSpaceMatrixElement
-			end select
-		end select
 
-		call k_space_melement_ptr(size(sameEnergy,1), sameEnergy, kSpaceMatrixElement_sameEnergy)
-		call k_space_melement_ptr(size(crossingPoints,1), crossingPoints, kSpaceMatrixElement_crossoingPoints)
+		call calculate_a2free_kSpaceMatrixElement(size(crossingPoints,1), crossingPoints, kSpaceMatrixElement_crossoingPoints)
+		
+! 		select case (trim(cnt1%targetExcitonType))
+! 		case('Ex_A1', 'Ex0_A2', 'Ex1_A2')
+! 			select case (trim(cnt2%targetExcitonType))
+! 			case('Ex_A1', 'Ex0_A2', 'Ex1_A2')
+! 				k_space_melement_ptr => calculate_a2a_kSpaceMatrixElement
+! 			case('Ex0_Ep', 'Ex1_Ep')
+! 				k_space_melement_ptr => calculate_a2ep_kSpaceMatrixElement
+! 			case('Ex0_Em', 'Ex1_Em')
+! 				k_space_melement_ptr => calculate_a2em_kSpaceMatrixElement
+! 			end select
+! 		case('Ex0_Ep', 'Ex1_Ep')
+! 			select case (trim(cnt2%targetExcitonType))
+! 			case('Ex_A1', 'Ex0_A2', 'Ex1_A2')
+! 				k_space_melement_ptr => calculate_ep2a_kSpaceMatrixElement
+! 			case('Ex0_Ep', 'Ex1_Ep')
+! 				k_space_melement_ptr => calculate_ep2ep_kSpaceMatrixElement
+! 			case('Ex0_Em', 'Ex1_Em')
+! 				k_space_melement_ptr => calculate_ep2em_kSpaceMatrixElement
+! 			end select
+! 		case('Ex0_Em', 'Ex1_Em')
+! 			select case (trim(cnt2%targetExcitonType))
+! 			case('Ex_A1', 'Ex0_A2', 'Ex1_A2')
+! 				k_space_melement_ptr => calculate_em2a_kSpaceMatrixElement
+! 			case('Ex0_Ep', 'Ex1_Ep')
+! 				k_space_melement_ptr => calculate_em2ep_kSpaceMatrixElement
+! 			case('Ex0_Em', 'Ex1_Em')
+! 				k_space_melement_ptr => calculate_em2em_kSpaceMatrixElement
+! 			end select
+! 		end select
+
+! 		call k_space_melement_ptr(size(sameEnergy,1), sameEnergy, kSpaceMatrixElement_sameEnergy)
+! 		call k_space_melement_ptr(size(crossingPoints,1), crossingPoints, kSpaceMatrixElement_crossoingPoints)
 
 		!allocate the transition rate table
 		allocate(transitionRate(2,nTheta,nc2c))
@@ -198,10 +201,10 @@ contains
 
 							matrixElement = geometricMatrixElement * kSpaceMatrixElement_crossoingPoints(iC)
 							call calculateDOS(cnt1,iKcm1,ix1,dos1)
-							call calculateDOS(cnt2,iKcm2,ix2,dos2)
+! 							call calculateDOS(cnt2,iKcm2,ix2,dos2)
 
 							transitionRate(1,iTheta,ic2c) = transitionRate(1,iTheta,ic2c) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/Temperature) * (abs(matrixElement)**2) * dos1 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 * (2*pi/cnt1%dkx) / hb / partitionFunction1
-							transitionRate(2,iTheta,ic2c) = transitionRate(2,iTheta,ic2c) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/Temperature) * (abs(matrixElement)**2) * dos2 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 * (2*pi/cnt2%dkx) / hb / partitionFunction2
+! 							transitionRate(2,iTheta,ic2c) = transitionRate(2,iTheta,ic2c) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/Temperature) * (abs(matrixElement)**2) * dos2 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 * (2*pi/cnt2%dkx) / hb / partitionFunction2
 
 						end do
 					
@@ -231,6 +234,8 @@ contains
 
 			end do
 		end do
+
+		write(*,*) "transitionRate = ", transitionRate(1,1,1)
 		
 		call saveTransitionRates()
 		return				

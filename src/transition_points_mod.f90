@@ -15,59 +15,56 @@ contains
 		use write_log_mod, only: writeLog
 
 		type(cnt), intent(in) :: cnt1,cnt2
-		integer :: ix1,ix2
+		integer :: ix1
+		integer :: ikr2
 		integer :: iKcm
-		integer :: tmp,i, nCrossing
-		integer, dimension(:,:), allocatable :: tempCrossingPoints
+		integer :: nCrossing
 		real*8 :: rtmp1, rtmp2
 		character(len=200) :: logInput
-        
-		tmp = cnt1%nX_t * cnt2%nX_t * (2*cnt1%iKcm_max_fine+1) * (2*cnt2%iKcm_max_fine+1)
-		allocate(tempCrossingPoints(tmp,4))
-		do i = 1,tmp
-			tempCrossingPoints(i,1) = 0    
-			tempCrossingPoints(i,2) = 0
-			tempCrossingPoints(i,3) = 0
-			tempCrossingPoints(i,4) = 0
-		end do
-        
+
 		nCrossing = 0
 		do ix1 = 1,cnt1%nX_t
-			do ix2 = 1,cnt2%nX_t
-				do iKcm = cnt1%iKcm_min_fine+1 , cnt1%iKcm_max_fine
-					rtmp1 = (cnt1%Ex_t(ix1,iKcm)-cnt2%Ex_t(ix2,iKcm))
-					rtmp2 = (cnt1%Ex_t(ix1,iKcm-1)-cnt2%Ex_t(ix2,iKcm-1))
+			do ikr2 = cnt2%ikr_low,cnt2%ikr_high
+				do iKcm = cnt1%iKcm_min_fine , -1
+					rtmp1 = (cnt1%Ex_t(ix1,iKcm)-cnt2%E_free_eh(1,1,ikr2,iKcm))
+					rtmp2 = (cnt1%Ex_t(ix1,iKcm+1)-cnt2%E_free_eh(1,1,ikr2,iKcm+1))
 					if ((rtmp1 * rtmp2) .le. 0.d0) then
-						if ((abs(rtmp1) .le. abs(rtmp2)) .or. (abs(rtmp1) .eq. 0.d0)) then
-							if (iKcm .ne. 0) then
-								nCrossing = nCrossing+1
-								tempCrossingPoints(nCrossing,1) = ix1
-								tempCrossingPoints(nCrossing,2) = ix2
-								tempCrossingPoints(nCrossing,3) = iKcm
-								tempCrossingPoints(nCrossing,4) = iKcm
-							endif
-						else
-							if ((iKcm-1) .ne. 0) then
-								nCrossing = nCrossing+1
-								tempCrossingPoints(nCrossing,1) = ix1
-								tempCrossingPoints(nCrossing,2) = ix2
-								tempCrossingPoints(nCrossing,3) = iKcm-1
-								tempCrossingPoints(nCrossing,4) = iKcm-1
-							endif
-						endif
+						nCrossing = nCrossing+2
 					end if
 				end do
 			end do
 		end do
-        
-		if(allocated(crossingPoints))	deallocate(crossingPoints)
-		allocate(crossingPoints(nCrossing ,4))
-		crossingPoints(:,:) = tempCrossingPoints(1:nCrossing,:)
 
-		call writeLog(new_line('A')//"Crossing points table calculated!!!"//new_line('A'))
-		
 		write(logInput,*) "Number of crossing points = ", nCrossing
 		call writeLog(logInput)
+
+		if(allocated(crossingPoints))	deallocate(crossingPoints)
+		allocate(crossingPoints(nCrossing ,4))
+
+		nCrossing = 0
+		do ix1 = 1,cnt1%nX_t
+			do ikr2 = cnt2%ikr_low,cnt2%ikr_high
+				do iKcm = cnt1%iKcm_min_fine , -1
+					rtmp1 = (cnt1%Ex_t(ix1,iKcm)-cnt2%E_free_eh(1,1,ikr2,iKcm))
+					rtmp2 = (cnt1%Ex_t(ix1,iKcm+1)-cnt2%E_free_eh(1,1,ikr2,iKcm+1))
+					if ((rtmp1 * rtmp2) .le. 0.d0) then
+						nCrossing = nCrossing+1
+						crossingPoints(nCrossing,1) = ix1
+						crossingPoints(nCrossing,2) = ikr2
+						crossingPoints(nCrossing,3) = iKcm
+						crossingPoints(nCrossing,4) = iKcm
+
+						nCrossing = nCrossing+1
+						crossingPoints(nCrossing,1) = ix1
+						crossingPoints(nCrossing,2) = ikr2
+						crossingPoints(nCrossing,3) = -iKcm
+						crossingPoints(nCrossing,4) = -iKcm
+					end if
+				end do
+			end do
+		end do
+
+		call writeLog(new_line('A')//"Crossing points table calculated!!!"//new_line('A'))
 
 		call saveTransitionPoints(cnt1,cnt2)
 
@@ -191,29 +188,19 @@ contains
 		enddo
 		close(100)
 
-		!write carbon nanotube 2 Ex_t dispersion
-		open(unit=100,file='cnt2_Ex_t.dat',status="unknown")
-		do iKcm=cnt2%iKcm_min_fine,cnt2%iKcm_max_fine
-			do iX=1,cnt2%nX_t
-				write(100,'(E16.8)', advance='no') cnt2%Ex_t(iX,iKcm)
-			enddo
-			write(100,*)
-		enddo
-		close(100) 
-
 		!write crossing points indexes
 		open(unit=100,file='crossingPoints.dat',status="unknown")
 		do i=lbound(crossingPoints,1),ubound(crossingPoints,1)
-			write(100,'(4I8, 4I8, 4I8, 4I8)') crossingPoints(i,1), crossingPoints(i,2), crossingPoints(i,3), crossingPoints(i,4)
+			write(100,'(4I8, 4I8, 4I8, 4I8)') crossingPoints(i,1), crossingPoints(i,2)-cnt2%ikr_low+1, crossingPoints(i,3)-cnt1%iKcm_min_fine+1, crossingPoints(i,4)-cnt2%iKcm_min_fine+1
 		enddo
 		close(100) 
 
-		!write same energy points indexes for transition from cnt1 to cnt2
-		open(unit=100,file='sameEnergy.dat',status="unknown")
-		do i=lbound(sameEnergy,1),ubound(sameEnergy,1)
-			write(100,'(4I8, 4I8, 4I8, 4I8)') sameEnergy(i,1), sameEnergy(i,2), sameEnergy(i,3), sameEnergy(i,4)
-		enddo
-		close(100) 
+! 		!write same energy points indexes for transition from cnt1 to cnt2
+! 		open(unit=100,file='sameEnergy.dat',status="unknown")
+! 		do i=lbound(sameEnergy,1),ubound(sameEnergy,1)
+! 			write(100,'(4I8, 4I8, 4I8, 4I8)') sameEnergy(i,1), sameEnergy(i,2), sameEnergy(i,3), sameEnergy(i,4)
+! 		enddo
+! 		close(100) 
 
 		return    
 	end subroutine saveTransitionPoints
