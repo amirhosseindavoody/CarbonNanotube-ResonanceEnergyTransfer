@@ -20,7 +20,7 @@ contains
 
 		character(len=100) :: filename
 		character(len=200) :: buffer, command, label, value
-		character(len=300) :: outdir	
+		character(len=1000) :: outdir	
 		character(len=200) :: indir
 		integer :: istat=0
 		integer :: ios=0
@@ -181,7 +181,7 @@ contains
 
 		character(len=*), intent(in) :: outdir
 		integer :: istat=0
-		character(len=400) :: command
+		character(len=1000) :: command
 		integer, dimension(3) :: date, time
 		character(len=100) :: logInput
 
