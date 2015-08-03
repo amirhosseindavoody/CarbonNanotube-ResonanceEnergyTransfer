@@ -5,10 +5,9 @@
 !*******************************************************************************
 
 program cnt_resonance_energy_transfer
-	use cnt_class, only: cnt
+	use cnt_class, only: cnt, free_cnt_memory
 	use comparams, only: starttime, endtime, cnt1, cnt2
 	use input_cnt_mod, only: input_cnt
-! 	use kappaMatrix_module
 	use occupation_mod, only: calculate_occupation_table
 	use parse_input_file_mod, only: parse_input_file
 	use prepareForster_module, only: saveDOS
@@ -44,6 +43,10 @@ program cnt_resonance_energy_transfer
 	call CPU_time(endtime)
 	write(logInput,'("Run time = ",f10.3," seconds.")'),endtime-starttime
 	call writeLog(logInput)
+
+	! deallocate all allocatable components in cnt_class
+	call free_cnt_memory(cnt1)
+	call free_cnt_memory(cnt2)
 
 end program cnt_resonance_energy_transfer
 

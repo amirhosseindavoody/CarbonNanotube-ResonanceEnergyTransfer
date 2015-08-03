@@ -231,6 +231,8 @@ contains
 
 			end do
 		end do
+
+		k_space_melement_ptr => null()
 		
 		call saveTransitionRates()
 		return				

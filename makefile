@@ -1,8 +1,7 @@
 
 FC=gfortran
 FCFLAGS = -O3 -ffree-line-length-none
-# FCFLAGS += -fcheck=all -Wall -Wconversion-extra -Wtabs -Wimplicit-interface -Wintrinsic-shadow -Wsurprising -Wfunction-elimination
-# FCFLAGS += -fbounds-check -ffree-line-length-none -fall-intrinsics
+# FCFLAGS += -fcheck=all -Wall -Wconversion-extra -Wtabs -Wimplicit-interface -Wintrinsic-shadow -Wsurprising -Wfunction-elimination -fbounds-check -ffree-line-length-none -fall-intrinsics
 
 SRCDIR = ./src
 OBJDIR = ./obj

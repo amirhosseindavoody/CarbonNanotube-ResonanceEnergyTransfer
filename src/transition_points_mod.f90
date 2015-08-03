@@ -12,6 +12,8 @@ contains
 	
 	subroutine findCrossings(cnt1,cnt2)
 		use cnt_class, only: cnt
+		use comparams, only: Temperature
+		use physicalConstants, only: kb
 		use write_log_mod, only: writeLog
 
 		type(cnt), intent(in) :: cnt1,cnt2
@@ -20,6 +22,11 @@ contains
 		integer :: nCrossing
 		real*8 :: rtmp1, rtmp2
 		character(len=200) :: logInput
+		real*8 :: min_energy, deltaE
+
+		! calculate relevant crossing points for transition from cnt1 to cnt2
+		deltaE = (-1.d0) * log(1.d-3) * kb*Temperature
+		min_energy = max(minval(cnt1%Ex_t),minval(cnt2%Ex_t))
         
 		nCrossing = 0
 		do ix1 = 1,cnt1%nX_t
@@ -27,7 +34,7 @@ contains
 				do iKcm = 1 , cnt1%iKcm_max_fine
 					rtmp1 = (cnt1%Ex_t(ix1,iKcm)-cnt2%Ex_t(ix2,iKcm))
 					rtmp2 = (cnt1%Ex_t(ix1,iKcm-1)-cnt2%Ex_t(ix2,iKcm-1))
-					if ((rtmp1 * rtmp2) .le. 0.d0) then
+					if (((rtmp1 * rtmp2) .le. 0.d0) .and. ((cnt1%Ex_t(ix1,iKcm) - min_energy) .lt. deltaE) ) then
 						nCrossing = nCrossing + 2
 					end if
 				end do
@@ -46,7 +53,7 @@ contains
 				do iKcm = 1 , cnt1%iKcm_max_fine
 					rtmp1 = (cnt1%Ex_t(ix1,iKcm)-cnt2%Ex_t(ix2,iKcm))
 					rtmp2 = (cnt1%Ex_t(ix1,iKcm-1)-cnt2%Ex_t(ix2,iKcm-1))
-					if ((rtmp1 * rtmp2) .le. 0.d0) then
+					if (((rtmp1 * rtmp2) .le. 0.d0) .and. ((cnt1%Ex_t(ix1,iKcm) - min_energy) .lt. deltaE) ) then
 						nCrossing = nCrossing+1
 						crossingPoints(nCrossing,1) = ix1
 						crossingPoints(nCrossing,2) = ix2

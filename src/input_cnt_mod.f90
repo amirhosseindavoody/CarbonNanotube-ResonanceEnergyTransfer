@@ -246,6 +246,10 @@ contains
 			currcnt%ex_symmetry = +1.d0
 		end select
 
+		deallocate(currcnt%Psi_A1)
+		deallocate(currcnt%Psi0_A2)
+		deallocate(currcnt%Psi1_A2)
+
 		return
 	end subroutine input_A_exciton
 
@@ -388,6 +392,11 @@ contains
 			currcnt%Ex_t = currcnt%Ex1_Em
 			currcnt%Psi_t = currcnt%Psi1_Em
 		end select
+
+		deallocate(currcnt%Psi0_Ep)
+		deallocate(currcnt%Psi1_Ep)
+		deallocate(currcnt%Psi0_Em)
+		deallocate(currcnt%Psi1_Em)
 
 		return
 	end subroutine input_E_exciton

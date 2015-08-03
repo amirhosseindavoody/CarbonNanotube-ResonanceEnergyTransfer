@@ -1,8 +1,8 @@
-directory, input= /cygdrive/c/Amirhossein/Research/Exciton/Data/Exciton_Energy/
-directory, output= /cygdrive/c/Users/Amirhossein/Google Drive/Research/Exciton/Data/transition_rates_including_continuum_states/angle_dependence/
+directory, input= /home/amirhossein/research/exciton/data/exciton_dispersion/
+directory, output= /home/amirhossein/research/exciton/data/transfer_rates/transfer_rate_including_continuum_of_states/transfer_rate_versus_angle/
 
 cnt1, n_ch=	8
-cnt1, m_ch=	6
+cnt1, m_ch=	7
 cnt1, nkg=	1001
 cnt1, dk/dkx=	10
 cnt1, nr=		200
@@ -14,8 +14,8 @@ cnt1, target_exciton_type=	Ex0_A2
 cnt1, length[nm]=	10
 cnt1, center_position[nm]=	0
 
-cnt2, n_ch=	8
-cnt2, m_ch=	7
+cnt2, n_ch=	7
+cnt2, m_ch=	5
 cnt2, nkg=	1001
 cnt2, dk/dkx=	10
 cnt2, nr=	200
