@@ -95,6 +95,7 @@ contains
 		integer :: nSameEnergy
 		integer :: n, iKcm_raw
 		real*8 :: min_energy, deltaE
+		real*8, dimension(:), allocatable :: ya_tmp
 
 		! calculate relevant same energy points for transition from cnt1 to cnt2
 		deltaE = (-1.d0) * log(1.d-3) * kb*Temperature
@@ -102,13 +103,15 @@ contains
 		min_energy = max(minval(cnt1%Ex_t),minval(cnt2%Ex_t))
 
 		n = cnt2%iKcm_max_fine
+		allocate(ya_tmp(n))
 
 		nSameEnergy = 0
 		do ix1 = 1,cnt1%nX_t
 			do iKcm1 = cnt1%iKcm_min_fine , -1
 				if ((cnt1%Ex_t(ix1,iKcm1) - min_energy) .lt. deltaE) then
 					do ix2 = 1, cnt2%nX_t
-						call bisect_root(n, cnt2%Ex_t(ix2,cnt2%iKcm_min_fine:-1), cnt1%Ex_t(ix1,iKcm1), iKcm_raw)
+						ya_tmp = cnt2%Ex_t(ix2,cnt2%iKcm_min_fine:-1)
+						call bisect_root(n, ya_tmp, cnt1%Ex_t(ix1,iKcm1), iKcm_raw)
 						if (iKcm_raw .gt. 0) then
 							nSameEnergy = nSameEnergy + 4
 						endif
@@ -128,7 +131,8 @@ contains
 			do iKcm1 = cnt1%iKcm_min_fine , -1
 				if ((cnt1%Ex_t(ix1,iKcm1) - min_energy) .lt. deltaE) then
 					do ix2 = 1, cnt2%nX_t
-						call bisect_root(n, cnt2%Ex_t(ix2,cnt2%iKcm_min_fine:-1), cnt1%Ex_t(ix1,iKcm1), iKcm_raw)
+						ya_tmp = cnt2%Ex_t(ix2,cnt2%iKcm_min_fine:-1)
+						call bisect_root(n, ya_tmp, cnt1%Ex_t(ix1,iKcm1), iKcm_raw)
 						if (iKcm_raw .gt. 0) then
 							iKcm2 = cnt2%iKcm_min_fine + iKcm_raw - 1
 

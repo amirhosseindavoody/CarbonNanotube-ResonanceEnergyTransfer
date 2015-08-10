@@ -214,11 +214,11 @@ contains
 			integer :: i,j,mu,ik,tmpi
 			integer, dimension(:), allocatable :: min_loc
 			real*8 :: tmpr
-			real*8, dimension(2) :: k,E1_tmp,E2_tmp
+			real*8, dimension(2) :: k, E1_tmp, E2_tmp, e_tmp
 			real*8, dimension(:), allocatable :: k_vec,min_energy
 			real*8, dimension(:,:,:), allocatable :: E_k
 			complex*16, dimension(:,:,:), allocatable :: Cc_k,Cv_k
-			complex*16, dimension(2) :: Cc_tmp,Cv_tmp
+			complex*16, dimension(2) :: Cc_tmp, Cv_tmp
 		
 			
 			! calculate CNT energy dispersion.
@@ -238,8 +238,12 @@ contains
 			
 			do mu=1-currcnt%Nu/2,currcnt%Nu/2
 				do ik=currcnt%ikc_min,currcnt%ikc_max
-				k = dble(mu) * currcnt%K1 + dble(ik) * currcnt%dk * currcnt%K2
-				call grapheneEnergy(currcnt, E_k(mu,ik,:), Cc_k(mu,ik,:), Cv_k(mu,ik,:), k)
+					k = dble(mu) * currcnt%K1 + dble(ik) * currcnt%dk * currcnt%K2
+! 					call grapheneEnergy(currcnt, E_k(mu,ik,:), Cc_k(mu,ik,:), Cv_k(mu,ik,:), k)
+					call grapheneEnergy(currcnt, e_tmp, Cc_tmp, Cv_tmp, k)
+					E_k(mu,ik,:) = e_tmp
+					Cc_k(mu,ik,:) = Cc_tmp
+					Cv_k(mu,ik,:) = Cv_tmp
 				enddo
 			enddo
 			
@@ -321,11 +325,20 @@ contains
 			do ik=currcnt%ik_low*currcnt%dk_dkx_ratio,currcnt%ik_high*currcnt%dk_dkx_ratio
 				mu=currcnt%min_sub(currcnt%i_sub) !first band
 				k=dble(mu)*currcnt%K1+dble(ik)*currcnt%dkx*currcnt%K2
-				call grapheneEnergy(currcnt,currcnt%Ek(1,ik,:),currcnt%Cc(1,ik,:),currcnt%Cv(1,ik,:),k)
+! 				call grapheneEnergy(currcnt,currcnt%Ek(1,ik,:),currcnt%Cc(1,ik,:),currcnt%Cv(1,ik,:),k)
+				call grapheneEnergy(currcnt,e_tmp,Cc_tmp,Cv_tmp,k)
+				currcnt%Ek(1,ik,:) = e_tmp
+				currcnt%Cc(1,ik,:) = Cc_tmp
+				currcnt%Cv(1,ik,:) = Cv_tmp
+
 
 				mu=-currcnt%min_sub(currcnt%i_sub) !second band
 				k=dble(mu)*currcnt%K1+dble(ik)*currcnt%dkx*currcnt%K2
-				call grapheneEnergy(currcnt,currcnt%Ek(2,ik,:),currcnt%Cc(2,ik,:),currcnt%Cv(2,ik,:),k)
+! 				call grapheneEnergy(currcnt,currcnt%Ek(2,ik,:),currcnt%Cc(2,ik,:),currcnt%Cv(2,ik,:),k)
+				call grapheneEnergy(currcnt,e_tmp,Cc_tmp,Cv_tmp,k)
+				currcnt%Ek(2,ik,:) = e_tmp
+				currcnt%Cc(2,ik,:) = Cc_tmp
+				currcnt%Cv(2,ik,:) = Cv_tmp
 			enddo
 		
 		end subroutine cnt_band

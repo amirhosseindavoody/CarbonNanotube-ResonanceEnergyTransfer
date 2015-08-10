@@ -1,14 +1,14 @@
 directory, input= /home/amirhossein/research/exciton/data/exciton_dispersion/
-directory, output= /home/amirhossein/research/exciton/data/transfer_rates/transfer_rate_including_continuum_of_states/transfer_rate_versus_angle/
+directory, output= /home/amirhossein/research/exciton/data/transfer_rates/test/
 
-cnt1, n_ch=	8
-cnt1, m_ch=	7
+cnt1, n_ch=	7
+cnt1, m_ch=	5
 cnt1, nkg=	1001
 cnt1, dk/dkx=	10
 cnt1, nr=		200
 cnt1, E_th[eV]=	0.5
 cnt1, Kcm_max[1/nm]=	1.5
-cnt1, i_sub=	2
+cnt1, i_sub=	1
 cnt1, Ckappa=	2.0
 cnt1, target_exciton_type=	Ex0_A2
 cnt1, length[nm]=	10

@@ -36,11 +36,11 @@ contains
 
 		do iT = 0, n_cnt_unitcell-1
 			! when posA3 is calculated we assume the CNT is along y-axis. Here, we change to axis labeling so that the CNT is along x-axis.
-			currcnt%ur_posA3(iT*currcnt%Nu:(iT+1)*currcnt%Nu,1) = iT*t_vec_3D(2) + currcnt%posA3(:,2)
-			currcnt%ur_posA3(iT*currcnt%Nu:(iT+1)*currcnt%Nu,2) = iT*t_vec_3D(3) + currcnt%posA3(:,3)
-			currcnt%ur_posA3(iT*currcnt%Nu:(iT+1)*currcnt%Nu,3) = iT*t_vec_3D(1) + currcnt%posA3(:,1)
+			currcnt%ur_posA3(iT*currcnt%Nu+1:(iT+1)*currcnt%Nu,1) = iT*t_vec_3D(2) + currcnt%posA3(:,2)
+			currcnt%ur_posA3(iT*currcnt%Nu+1:(iT+1)*currcnt%Nu,2) = iT*t_vec_3D(3) + currcnt%posA3(:,3)
+			currcnt%ur_posA3(iT*currcnt%Nu+1:(iT+1)*currcnt%Nu,3) = iT*t_vec_3D(1) + currcnt%posA3(:,1)
 			! calculate azimuthal angle of carbon atoms
-			currcnt%az_angle(iT*currcnt%Nu:(iT+1)*currcnt%Nu) = 2.d0*pi*currcnt%posA(:,1)/currcnt%len_ch
+			currcnt%az_angle(iT*currcnt%Nu+1:(iT+1)*currcnt%Nu) = 2.d0*pi*currcnt%posA(:,1)/currcnt%len_ch
 		enddo
 
 		! shift the tube along z-axis
