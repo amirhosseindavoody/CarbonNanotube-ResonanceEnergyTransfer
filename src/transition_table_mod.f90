@@ -12,15 +12,11 @@ module transition_table_mod
 	real*8, public :: c2cMin
 	real*8, public :: c2cMax
 	integer, public :: nc2c
-	real*8 :: c2cDistance
-	integer :: ic2c
 	real*8 :: dc2c
 	
 	real*8, public :: thetaMax
 	real*8, public :: thetaMin
 	integer, public :: nTheta
-	real*8 :: theta
-	integer :: iTheta
 	real*8 :: dTheta
 
 	integer, public :: partition_function_type
@@ -68,6 +64,11 @@ contains
 		real*8 :: partitionFunction1, partitionFunction2
 		real*8 :: dos1, dos2
 		complex*16 :: matrixElement, geometricMatrixElement
+		
+		integer :: ic2c
+		real*8 :: c2cDistance
+		integer :: iTheta
+		real*8 :: theta
 
 		procedure(calculate_kSpaceMatrixElement), pointer :: k_space_melement_ptr => null()
 		
@@ -229,6 +230,8 @@ contains
 
 				end if
 
+				call save_transition_rates(iTheta,ic2c)
+
 			end do
 		end do
 
@@ -243,6 +246,9 @@ contains
 	!**************************************************************************************************************************
 	
 	subroutine saveTransitionRates()
+
+		integer :: ic2c
+		integer :: iTheta
 
 		!write transition rates to the file
 		open(unit=100,file='transitionRates12.dat',status="unknown")
@@ -279,5 +285,70 @@ contains
 		
 		return
 	end subroutine saveTransitionRates
+
+	!**************************************************************************************************************************
+	! save the calculated transition table on the fly
+	!**************************************************************************************************************************
+	
+	subroutine save_transition_rates(iTheta, ic2c)
+
+		integer, intent(in) :: ic2c
+		integer, intent(in) :: iTheta
+		logical :: flgexist
+
+		! write 1 to 2 transition rates
+		inquire(file="transition_rates_12.dat",exist=flgexist)
+		if (flgexist) then
+			open(unit=100, file="transition_rates_12.dat", status="old", position="append", action="write")
+		else
+			open(unit=100, file="transition_rates_12.dat", status="new", action="write")
+		end if
+
+		if (iTheta .ne. nTheta) then
+			write(100,'(E16.8)', advance='no') transitionRate(1,iTheta,ic2c)
+		else
+			write(100,'(E16.8)') transitionRate(1,iTheta,ic2c)
+		endif
+		close(100)
+
+		! write 2 to 1 transition rates
+		inquire(file="transition_rates_21.dat",exist=flgexist)
+		if (flgexist) then
+			open(unit=100, file="transition_rates_21.dat", status="old", position="append", action="write")
+		else
+			open(unit=100, file="transition_rates_21.dat", status="new", action="write")
+		end if
+
+		if (iTheta .ne. nTheta) then
+			write(100,'(E16.8)', advance='no') transitionRate(2,iTheta,ic2c)
+		else
+			write(100,'(E16.8)') transitionRate(2,iTheta,ic2c)
+		endif
+		close(100)
+
+		! write theta values
+		inquire(file="theta.dat",exist=flgexist)
+		if (flgexist) then
+			open(unit=100, file="theta.dat", status="old", position="append", action="write")
+		else
+			open(unit=100, file="theta.dat", status="new", action="write")
+		end if
+
+		write(100,'(E16.8)', advance='no') thetaMin+dble(iTheta-1)*dTheta
+		close(100)
+				
+		! write c2c values
+		inquire(file="c2c.dat",exist=flgexist)
+		if (flgexist) then
+			open(unit=100, file="c2c.dat", status="old", position="append", action="write")
+		else
+			open(unit=100, file="c2c.dat", status="new", action="write")
+		end if
+
+		write(100,'(E16.8)', advance='no') c2cMin+dble(ic2c-1)*dc2c
+		close(100)
+		
+		return
+	end subroutine save_transition_rates
 
 end module transition_table_mod
