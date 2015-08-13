@@ -12,6 +12,7 @@ contains
 	subroutine rotate_shift_cnt(currcnt, theta, c2cDistance)
 		use cnt_class, only: cnt
 		use physicalConstants, only: pi
+		use math_functions_mod, only: my_norm2
 
 		type(cnt), intent(inout) :: currcnt
 		real*8, intent(in) :: theta
@@ -27,7 +28,7 @@ contains
 		t_vec_3D(1:2) = currcnt%t_vec
 		t_vec_3D(3) = 0.d0
 
-		t_vec_length = norm2(currcnt%t_vec)
+		t_vec_length = my_norm2(currcnt%t_vec)
 		n_cnt_unitcell = nint(currcnt%length/t_vec_length)
 
 		if(.not. allocated(currcnt%ur_posA3)) allocate(currcnt%ur_posA3(n_cnt_unitcell*currcnt%Nu,3))

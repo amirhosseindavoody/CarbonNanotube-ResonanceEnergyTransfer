@@ -73,7 +73,7 @@ contains
 		!**************************************************************************************************************************
 		
 		subroutine cnt_geometry(currcnt)
-			use math_Functions_mod, only: gcd
+			use math_Functions_mod, only: gcd, my_norm2
 			use physicalConstants, only: a_l, pi
 
 			type(cnt), intent(inout) :: currcnt
@@ -107,8 +107,8 @@ contains
 	 
 	 
 			! rotate basis vectors so that ch_vec is along x-axis.
-			cosTh=currcnt%ch_vec(1)/norm2(currcnt%ch_vec)
-			sinTh=currcnt%ch_vec(2)/norm2(currcnt%ch_vec)
+			cosTh=currcnt%ch_vec(1)/my_norm2(currcnt%ch_vec)
+			sinTh=currcnt%ch_vec(2)/my_norm2(currcnt%ch_vec)
 			Rot=reshape((/ cosTh, -sinTh , sinTh, cosTh /), (/2,2/))
 			currcnt%ch_vec=matmul(Rot,currcnt%ch_vec)
 			currcnt%t_vec=matmul(Rot,currcnt%t_vec)
@@ -119,11 +119,11 @@ contains
 			currcnt%aCC_vec=matmul(Rot,currcnt%aCC_vec)
 		
 			! calculate reciprocal lattice of CNT.
-			currcnt%dk=norm2(currcnt%b1)/(dble(currcnt%nkg)-1.d0)
+			currcnt%dk=my_norm2(currcnt%b1)/(dble(currcnt%nkg)-1.d0)
 			currcnt%dkx=currcnt%dk / currcnt%dk_dkx_ratio
 			currcnt%K1=(-t2*currcnt%b1+t1*currcnt%b2)/(dble(currcnt%Nu))
 			currcnt%K2=(dble(currcnt%m_ch)*currcnt%b1-dble(currcnt%n_ch)*currcnt%b2)/dble(currcnt%Nu)
-			currcnt%K2=currcnt%K2/norm2(currcnt%K2)
+			currcnt%K2=currcnt%K2/my_norm2(currcnt%K2)
 		
 			! calculate coordinates of atoms in the unwarped CNT unit cell.
 			allocate(currcnt%posA(currcnt%Nu,2))
@@ -208,6 +208,7 @@ contains
 		
 		subroutine cnt_band(currcnt)
 			use physicalConstants
+			use math_functions_mod, only: my_norm2
 			type(cnt), intent(inout) :: currcnt
 			
 			integer :: nkc, imin_sub
@@ -222,7 +223,7 @@ contains
 		
 			
 			! calculate CNT energy dispersion.
-			currcnt%ikc_max=floor(pi/norm2(currcnt%t_vec)/currcnt%dk)
+			currcnt%ikc_max=floor(pi/my_norm2(currcnt%t_vec)/currcnt%dk)
 			currcnt%ikc_min=-currcnt%ikc_max
 			nkc=2*currcnt%ikc_max+1
 			

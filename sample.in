@@ -33,6 +33,6 @@ geometry, nc2c= 1
 
 geometry, thetaMin[degree]= 0
 geometry, thetaMax[degree]= 90
-geometry, nTheta= 10
+geometry, nTheta= 50
 
 simulation, partition_function= target
