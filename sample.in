@@ -13,8 +13,8 @@ cnt1, Ckappa=	2.0
 cnt1, length[nm]=	inf
 cnt1, center_position[nm]=	0
 
-cnt2, n_ch=	8
-cnt2, m_ch=	7
+cnt2, n_ch=	7
+cnt2, m_ch=	5
 cnt2, nkg=	1001
 cnt2, dk/dkx=	10
 cnt2, nr=	200
@@ -28,5 +28,5 @@ cnt2, center_position[nm]=	0
 geometry, c2c_distance[nm]= 1.2
 
 environment, min_temperature[Kelvin]= 10
-environment, max_temperature[Kelvin]= 500
-environment, temperature_steps= 50
+environment, max_temperature[Kelvin]= 300
+environment, temperature_steps= 2

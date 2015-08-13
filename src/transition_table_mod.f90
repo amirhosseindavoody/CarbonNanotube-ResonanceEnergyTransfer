@@ -33,6 +33,7 @@ contains
 		use a2em_kspace_matrix_element_mod, only: calculate_a2em_kSpaceMatrixElement
 		use cnt_class, only: cnt
 		use comparams, only: ppLen, min_temperature, max_temperature, temperature_steps
+		use density_of_states_mod, only: calculate_dos
 		use em2a_kspace_matrix_element_mod, only: calculate_em2a_kSpaceMatrixElement
 		use em2ep_kspace_matrix_element_mod, only: calculate_em2ep_kSpaceMatrixElement
 		use em2em_kspace_matrix_element_mod, only: calculate_em2em_kSpaceMatrixElement
@@ -40,8 +41,8 @@ contains
 		use ep2ep_kspace_matrix_element_mod, only: calculate_ep2ep_kSpaceMatrixElement
 		use ep2em_kspace_matrix_element_mod, only: calculate_ep2em_kSpaceMatrixElement
 		use geometric_matrix_element_mod, only: calculate_finite_geometric_matrix_element, calculate_infinite_geometric_matrix_element, calculate_infinite_parallel_geometric_matrix_element
+		use partition_function_mod, only: partition_function_table
 		use physicalConstants, only: pi, kb, hb, A_u
-		use prepareForster_module, only: calculatePartitionFunction, calculateDOS
 		use rotate_shift_mod, only: rotate_shift_cnt
 		use transition_points_mod, only: findSameEnergy, sameEnergy, findCrossings, crossingPoints
 		use write_log_mod, only: writeLog
@@ -54,7 +55,6 @@ contains
 		integer :: ix1, ix2, iKcm1, iKcm2
 		integer :: iTemperature
 		real*8 :: temperature
-		real*8 :: partitionFunction1, partitionFunction2
 		real*8 :: dos1, dos2
 		complex*16 :: matrixElement, geometricMatrixElement
 
@@ -139,17 +139,14 @@ contains
 				call calculate_finite_geometric_matrix_element(iKcm1, iKcm2, geometricMatrixElement)
 							
 				matrixElement = geometricMatrixElement * kSpaceMatrixElement_sameEnergy(iS)
-				call calculateDOS(cnt1,iKcm1,ix1,dos1)
-				call calculateDOS(cnt2,iKcm2,ix2,dos2)
+				call calculate_dos(cnt1,iKcm1,ix1,dos1)
+				call calculate_dos(cnt2,iKcm2,ix2,dos2)
 
 				do iTemperature = 1,temperature_steps
 					temperature = min_temperature + dble(iTemperature-1) * (max_temperature-min_temperature) / dble(temperature_steps-1)
 
-					call calculatePartitionFunction(cnt1, temperature, partitionFunction1)
-					call calculatePartitionFunction(cnt2, temperature, partitionFunction2)
-
-					transitionRate(1,1,iTemperature) = transitionRate(1,1,iTemperature) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/temperature) * (abs(matrixElement)**2) * dos2 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 / hb / cnt1%length / partitionFunction1 
-					transitionRate(2,1,iTemperature) = transitionRate(2,1,iTemperature) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/temperature) * (abs(matrixElement)**2) * dos1 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 / hb / cnt2%length / partitionFunction2
+					transitionRate(1,1,iTemperature) = transitionRate(1,1,iTemperature) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/temperature) * (abs(matrixElement)**2) * dos2 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 / hb / cnt1%length / partition_function_table(1,iTemperature) 
+					transitionRate(2,1,iTemperature) = transitionRate(2,1,iTemperature) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/temperature) * (abs(matrixElement)**2) * dos1 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 / hb / cnt2%length / partition_function_table(2,iTemperature)
 				enddo
 
 			end do
@@ -171,17 +168,14 @@ contains
 				call calculate_infinite_parallel_geometric_matrix_element(iKcm1,iKcm2,c2cDistance,geometricMatrixElement)
 
 				matrixElement = geometricMatrixElement * kSpaceMatrixElement_crossoingPoints(iC)
-				call calculateDOS(cnt1,iKcm1,ix1,dos1)
-				call calculateDOS(cnt2,iKcm2,ix2,dos2)
+				call calculate_dos(cnt1,iKcm1,ix1,dos1)
+				call calculate_dos(cnt2,iKcm2,ix2,dos2)
 
 				do iTemperature = 1,temperature_steps
 					temperature = min_temperature + dble(iTemperature-1) * (max_temperature-min_temperature) / dble(temperature_steps-1)
 
-					call calculatePartitionFunction(cnt1, temperature, partitionFunction1)
-					call calculatePartitionFunction(cnt2, temperature, partitionFunction2)
-
-					transitionRate(1,1,iTemperature) = transitionRate(1,1,iTemperature) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/temperature) * (abs(matrixElement)**2) * dos1 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 * (2*pi/cnt1%dkx) / hb / partitionFunction1
-					transitionRate(2,1,iTemperature) = transitionRate(2,1,iTemperature) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/temperature) * (abs(matrixElement)**2) * dos2 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 * (2*pi/cnt2%dkx) / hb / partitionFunction2
+					transitionRate(1,1,iTemperature) = transitionRate(1,1,iTemperature) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/temperature) * (abs(matrixElement)**2) * dos1 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 * (2*pi/cnt1%dkx) / hb / partition_function_table(1,iTemperature)
+					transitionRate(2,1,iTemperature) = transitionRate(2,1,iTemperature) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/temperature) * (abs(matrixElement)**2) * dos2 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 * (2*pi/cnt2%dkx) / hb / partition_function_table(2,iTemperature)
 				enddo
 
 			end do
@@ -210,17 +204,14 @@ contains
 				call calculate_finite_geometric_matrix_element(iKcm1, iKcm2, geometricMatrixElement)
 							
 				matrixElement = geometricMatrixElement * kSpaceMatrixElement_sameEnergy(iS)
-				call calculateDOS(cnt1,iKcm1,ix1,dos1)
-				call calculateDOS(cnt2,iKcm2,ix2,dos2)
+				call calculate_dos(cnt1,iKcm1,ix1,dos1)
+				call calculate_dos(cnt2,iKcm2,ix2,dos2)
 
 				do iTemperature = 1,temperature_steps
 					temperature = min_temperature + dble(iTemperature-1) * (max_temperature-min_temperature) / dble(temperature_steps-1)
 
-					call calculatePartitionFunction(cnt1, temperature, partitionFunction1)
-					call calculatePartitionFunction(cnt2, temperature, partitionFunction2)
-
-					transitionRate(1,2,iTemperature) = transitionRate(1,2,iTemperature) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/temperature) * (abs(matrixElement)**2) * dos2 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 / hb / cnt1%length / partitionFunction1 
-					transitionRate(2,2,iTemperature) = transitionRate(2,2,iTemperature) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/temperature) * (abs(matrixElement)**2) * dos1 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 / hb / cnt2%length / partitionFunction2
+					transitionRate(1,2,iTemperature) = transitionRate(1,2,iTemperature) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/temperature) * (abs(matrixElement)**2) * dos2 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 / hb / cnt1%length / partition_function_table(1,iTemperature)
+					transitionRate(2,2,iTemperature) = transitionRate(2,2,iTemperature) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/temperature) * (abs(matrixElement)**2) * dos1 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 / hb / cnt2%length / partition_function_table(2,iTemperature)
 				enddo		
 
 			end do
@@ -237,17 +228,14 @@ contains
 				call calculate_infinite_geometric_matrix_element(iKcm1, iKcm2, theta, c2cDistance, geometricMatrixElement)
 						
 				matrixElement = geometricMatrixElement * kSpaceMatrixElement_sameEnergy(iS)
-				call calculateDOS(cnt1,iKcm1,ix1,dos1)
-				call calculateDOS(cnt2,iKcm2,ix2,dos2)
+				call calculate_dos(cnt1,iKcm1,ix1,dos1)
+				call calculate_dos(cnt2,iKcm2,ix2,dos2)
 
 				do iTemperature = 1,temperature_steps
 					temperature = min_temperature + dble(iTemperature-1) * (max_temperature-min_temperature) / dble(temperature_steps-1)
 
-					call calculatePartitionFunction(cnt1, temperature, partitionFunction1)
-					call calculatePartitionFunction(cnt2, temperature, partitionFunction2)
-
-					transitionRate(1,2,iTemperature) = transitionRate(1,2,iTemperature) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/temperature) * (abs(matrixElement)**2) * dos2 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 * (sin(theta)) / hb / ppLen/ partitionFunction1
-					transitionRate(2,2,iTemperature) = transitionRate(2,2,iTemperature) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/temperature) * (abs(matrixElement)**2) * dos1 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 * (sin(theta)) / hb / ppLen/ partitionFunction2
+					transitionRate(1,2,iTemperature) = transitionRate(1,2,iTemperature) + exp(-(cnt1%Ex_t(ix1,iKcm1))/kb/temperature) * (abs(matrixElement)**2) * dos2 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 * (sin(theta)) / hb / ppLen/ partition_function_table(1,iTemperature)
+					transitionRate(2,2,iTemperature) = transitionRate(2,2,iTemperature) + exp(-(cnt2%Ex_t(ix2,iKcm2))/kb/temperature) * (abs(matrixElement)**2) * dos1 * (A_u**2/(4.d0*pi*pi*cnt1%radius*cnt2%radius))**2 * (sin(theta)) / hb / ppLen/ partition_function_table(2,iTemperature)
 				enddo
 			end do
 		endif
