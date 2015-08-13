@@ -36,10 +36,12 @@ program cnt_resonance_energy_transfer
 	call calculate_transition_table(cnt1,cnt2)
 
 	call writeLog(new_line('A')//"Ex0_A2 --> Ex0_Ep")
+	call set_target_exciton(cnt1, 'Ex0_A2')
 	call set_target_exciton(cnt2, 'Ex0_Ep')
 	call calculate_transition_table(cnt1,cnt2)
 
 	call writeLog(new_line('A')//"Ex0_A2 --> Ex0_Em")
+	call set_target_exciton(cnt1, 'Ex0_A2')
 	call set_target_exciton(cnt2, 'Ex0_Em')
 	call calculate_transition_table(cnt1,cnt2)
 
@@ -50,10 +52,12 @@ program cnt_resonance_energy_transfer
 	call calculate_transition_table(cnt1,cnt2)
 
 	call writeLog(new_line('A')//"Ex0_Ep --> Ex0_Ep")
+	call set_target_exciton(cnt1, 'Ex0_Ep')
 	call set_target_exciton(cnt2, 'Ex0_Ep')
 	call calculate_transition_table(cnt1,cnt2)
 
 	call writeLog(new_line('A')//"Ex0_Ep --> Ex0_Em")
+	call set_target_exciton(cnt1, 'Ex0_Ep')
 	call set_target_exciton(cnt2, 'Ex0_Em')
 	call calculate_transition_table(cnt1,cnt2)
 
@@ -64,10 +68,12 @@ program cnt_resonance_energy_transfer
 	call calculate_transition_table(cnt1,cnt2)
 
 	call writeLog(new_line('A')//"Ex0_Em --> Ex0_Ep")
+	call set_target_exciton(cnt1, 'Ex0_Em')
 	call set_target_exciton(cnt2, 'Ex0_Ep')
 	call calculate_transition_table(cnt1,cnt2)
 
 	call writeLog(new_line('A')//"Ex0_Em --> Ex0_Em")
+	call set_target_exciton(cnt1, 'Ex0_Em')
 	call set_target_exciton(cnt2, 'Ex0_Em')
 	call calculate_transition_table(cnt1,cnt2)
 
