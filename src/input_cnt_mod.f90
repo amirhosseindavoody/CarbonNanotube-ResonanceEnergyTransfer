@@ -263,7 +263,7 @@ contains
 
 		type(cnt), intent(inout) :: currcnt
 		integer :: iX, iKcm, ikr
-		real*8 :: tmpr1, tmpr2, tmpr3
+		real*8 :: tmpr1, tmpr2, tmpr3, tmpr4
 
 		! read the information of singlet E+ exciton
 		allocate(currcnt%Ex0_Ep(1:currcnt%nX_e,currcnt%iKcm_min_fine:currcnt%iKcm_max_fine))
@@ -351,16 +351,17 @@ contains
 				tmpr1 = 0.d0
 				tmpr2 = 0.d0
 				tmpr3 = 0.d0
+				tmpr4 = 0.d0
 				do ikr=currcnt%ikr_low,currcnt%ikr_high
 					tmpr1 = tmpr1 + abs(currcnt%Psi0_Ep(ikr,iX,iKcm))
 					tmpr2 = tmpr2 + abs(currcnt%Psi0_Em(ikr,iX,iKcm))
 					tmpr3 = tmpr3 + abs(currcnt%Psi1_Ep(ikr,iX,iKcm))
-					tmpr3 = tmpr3 + abs(currcnt%Psi1_Em(ikr,iX,iKcm))
+					tmpr4 = tmpr4 + abs(currcnt%Psi1_Em(ikr,iX,iKcm))
 				enddo
 				currcnt%Psi0_Ep(:,iX,iKcm) = currcnt%Psi0_Ep(:,iX,iKcm) / dcmplx(sqrt(tmpr1))
 				currcnt%Psi0_Em(:,iX,iKcm) = currcnt%Psi0_Em(:,iX,iKcm) / dcmplx(sqrt(tmpr2))
 				currcnt%Psi1_Ep(:,iX,iKcm) = currcnt%Psi1_Ep(:,iX,iKcm) / dcmplx(sqrt(tmpr3))
-				currcnt%Psi1_Em(:,iX,iKcm) = currcnt%Psi1_Em(:,iX,iKcm) / dcmplx(sqrt(tmpr3))
+				currcnt%Psi1_Em(:,iX,iKcm) = currcnt%Psi1_Em(:,iX,iKcm) / dcmplx(sqrt(tmpr4))
 			enddo
 		enddo
 
