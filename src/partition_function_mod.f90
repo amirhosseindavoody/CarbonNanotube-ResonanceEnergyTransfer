@@ -376,7 +376,7 @@ contains
 		! partition function due to target exciton type
 		do ix = 1,currcnt%nX_t
 			do iKcm = currcnt%iKcm_min_fine,currcnt%iKcm_max_fine
-				if((currcnt%Ex_A1(ix,iKcm)-min_energy) .le. deltaE) then
+				if((currcnt%Ex_t(ix,iKcm)-min_energy) .le. deltaE) then
 					partition_function = partition_function + exp(-currcnt%Ex_t(ix,iKcm)/kb/temperature)
 				endif
 			end do
